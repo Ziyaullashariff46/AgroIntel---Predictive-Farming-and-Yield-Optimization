@@ -1,0 +1,76 @@
+{% extends 'base.html' %}
+{% block title %}{{ role|capitalize }} Registration | AgroIntel{% endblock %}
+
+{% block content %}
+<div class="container py-5 d-flex align-items-center justify-content-center" style="min-height: 80vh;">
+  <div class="w-100" style="max-width: 680px;">
+    <div class="glass-card p-4 p-md-5">
+      <div class="text-center mb-4">
+        <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-user-plus"></i> Join AgroIntel Network</span>
+        <h3 class="text-bright font-weight-bold mb-1">{{ role|capitalize }} Account Registration</h3>
+        <p class="text-muted small">Create your profile to start using AI tools & marketplace services</p>
+      </div>
+
+      <form action="{{ url_for('register', role=role) }}" method="POST">
+        <div class="form-group mb-3">
+          <label class="font-weight-bold small text-muted"><i class="fas fa-user mr-1 text-emerald"></i> Full Name</label>
+          <input type="text" name="name" class="form-control form-control-agro" placeholder="e.g. Ramesh Kumar" required>
+        </div>
+
+        <div class="row g-3 mb-3">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <label class="font-weight-bold small text-muted"><i class="fas fa-envelope mr-1 text-emerald"></i> Email Address</label>
+            <input type="email" name="email" class="form-control form-control-agro" placeholder="name@example.com" required>
+          </div>
+          <div class="col-md-6">
+            <label class="font-weight-bold small text-muted"><i class="fas fa-phone mr-1 text-emerald"></i> Phone Number</label>
+            <input type="text" name="phone" class="form-control form-control-agro" placeholder="10 Digit Phone Number" required>
+          </div>
+        </div>
+
+        <div class="form-group mb-3">
+          <label class="font-weight-bold small text-muted"><i class="fas fa-lock mr-1 text-emerald"></i> Create Password</label>
+          <input type="password" name="password" class="form-control form-control-agro" placeholder="••••••••" required>
+        </div>
+
+        {% if role == 'farmer' %}
+          <div class="row g-3 mb-3">
+            <div class="col-md-6 mb-3 mb-md-0">
+              <label class="font-weight-bold small text-muted"><i class="fas fa-venus-mars mr-1 text-emerald"></i> Gender</label>
+              <select name="gender" class="form-control form-control-agro">
+                <option value="Male">Male</option>
+                <option value="Female">Female</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label class="font-weight-bold small text-muted"><i class="fas fa-calendar mr-1 text-emerald"></i> Date of Birth</label>
+              <input type="date" name="birthday" class="form-control form-control-agro" required>
+            </div>
+          </div>
+        {% endif %}
+
+        <div class="row g-3 mb-4">
+          <div class="col-md-6 mb-3 mb-md-0">
+            <label class="font-weight-bold small text-muted"><i class="fas fa-map-location-dot mr-1 text-emerald"></i> State</label>
+            <input type="text" name="state" class="form-control form-control-agro" placeholder="e.g. Karnataka" required>
+          </div>
+          <div class="col-md-6">
+            <label class="font-weight-bold small text-muted"><i class="fas fa-city mr-1 text-emerald"></i> District / City</label>
+            <input type="text" name="district" class="form-control form-control-agro" placeholder="e.g. Udupi / Mandya" required>
+          </div>
+        </div>
+
+        <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold fs-6">
+          Create {{ role|capitalize }} Account <i class="fas fa-check-circle ml-2"></i>
+        </button>
+      </form>
+
+      <div class="mt-4 text-center border-top pt-3" style="border-color: var(--border-glass) !important;">
+        <p class="mb-0 text-muted small">Already have an account? 
+          <a href="{{ url_for('login', role=role) }}" class="font-weight-bold text-emerald">Sign In Here</a>
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

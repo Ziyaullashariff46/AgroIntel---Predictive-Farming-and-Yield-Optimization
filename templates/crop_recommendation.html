@@ -1,0 +1,94 @@
+{% extends 'base.html' %}
+{% block title %}Crop Recommendation | AgroIntel AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="text-center mb-5">
+        <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-microchip"></i> Random Forest Classifier</span>
+        <h2 class="display-5 font-weight-extrabold text-white">Smart Crop Recommendation</h2>
+        <p class="text-muted max-w-600 mx-auto">Adjust your field's soil nutrient levels and environmental conditions to calculate the highest yielding suitable crop.</p>
+      </div>
+
+      <div class="glass-card p-4 p-md-5 mb-5">
+        <form action="{{ url_for('farmer_crop_recommendation') }}" method="POST">
+          <div class="row g-4 mb-4">
+            <!-- N -->
+            <div class="col-md-4 mb-3">
+              <div class="p-3 rounded" style="background: rgba(4, 15, 11, 0.6); border: 1px solid var(--border-glass);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label class="font-weight-bold text-white mb-0">Nitrogen (N)</label>
+                  <span class="badge badge-success" id="nVal">90</span>
+                </div>
+                <input type="range" name="n" min="0" max="140" value="90" class="custom-range" oninput="document.getElementById('nVal').innerText = this.value">
+                <div class="d-flex justify-content-between text-muted small mt-1"><span>0</span><span>70</span><span>140 kg/ha</span></div>
+              </div>
+            </div>
+
+            <!-- P -->
+            <div class="col-md-4 mb-3">
+              <div class="p-3 rounded" style="background: rgba(4, 15, 11, 0.6); border: 1px solid var(--border-glass);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label class="font-weight-bold text-white mb-0">Phosphorus (P)</label>
+                  <span class="badge badge-info" id="pVal">42</span>
+                </div>
+                <input type="range" name="p" min="5" max="145" value="42" class="custom-range" oninput="document.getElementById('pVal').innerText = this.value">
+                <div class="d-flex justify-content-between text-muted small mt-1"><span>5</span><span>75</span><span>145 kg/ha</span></div>
+              </div>
+            </div>
+
+            <!-- K -->
+            <div class="col-md-4 mb-3">
+              <div class="p-3 rounded" style="background: rgba(4, 15, 11, 0.6); border: 1px solid var(--border-glass);">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                  <label class="font-weight-bold text-white mb-0">Potassium (K)</label>
+                  <span class="badge badge-warning" id="kVal">43</span>
+                </div>
+                <input type="range" name="k" min="5" max="205" value="43" class="custom-range" oninput="document.getElementById('kVal').innerText = this.value">
+                <div class="d-flex justify-content-between text-muted small mt-1"><span>5</span><span>100</span><span>205 kg/ha</span></div>
+              </div>
+            </div>
+          </div>
+
+          <div class="row g-4 mb-4">
+            <!-- Temp -->
+            <div class="col-md-3 mb-3">
+              <label class="font-weight-bold small text-muted">Temperature (°C)</label>
+              <input type="number" step="0.1" name="t" class="form-control form-control-agro" value="20.8" placeholder="e.g. 25" required>
+            </div>
+            <!-- Humidity -->
+            <div class="col-md-3 mb-3">
+              <label class="font-weight-bold small text-muted">Humidity (%)</label>
+              <input type="number" step="0.1" name="h" class="form-control form-control-agro" value="82.0" placeholder="e.g. 70" required>
+            </div>
+            <!-- pH -->
+            <div class="col-md-3 mb-3">
+              <label class="font-weight-bold small text-muted">Soil pH Level</label>
+              <input type="number" step="0.1" name="ph" class="form-control form-control-agro" value="6.5" placeholder="e.g. 6.5" required>
+            </div>
+            <!-- Rainfall -->
+            <div class="col-md-3 mb-3">
+              <label class="font-weight-bold small text-muted">Rainfall (mm)</label>
+              <input type="number" step="0.1" name="r" class="form-control form-control-agro" value="202.9" placeholder="e.g. 200" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold fs-5">
+            <i class="fas fa-sparkles mr-2"></i> Compute AI Crop Recommendation
+          </button>
+        </form>
+
+        {% if result %}
+          <div class="mt-5 p-4 rounded-lg text-center animate-glow" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.25) 0%, rgba(6, 182, 212, 0.3) 100%); border: 2px solid var(--emerald-primary);">
+            <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-check-double"></i> Optimal Match Found</span>
+            <span class="text-muted d-block small">Recommended Crop to Cultivate</span>
+            <h1 class="display-3 font-weight-extrabold text-white text-capitalize mb-2 gradient-text">{{ result }}</h1>
+            <p class="text-white-50 mb-0">Analyzed across 2,200 agricultural dataset observations using 10 decision trees.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

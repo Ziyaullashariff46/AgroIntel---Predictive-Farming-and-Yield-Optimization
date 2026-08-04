@@ -1,0 +1,66 @@
+{% extends 'base.html' %}
+{% block title %}Direct Crop Marketplace | AgroIntel{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="text-center mb-5">
+    <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-store"></i> Direct Farm-to-Buyer Marketplace</span>
+    <h2 class="display-5 font-weight-extrabold text-white">Fresh Crop Marketplace</h2>
+    <p class="text-muted max-w-600 mx-auto">Purchase fresh organic crops directly from verified local farmers at fair prices.</p>
+  </div>
+
+  <div class="row g-4">
+    {% if crops %}
+      {% for item in crops %}
+        <div class="col-md-6 col-lg-4 mb-4">
+          <div class="glass-card h-100 p-4 d-flex flex-column justify-content-between">
+            <div>
+              <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="badge-agro badge-agro-emerald"><i class="fas fa-leaf"></i> Verified Farmer Harvest</span>
+                <span class="text-muted small">ID: #{{ item[0] }}</span>
+              </div>
+
+              <h3 class="text-white font-weight-bold text-capitalize mb-2">{{ item[2] }}</h3>
+              
+              <div class="p-3 mb-3 rounded" style="background: rgba(4, 15, 11, 0.6); border: 1px solid var(--border-glass);">
+                <div class="d-flex justify-content-between text-muted small mb-1">
+                  <span>In Stock</span>
+                  <span class="text-white font-weight-bold">{{ item[3] }} kg</span>
+                </div>
+                <div class="progress" style="height: 6px; background: rgba(255,255,255,0.08);">
+                  <div class="progress-bar bg-success" style="width: 85%;"></div>
+                </div>
+              </div>
+
+              <div class="d-flex align-items-baseline gap-2 mb-4">
+                <h2 class="text-emerald font-weight-extrabold mb-0">₹{{ item[4] }}</h2>
+                <span class="text-muted small">/ per kg</span>
+              </div>
+            </div>
+
+            <form action="{{ url_for('customer_buy_crops') }}" method="POST">
+              <input type="hidden" name="trade_id" value="{{ item[0] }}">
+              <div class="form-group mb-3">
+                <label class="font-weight-bold small text-muted">Select Purchase Quantity (kg)</label>
+                <input type="number" name="buy_quantity" max="{{ item[3] }}" min="1" value="1" class="form-control form-control-agro text-center font-weight-bold" required>
+              </div>
+
+              <button type="submit" class="btn btn-agro-primary w-100 font-weight-bold py-2.5">
+                <i class="fas fa-cart-shopping mr-2"></i> Purchase Directly
+              </button>
+            </form>
+          </div>
+        </div>
+      {% endfor %}
+    {% else %}
+      <div class="col-12 text-center py-5">
+        <div class="glass-card p-5 max-w-600 mx-auto">
+          <i class="fas fa-box-open fs-1 text-muted mb-3"></i>
+          <h4 class="text-white font-weight-bold">No Crops Currently Available</h4>
+          <p class="text-muted small mb-0">Farmers have sold out their active produce! Check back soon for fresh crop listings.</p>
+        </div>
+      </div>
+    {% endif %}
+  </div>
+</div>
+{% endblock %}

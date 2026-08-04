@@ -1,0 +1,91 @@
+{% extends 'base.html' %}
+{% block title %}Fertilizer Recommendation | AgroIntel AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="text-center mb-5">
+        <span class="badge-agro badge-agro-cyan mb-2"><i class="fas fa-flask"></i> Soil & Nutrient Optimization</span>
+        <h2 class="display-5 font-weight-extrabold text-white">Fertilizer Advisory System</h2>
+        <p class="text-muted max-w-600 mx-auto">Calculate precise fertilizer formulas based on soil composition, moisture level, and target crop.</p>
+      </div>
+
+      <div class="glass-card p-4 p-md-5 mb-5">
+        <form action="{{ url_for('farmer_fertilizer_recommendation') }}" method="POST">
+          <div class="row g-3 mb-4">
+            <div class="col-md-4 mb-3">
+              <label class="font-weight-bold small text-muted">Nitrogen (N)</label>
+              <input type="number" name="n" class="form-control form-control-agro" value="37" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="font-weight-bold small text-muted">Phosphorus (P)</label>
+              <input type="number" name="p" class="form-control form-control-agro" value="0" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="font-weight-bold small text-muted">Potassium (K)</label>
+              <input type="number" name="k" class="form-control form-control-agro" value="0" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-4 mb-3">
+              <label class="font-weight-bold small text-muted">Temperature (°C)</label>
+              <input type="number" name="t" class="form-control form-control-agro" value="26" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="font-weight-bold small text-muted">Humidity (%)</label>
+              <input type="number" name="h" class="form-control form-control-agro" value="52" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="font-weight-bold small text-muted">Soil Moisture</label>
+              <input type="number" name="sm" class="form-control form-control-agro" value="38" required>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6 mb-3">
+              <label class="font-weight-bold small text-muted">Soil Type</label>
+              <select name="soil" class="form-control form-control-agro" required>
+                <option value="Sandy">Sandy Soil</option>
+                <option value="Loamy">Loamy Soil</option>
+                <option value="Black">Black Soil</option>
+                <option value="Red">Red Soil</option>
+                <option value="Clayey">Clayey Soil</option>
+              </select>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="font-weight-bold small text-muted">Crop Cultivating</label>
+              <select name="crop" class="form-control form-control-agro" required>
+                <option value="Maize">Maize</option>
+                <option value="Sugarcane">Sugarcane</option>
+                <option value="Cotton">Cotton</option>
+                <option value="Tobacco">Tobacco</option>
+                <option value="Paddy">Paddy / Rice</option>
+                <option value="Barley">Barley</option>
+                <option value="Wheat">Wheat</option>
+                <option value="Millets">Millets</option>
+                <option value="Oil seeds">Oil seeds</option>
+                <option value="Pulses">Pulses</option>
+                <option value="Ground Nuts">Ground Nuts</option>
+              </select>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold">
+            <i class="fas fa-flask-vial mr-2"></i> Compute Recommended Fertilizer
+          </button>
+        </form>
+
+        {% if result %}
+          <div class="mt-5 p-4 rounded-lg text-center animate-glow" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.25) 0%, rgba(139, 92, 246, 0.3) 100%); border: 2px solid var(--cyan-accent);">
+            <span class="badge-agro badge-agro-cyan mb-2"><i class="fas fa-circle-check"></i> Recommended Formula</span>
+            <h1 class="display-3 font-weight-extrabold text-white text-capitalize mb-2 gradient-text">{{ result }}</h1>
+            <p class="text-white-50 mb-0">Decision Tree model prediction for optimal soil fertility recovery.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

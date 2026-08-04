@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="dark">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <link rel="icon" type="image/png" href="{{ url_for('static_assets', path='img/logo.png') }}" />
+  <title>{% block title %}AgroIntel | Intelligent Agriculture Platform{% endblock %}</title>
+
+  <!-- Early Theme Script (Prevents flash on load) -->
+  <script>
+    (function() {
+      const savedTheme = localStorage.getItem('agrointel-theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
+      document.documentElement.setAttribute('data-theme', savedTheme);
+    })();
+  </script>
+
+  <!-- Google Fonts & FontAwesome 6 Free -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Bootstrap 4.6 & Custom Modern Design System -->
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
+  <link rel="stylesheet" href="{{ url_for('static_assets', path='css/modern-agrointel.css') }}">
+  
+  {% block extra_head %}{% endblock %}
+</head>
+<body>
+
+  {% set is_landing = (request.endpoint == 'index') %}
+  {% set is_auth = (request.endpoint in ['login', 'register']) %}
+  {% set is_farmer_page = (request.endpoint and (request.endpoint.startswith('farmer_') or request.endpoint in ['farmer_crop_recommendation', 'farmer_fertilizer_recommendation', 'farmer_crop_prediction', 'farmer_yield_prediction', 'farmer_rainfall_prediction', 'farmer_weather_forecast', 'farmer_trade_crops', 'farmer_selling_history'])) %}
+  {% set is_customer_page = (request.endpoint and (request.endpoint.startswith('customer_') or request.endpoint == 'customer_buy_crops')) %}
+  {% set is_admin_page = (request.endpoint and (request.endpoint.startswith('admin_') or request.endpoint in ['admin_farmers', 'admin_customers', 'admin_messages'])) %}
+
+  <!-- Sticky Glassmorphism Header Navbar -->
+  <nav class="navbar navbar-expand-lg navbar-glass sticky-top">
+    <div class="container-fluid px-lg-4">
+      <a href="{{ url_for('index') }}" class="navbar-brand d-flex align-items-center mr-lg-3 py-0">
+        <div class="bg-gradient-success rounded-circle d-flex align-items-center justify-content-center mr-2" style="width: 40px; height: 40px; background: linear-gradient(135deg, #10b981, #059669);">
+          <i class="fas fa-leaf text-white fs-5"></i>
+        </div>
+        <span class="font-weight-extrabold text-bright text-xl tracking-tight" style="font-size: 1.45rem;">Agro<span class="text-success">Intel</span></span>
+      </a>
+
+      <div class="d-flex align-items-center d-lg-none">
+        <!-- Sliding Pill Theme Switcher Mobile -->
+        <div class="theme-switch-wrapper mr-2">
+          <label class="theme-switch-label mb-0" title="Toggle Light/Dark Mode">
+            <input type="checkbox" class="theme-switch-checkbox" onchange="toggleTheme()">
+            <div class="theme-switch-track">
+              <i class="fas fa-moon"></i>
+              <i class="fas fa-sun"></i>
+            </div>
+            <div class="theme-switch-thumb"></div>
+          </label>
+        </div>
+
+        <button class="navbar-toggler border-0 p-2" type="button" data-toggle="collapse" data-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
+          <i class="fas fa-bars text-bright fs-4"></i>
+        </button>
+      </div>
+
+      <div class="collapse navbar-collapse" id="navbarMain">
+        <ul class="navbar-nav mx-auto align-items-lg-center">
+          {% if is_auth %}
+            <!-- LOGIN / REGISTER PAGES: Only Home Link -->
+            <li class="nav-item">
+              <a href="{{ url_for('index') }}" class="nav-link-custom">
+                <i class="fas fa-house"></i> Home
+              </a>
+            </li>
+
+          {% elif is_landing %}
+            <!-- LANDING PAGE: Public Nav Only -->
+            <li class="nav-item">
+              <a href="{{ url_for('index') }}" class="nav-link-custom active">
+                <i class="fas fa-house"></i> Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('contact') }}" class="nav-link-custom">
+                <i class="fas fa-address-book"></i> Contact Us
+              </a>
+            </li>
+
+          {% elif is_farmer_page and session.get('user_type') == 'farmer' %}
+            <!-- FARMER PORTAL TOOL PAGES -->
+            <li class="nav-item">
+              <a href="{{ url_for('index') }}" class="nav-link-custom">
+                <i class="fas fa-house"></i> Home
+              </a>
+            </li>
+            <li class="nav-item dropdown">
+              <a href="#" class="nav-link-custom dropdown-toggle {% if 'farmer' in request.endpoint and request.endpoint not in ['farmer_trade_crops', 'farmer_selling_history'] %}active{% endif %}" id="aiSuiteDropdown" role="button" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+                <i class="fas fa-brain text-success"></i> AI Science Suite
+              </a>
+              <div class="dropdown-menu dropdown-menu-agro shadow-lg border-0" aria-labelledby="aiSuiteDropdown">
+                <a class="dropdown-item dropdown-item-custom {% if request.endpoint == 'farmer_crop_recommendation' %}active{% endif %}" href="{{ url_for('farmer_crop_recommendation') }}">
+                  <i class="fas fa-seedling text-success"></i> Crop Recommendation
+                </a>
+                <a class="dropdown-item dropdown-item-custom {% if request.endpoint == 'farmer_fertilizer_recommendation' %}active{% endif %}" href="{{ url_for('farmer_fertilizer_recommendation') }}">
+                  <i class="fas fa-vial text-info"></i> Fertilizer Advisory
+                </a>
+                <a class="dropdown-item dropdown-item-custom {% if request.endpoint == 'farmer_crop_prediction' %}active{% endif %}" href="{{ url_for('farmer_crop_prediction') }}">
+                  <i class="fas fa-chart-line text-warning"></i> Price Trend Predictor
+                </a>
+                <a class="dropdown-item dropdown-item-custom {% if request.endpoint == 'farmer_yield_prediction' %}active{% endif %}" href="{{ url_for('farmer_yield_prediction') }}">
+                  <i class="fas fa-wheat-awn text-success"></i> Yield Harvest Forecast
+                </a>
+                <a class="dropdown-item dropdown-item-custom {% if request.endpoint == 'farmer_rainfall_prediction' %}active{% endif %}" href="{{ url_for('farmer_rainfall_prediction') }}">
+                  <i class="fas fa-cloud-showers-heavy text-info"></i> Rainfall Estimation
+                </a>
+                <a class="dropdown-item dropdown-item-custom {% if request.endpoint == 'farmer_weather_forecast' %}active{% endif %}" href="{{ url_for('farmer_weather_forecast') }}">
+                  <i class="fas fa-sun text-warning"></i> Weather Forecast
+                </a>
+              </div>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('farmer_trade_crops') }}" class="nav-link-custom {% if request.endpoint == 'farmer_trade_crops' %}active{% endif %}">
+                <i class="fas fa-store text-success"></i> Trade Produce
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('farmer_selling_history') }}" class="nav-link-custom {% if request.endpoint == 'farmer_selling_history' %}active{% endif %}">
+                <i class="fas fa-clock-rotate-left text-muted"></i> Selling History
+              </a>
+            </li>
+
+          {% elif is_customer_page and session.get('user_type') == 'customer' %}
+            <!-- BUYER PORTAL TOOL PAGES -->
+            <li class="nav-item">
+              <a href="{{ url_for('index') }}" class="nav-link-custom">
+                <i class="fas fa-house"></i> Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('customer_buy_crops') }}" class="nav-link-custom {% if request.endpoint == 'customer_buy_crops' %}active{% endif %}">
+                <i class="fas fa-basket-shopping text-success"></i> Marketplace
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('contact') }}" class="nav-link-custom {% if request.endpoint == 'contact' %}active{% endif %}">
+                <i class="fas fa-headset text-info"></i> Support
+              </a>
+            </li>
+
+          {% elif is_admin_page and session.get('user_type') == 'admin' %}
+            <!-- ADMIN PORTAL TOOL PAGES -->
+            <li class="nav-item">
+              <a href="{{ url_for('admin_farmers') }}" class="nav-link-custom {% if request.endpoint == 'admin_farmers' %}active{% endif %}">
+                <i class="fas fa-users-gear text-success"></i> Manage Farmers
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('admin_customers') }}" class="nav-link-custom {% if request.endpoint == 'admin_customers' %}active{% endif %}">
+                <i class="fas fa-user-group text-info"></i> Manage Customers
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('admin_messages') }}" class="nav-link-custom {% if request.endpoint == 'admin_messages' %}active{% endif %}">
+                <i class="fas fa-comments text-warning"></i> Messages
+              </a>
+            </li>
+
+          {% else %}
+            <!-- OTHER PUBLIC PAGES (e.g. Contact Us) -->
+            <li class="nav-item">
+              <a href="{{ url_for('index') }}" class="nav-link-custom">
+                <i class="fas fa-house"></i> Home
+              </a>
+            </li>
+            <li class="nav-item">
+              <a href="{{ url_for('contact') }}" class="nav-link-custom {% if request.endpoint == 'contact' %}active{% endif %}">
+                <i class="fas fa-address-book"></i> Contact Us
+              </a>
+            </li>
+          {% endif %}
+        </ul>
+
+        <!-- Right Controls Bar -->
+        <div class="navbar-controls mt-3 mt-lg-0">
+          <!-- Sliding Pill Theme Switcher -->
+          <div class="theme-switch-wrapper d-none d-lg-inline-flex">
+            <label class="theme-switch-label mb-0" title="Toggle Light/Dark Theme">
+              <input type="checkbox" class="theme-switch-checkbox" onchange="toggleTheme()">
+              <div class="theme-switch-track">
+                <i class="fas fa-moon"></i>
+                <i class="fas fa-sun"></i>
+              </div>
+              <div class="theme-switch-thumb"></div>
+            </label>
+          </div>
+
+          {% if is_auth %}
+            <!-- LOGIN / REGISTER PAGES: Only Theme Switcher -->
+
+          {% elif is_landing %}
+            <!-- LANDING PAGE: 3 Portal Login Action Buttons -->
+            <a href="{{ url_for('login', role='farmer') }}" class="btn btn-agro-primary btn-sm px-3">
+              <i class="fas fa-tractor"></i> Farmer Portal
+            </a>
+            <a href="{{ url_for('login', role='customer') }}" class="btn btn-agro-secondary btn-sm px-3">
+              <i class="fas fa-cart-shopping"></i> Buyer Marketplace
+            </a>
+            <a href="{{ url_for('login', role='admin') }}" class="btn btn-agro-admin btn-sm px-3">
+              <i class="fas fa-user-shield"></i> Admin Portal
+            </a>
+
+          {% elif session.get('user_type') and (is_farmer_page or is_customer_page or is_admin_page) %}
+            <!-- LOGGED-IN PORTAL TOOL PAGES: Profile Badge & Logout -->
+            <div class="badge-agro badge-agro-emerald">
+              <i class="fas fa-user-circle"></i>
+              {% if session.get('user_type') == 'farmer' %}
+                Farmer: {{ session.get('farmer_name') }}
+              {% elif session.get('user_type') == 'customer' %}
+                Buyer: {{ session.get('cust_name') }}
+              {% else %}
+                Admin
+              {% endif %}
+            </div>
+            <a href="{{ url_for('logout') }}" class="btn-logout-danger" title="Logout of Session">
+              <i class="fas fa-right-from-bracket"></i> Logout
+            </a>
+
+          {% else %}
+            <!-- PUBLIC VIEWS: Portal Login Action Buttons -->
+            <a href="{{ url_for('login', role='farmer') }}" class="btn btn-agro-primary btn-sm px-3">
+              <i class="fas fa-tractor"></i> Farmer Portal
+            </a>
+            <a href="{{ url_for('login', role='customer') }}" class="btn btn-agro-secondary btn-sm px-3">
+              <i class="fas fa-cart-shopping"></i> Buyer Marketplace
+            </a>
+            <a href="{{ url_for('login', role='admin') }}" class="btn btn-agro-admin btn-sm px-3">
+              <i class="fas fa-user-shield"></i> Admin Portal
+            </a>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </nav>
+
+  <!-- Flash Alerts -->
+  <div class="container mt-4">
+    {% with messages = get_flashed_messages(with_categories=true) %}
+      {% if messages %}
+        {% for category, message in messages %}
+          <div class="alert alert-{% if category == 'success' %}success{% elif category == 'error' %}danger{% else %}info{% endif %} glass-card border-0 alert-dismissible fade show shadow-lg py-3 px-4 mb-4" role="alert">
+            <div class="d-flex align-items-center">
+              <i class="fas fa-circle-info mr-3 fs-4"></i>
+              <div class="font-weight-medium">{{ message }}</div>
+            </div>
+            <button type="button" class="close text-bright" data-dismiss="alert" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+  </div>
+
+  <!-- Page Content -->
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <!-- Modern Footer -->
+  <footer class="mt-5 py-5 border-top">
+    <div class="container py-3">
+      <div class="row gy-4">
+        <div class="col-lg-4 mb-4 mb-lg-0">
+          <div class="d-flex align-items-center mb-3">
+            <div class="bg-gradient-success rounded-circle d-flex align-items-center justify-content-center mr-2" style="width: 38px; height: 38px; background: linear-gradient(135deg, #10b981, #059669);">
+              <i class="fas fa-leaf text-white"></i>
+            </div>
+            <span class="font-weight-bold text-bright fs-4">Agro<span class="text-success">Intel</span></span>
+          </div>
+          <p class="text-muted small">An intelligent agricultural portal empowering farmers with AI-driven crop recommendations, yield estimations, weather forecasts, and direct marketplace trade.</p>
+        </div>
+
+        <div class="col-6 col-lg-2 offset-lg-1 mb-3">
+          <h6 class="font-weight-bold text-bright mb-3">AI Suite</h6>
+          <ul class="list-unstyled small text-muted">
+            <li class="mb-2"><a href="{{ url_for('farmer_crop_recommendation') }}" class="text-muted text-decoration-none">Crop Recommendation</a></li>
+            <li class="mb-2"><a href="{{ url_for('farmer_fertilizer_recommendation') }}" class="text-muted text-decoration-none">Fertilizer Advisor</a></li>
+            <li class="mb-2"><a href="{{ url_for('farmer_crop_prediction') }}" class="text-muted text-decoration-none">Price Trend Predictor</a></li>
+            <li class="mb-2"><a href="{{ url_for('farmer_yield_prediction') }}" class="text-muted text-decoration-none">Yield Harvest Forecast</a></li>
+          </ul>
+        </div>
+
+        <div class="col-6 col-lg-2 mb-3">
+          <h6 class="font-weight-bold text-bright mb-3">Portals</h6>
+          <ul class="list-unstyled small text-muted">
+            <li class="mb-2"><a href="{{ url_for('login', role='farmer') }}" class="text-muted text-decoration-none">Farmer Portal</a></li>
+            <li class="mb-2"><a href="{{ url_for('login', role='customer') }}" class="text-muted text-decoration-none">Buyer Marketplace</a></li>
+            <li class="mb-2"><a href="{{ url_for('login', role='admin') }}" class="text-muted text-decoration-none">Admin Control</a></li>
+            <li class="mb-2"><a href="{{ url_for('contact') }}" class="text-muted text-decoration-none">Contact Support</a></li>
+          </ul>
+        </div>
+
+        <div class="col-lg-3">
+          <h6 class="font-weight-bold text-bright mb-3">Agri Intelligence</h6>
+          <p class="small text-muted mb-3">Built with Python Flask, Scikit-learn, and SQLite for high performance across all mobile & desktop browsers.</p>
+          <span class="badge-agro badge-agro-emerald"><i class="fas fa-shield-check"></i> Verified Platform</span>
+        </div>
+      </div>
+
+      <div class="border-top mt-5 pt-4 text-center text-muted small" style="border-color: rgba(255,255,255,0.08) !important;">
+        <p class="mb-0">&copy; 2026 AgroIntel Platform. Next-Gen Sustainable Smart Agriculture.</p>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Scripts & Sliding Theme Switcher Logic -->
+  <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/js/bootstrap.bundle.min.js"></script>
+  
+  <script>
+    function toggleTheme() {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      const newTheme = currentTheme === 'dark' ? 'light' : 'dark';
+      document.documentElement.setAttribute('data-theme', newTheme);
+      localStorage.setItem('agrointel-theme', newTheme);
+      syncThemeCheckboxes(newTheme);
+    }
+
+    function syncThemeCheckboxes(theme) {
+      const isLight = (theme === 'light');
+      document.querySelectorAll('.theme-switch-checkbox').forEach(cb => {
+        cb.checked = isLight;
+      });
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      const currentTheme = document.documentElement.getAttribute('data-theme') || 'dark';
+      syncThemeCheckboxes(currentTheme);
+    });
+  </script>
+  
+  {% block extra_scripts %}{% endblock %}
+</body>
+</html>

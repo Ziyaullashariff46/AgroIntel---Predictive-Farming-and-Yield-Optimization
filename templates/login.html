@@ -1,0 +1,56 @@
+{% extends 'base.html' %}
+{% block title %}{{ role|capitalize }} Login | AgroIntel{% endblock %}
+
+{% block content %}
+<div class="container py-5 d-flex align-items-center justify-content-center" style="min-height: 75vh;">
+  <div class="w-100" style="max-width: 480px;">
+    <div class="glass-card p-4 p-md-5">
+      
+      <!-- Role Selector Tabs -->
+      <div class="d-flex rounded-lg p-1.5 mb-4" style="background: var(--bg-input); border: 1px solid var(--border-glass);">
+        <a href="{{ url_for('login', role='farmer') }}" class="btn flex-fill text-sm font-weight-bold py-2 px-1 text-center {% if role=='farmer' %}btn-agro-primary{% else %}text-muted{% endif %}" style="min-width: 0;">
+          <i class="fas fa-tractor mr-1"></i> Farmer
+        </a>
+        <a href="{{ url_for('login', role='customer') }}" class="btn flex-fill text-sm font-weight-bold py-2 px-1 text-center {% if role=='customer' %}btn-agro-primary{% else %}text-muted{% endif %}" style="min-width: 0;">
+          <i class="fas fa-cart-shopping mr-1"></i> Buyer
+        </a>
+        <a href="{{ url_for('login', role='admin') }}" class="btn flex-fill text-sm font-weight-bold py-2 px-1 text-center {% if role=='admin' %}btn-agro-admin{% else %}text-muted{% endif %}" style="min-width: 0;">
+          <i class="fas fa-user-shield mr-1"></i> Admin
+        </a>
+      </div>
+
+      <div class="text-center mb-4">
+        <div class="bg-gradient-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981, #059669);">
+          <i class="fas fa-user-lock text-white fs-3"></i>
+        </div>
+        <h3 class="text-bright font-weight-bold mb-1">{{ role|capitalize }} Portal Sign In</h3>
+        <p class="text-muted small">Enter your credentials to access your dashboard</p>
+      </div>
+
+      <form action="{{ url_for('login', role=role) }}" method="POST">
+        <div class="form-group mb-3">
+          <label class="font-weight-bold small text-muted"><i class="fas fa-envelope mr-1 text-emerald"></i> Email / Username</label>
+          <input type="text" name="email" class="form-control form-control-agro" placeholder="Enter email or username" required>
+        </div>
+
+        <div class="form-group mb-4">
+          <label class="font-weight-bold small text-muted"><i class="fas fa-lock mr-1 text-emerald"></i> Password</label>
+          <input type="password" name="password" class="form-control form-control-agro" placeholder="••••••••" required>
+        </div>
+
+        <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold fs-6">
+          Sign In to Portal <i class="fas fa-arrow-right ml-2"></i>
+        </button>
+      </form>
+
+      {% if role != 'admin' %}
+        <div class="mt-4 text-center border-top pt-3" style="border-color: var(--border-glass) !important;">
+          <p class="mb-0 text-muted small">Don't have an account yet? 
+            <a href="{{ url_for('register', role=role) }}" class="font-weight-bold text-emerald">Register {{ role|capitalize }} Account</a>
+          </p>
+        </div>
+      {% endif %}
+    </div>
+  </div>
+</div>
+{% endblock %}

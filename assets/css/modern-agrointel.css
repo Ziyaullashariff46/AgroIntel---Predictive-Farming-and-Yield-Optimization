@@ -1,0 +1,525 @@
+/* ==========================================================================
+   AgroIntel Modern Design System & Dual Theme Engine (Light / Dark)
+   ========================================================================== */
+
+@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
+
+:root {
+  --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  
+  --emerald-primary: #10b981;
+  --emerald-dark: #059669;
+  --emerald-light: #34d399;
+  --emerald-glow: rgba(16, 185, 129, 0.3);
+  
+  --amber-accent: #f59e0b;
+  --cyan-accent: #06b6d4;
+  --purple-accent: #8b5cf6;
+  --rose-accent: #f43f5e;
+
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+  --radius-xl: 32px;
+
+  --transition-theme: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* ==========================================
+   DARK THEME VARIABLES (Default)
+   ========================================== */
+[data-theme="dark"], :root {
+  --bg-deep: #061410;
+  --bg-card: rgba(12, 35, 27, 0.85);
+  --bg-card-hover: rgba(18, 51, 39, 0.95);
+  --bg-input: rgba(4, 15, 11, 0.85);
+  --bg-navbar: rgba(6, 20, 16, 0.94);
+  --bg-footer: #030d0a;
+  
+  --text-bright: #ffffff;
+  --text-main: #f1f5f9;
+  --text-muted: #94a3b8;
+
+  --border-glass: rgba(52, 211, 153, 0.22);
+  --border-glass-strong: rgba(52, 211, 153, 0.48);
+  --shadow-card: 0 20px 45px -10px rgba(0, 0, 0, 0.6);
+  --table-header-bg: rgba(4, 15, 11, 0.9);
+  --footer-text-bright: #ffffff;
+}
+
+/* ==========================================
+   LIGHT THEME VARIABLES (High Contrast Crisp)
+   ========================================== */
+[data-theme="light"] {
+  --bg-deep: #f8fafc;
+  --bg-card: #ffffff;
+  --bg-card-hover: #ffffff;
+  --bg-input: #f1f5f9;
+  --bg-navbar: rgba(255, 255, 255, 0.94);
+  --bg-footer: #0f172a;
+  
+  --text-bright: #0f172a;
+  --text-main: #1e293b;
+  --text-muted: #475569;
+
+  --border-glass: rgba(16, 185, 129, 0.25);
+  --border-glass-strong: rgba(16, 185, 129, 0.55);
+  --shadow-card: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
+  --table-header-bg: #f1f5f9;
+  --footer-text-bright: #ffffff;
+}
+
+/* Global Reset & Body Styling */
+body {
+  font-family: var(--font-primary);
+  background-color: var(--bg-deep);
+  color: var(--text-main);
+  transition: var(--transition-theme);
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+  line-height: 1.8;
+}
+
+/* Typography Utilities */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-primary);
+  font-weight: 700;
+  letter-spacing: -0.025em;
+  color: var(--text-bright);
+  transition: var(--transition-theme);
+}
+
+.gradient-text {
+  background: linear-gradient(135deg, var(--emerald-light) 0%, var(--emerald-primary) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+[data-theme="light"] .gradient-text {
+  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.gradient-text-gold {
+  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* Glassmorphism Card System */
+.glass-card {
+  background: var(--bg-card);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-glass);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-card);
+  padding: 2.5rem;
+  margin-bottom: 2.5rem;
+  transition: var(--transition-normal);
+}
+
+.glass-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--border-glass-strong);
+  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.18), 0 0 30px var(--emerald-glow);
+  transform: translateY(-4px);
+}
+
+/* Header & Navbar Alignment */
+.navbar-glass {
+  background: var(--bg-navbar) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-glass);
+  padding: 0.85rem 2rem;
+  transition: var(--transition-theme);
+}
+
+.nav-link-custom {
+  color: var(--text-muted) !important;
+  font-weight: 600;
+  font-size: 0.95rem;
+  padding: 0.55rem 1rem !important;
+  margin: 0 0.2rem;
+  border-radius: var(--radius-md);
+  transition: var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  white-space: nowrap;
+}
+
+.nav-link-custom:hover, .nav-link-custom.active {
+  color: var(--emerald-primary) !important;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+/* Glassmorphism Dropdown Menu */
+.dropdown-menu-agro {
+  background: var(--bg-card) !important;
+  backdrop-filter: blur(25px) !important;
+  -webkit-backdrop-filter: blur(25px) !important;
+  border: 1px solid var(--border-glass-strong) !important;
+  border-radius: var(--radius-md) !important;
+  box-shadow: var(--shadow-card) !important;
+  padding: 0.6rem !important;
+  margin-top: 0.5rem !important;
+  min-width: 230px !important;
+}
+
+.dropdown-item-custom {
+  color: var(--text-main) !important;
+  font-weight: 600 !important;
+  font-size: 0.92rem !important;
+  padding: 0.65rem 1.1rem !important;
+  border-radius: var(--radius-sm) !important;
+  transition: var(--transition-normal) !important;
+  display: flex !important;
+  align-items: center !important;
+  gap: 0.65rem !important;
+}
+
+.dropdown-item-custom:hover, .dropdown-item-custom.active {
+  background: rgba(16, 185, 129, 0.15) !important;
+  color: var(--emerald-primary) !important;
+}
+
+/* Right Controls Container */
+.navbar-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  flex-shrink: 0;
+}
+
+/* Sliding Pill Theme Switcher */
+.theme-switch-wrapper {
+  display: inline-flex;
+  align-items: center;
+  margin: 0;
+  flex-shrink: 0;
+}
+
+.theme-switch-label {
+  position: relative;
+  display: inline-block;
+  width: 60px;
+  height: 30px;
+  margin-bottom: 0;
+  cursor: pointer;
+  user-select: none;
+}
+
+.theme-switch-checkbox {
+  opacity: 0;
+  width: 0;
+  height: 0;
+  position: absolute;
+}
+
+.theme-switch-track {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: var(--bg-input);
+  border: 1.5px solid var(--border-glass-strong);
+  border-radius: 30px;
+  transition: var(--transition-normal);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 7px;
+  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+.theme-switch-track .fa-moon {
+  color: #38bdf8;
+  font-size: 0.8rem;
+  z-index: 1;
+}
+
+.theme-switch-track .fa-sun {
+  color: #f59e0b;
+  font-size: 0.8rem;
+  z-index: 1;
+}
+
+.theme-switch-thumb {
+  position: absolute;
+  top: 3px;
+  left: 3px;
+  width: 22px;
+  height: 22px;
+  background-color: var(--emerald-primary);
+  border-radius: 50%;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  z-index: 2;
+}
+
+[data-theme="light"] .theme-switch-thumb {
+  transform: translateX(30px);
+  background-color: #f59e0b;
+}
+
+/* High Visibility Logout Button */
+.btn-logout-danger {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: #ffffff !important;
+  font-weight: 700 !important;
+  border: none !important;
+  border-radius: var(--radius-sm) !important;
+  padding: 0.45rem 1.1rem !important;
+  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35) !important;
+  transition: var(--transition-normal) !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  gap: 0.4rem !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+}
+
+.btn-logout-danger:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%) !important;
+  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5) !important;
+  transform: translateY(-2px);
+}
+
+/* Button Sizing */
+.btn-agro-primary {
+  background: linear-gradient(135deg, var(--emerald-primary) 0%, var(--emerald-dark) 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1.5rem;
+  box-shadow: 0 6px 20px var(--emerald-glow);
+  transition: var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-agro-primary:hover {
+  background: linear-gradient(135deg, var(--emerald-light) 0%, var(--emerald-primary) 100%);
+  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
+  transform: translateY(-3px);
+}
+
+.btn-agro-secondary {
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--text-bright) !important;
+  font-weight: 700;
+  border: 1.5px solid var(--border-glass);
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1.5rem;
+  transition: var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-agro-secondary:hover {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: var(--border-glass-strong);
+  transform: translateY(-3px);
+}
+
+.btn-agro-admin {
+  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+  color: #ffffff !important;
+  font-weight: 700;
+  border: none;
+  border-radius: var(--radius-md);
+  padding: 0.8rem 1.5rem;
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
+  transition: var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+}
+
+.btn-agro-admin:hover {
+  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
+  transform: translateY(-3px);
+}
+
+/* Compact Sub-nav Buttons */
+.btn-sm, .btn-group-sm > .btn {
+  min-width: auto !important;
+  padding: 0.5rem 1.25rem !important;
+  font-size: 0.88rem !important;
+  line-height: 1.4 !important;
+  border-radius: var(--radius-sm) !important;
+}
+
+/* Form Controls & Select Option Fix */
+.form-group {
+  margin-bottom: 1.8rem;
+}
+
+.form-control-agro {
+  background: var(--bg-input) !important;
+  border: 1px solid var(--border-glass) !important;
+  color: var(--text-bright) !important;
+  border-radius: var(--radius-md) !important;
+  padding: 0.95rem 1.4rem !important;
+  font-family: var(--font-primary) !important;
+  font-size: 1rem !important;
+  transition: var(--transition-normal) !important;
+}
+
+.form-control-agro:focus {
+  background: var(--bg-card-hover) !important;
+  border-color: var(--emerald-primary) !important;
+  box-shadow: 0 0 0 4px var(--emerald-glow) !important;
+  outline: none !important;
+}
+
+select.form-control-agro {
+  width: 100% !important;
+  text-overflow: clip !important;
+  white-space: normal !important;
+  word-wrap: break-word !important;
+  padding-right: 2.2rem !important;
+  height: auto !important;
+  appearance: auto !important;
+}
+
+select.form-control-agro option {
+  background-color: var(--bg-card) !important;
+  color: var(--text-bright) !important;
+  padding: 0.6rem 1rem !important;
+  font-size: 0.95rem !important;
+  white-space: normal !important;
+}
+
+/* Badges & Status Indicators */
+.badge-agro {
+  padding: 0.5rem 1.1rem;
+  border-radius: 50px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.badge-agro-emerald {
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--emerald-primary);
+  border: 1px solid rgba(16, 185, 129, 0.35);
+}
+
+.badge-agro-amber {
+  background: rgba(245, 158, 11, 0.15);
+  color: var(--amber-accent);
+  border: 1px solid rgba(245, 158, 11, 0.35);
+}
+
+.badge-agro-cyan {
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--cyan-accent);
+  border: 1px solid rgba(6, 182, 212, 0.35);
+}
+
+/* Feature Cards Grid */
+.feature-card {
+  padding: 2.5rem;
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  transition: var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.feature-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--emerald-primary);
+  transform: translateY(-8px);
+  box-shadow: 0 25px 50px -15px rgba(0, 0, 0, 0.2), 0 0 30px var(--emerald-glow);
+}
+
+.feature-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--emerald-primary);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Data Tables */
+.table-agro {
+  width: 100%;
+  color: var(--text-main);
+  margin-bottom: 0;
+}
+
+.table-agro th {
+  background: var(--table-header-bg);
+  color: var(--emerald-primary);
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.85rem;
+  letter-spacing: 0.05em;
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border-glass);
+}
+
+.table-agro td {
+  padding: 1.2rem 1.5rem;
+  border-bottom: 1px solid var(--border-glass);
+  vertical-align: middle;
+}
+
+/* Footer Styling */
+footer {
+  background: var(--bg-footer) !important;
+  color: #94a3b8;
+  border-top: 1px solid var(--border-glass) !important;
+  padding: 4rem 0 2rem;
+  transition: var(--transition-theme);
+}
+
+footer h6, footer .font-weight-bold {
+  color: var(--footer-text-bright) !important;
+}
+
+/* Mobile Responsiveness */
+@media (max-width: 991px) {
+  .navbar-collapse {
+    background: var(--bg-card) !important;
+    backdrop-filter: blur(25px);
+    padding: 2rem;
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-glass);
+    margin-top: 1rem;
+  }
+  
+  .glass-card {
+    padding: 1.8rem;
+  }
+
+  .theme-switch-wrapper {
+    margin: 0.5rem 0;
+  }
+}

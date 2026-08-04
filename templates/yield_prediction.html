@@ -1,0 +1,62 @@
+{% extends 'base.html' %}
+{% block title %}Yield Harvest Prediction | AgroIntel AI{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-lg-10">
+      <div class="text-center mb-5">
+        <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-wheat-field"></i> Random Forest Regressor</span>
+        <h2 class="display-5 font-weight-extrabold text-white">Harvest Yield Prediction</h2>
+        <p class="text-muted max-w-600 mx-auto">Estimate expected production harvest tonnage based on farm land area and local environmental metrics.</p>
+      </div>
+
+      <div class="glass-card p-4 p-md-5 mb-5">
+        <form action="{{ url_for('farmer_yield_prediction') }}" method="POST">
+          <div class="row g-3 mb-3">
+            <div class="col-md-4 mb-3">
+              <label class="font-weight-bold small text-muted">State</label>
+              <input type="text" name="state" class="form-control form-control-agro" value="Karnataka" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="font-weight-bold small text-muted">District</label>
+              <input type="text" name="district" class="form-control form-control-agro" value="BAGALKOT" required>
+            </div>
+            <div class="col-md-4 mb-3">
+              <label class="font-weight-bold small text-muted">Season</label>
+              <select name="season" class="form-control form-control-agro" required>
+                <option value="Kharif">Kharif</option>
+                <option value="Rabi">Rabi</option>
+                <option value="Whole Year">Whole Year</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="row g-3 mb-4">
+            <div class="col-md-6 mb-3">
+              <label class="font-weight-bold small text-muted">Crop Name</label>
+              <input type="text" name="crop" class="form-control form-control-agro" value="Rice" placeholder="e.g. Rice, Maize" required>
+            </div>
+            <div class="col-md-6 mb-3">
+              <label class="font-weight-bold small text-muted">Farm Land Size (Hectares)</label>
+              <input type="number" step="any" name="area" class="form-control form-control-agro" value="100" placeholder="e.g. 150" required>
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold">
+            <i class="fas fa-calculator mr-2"></i> Compute Expected Yield Tonnage
+          </button>
+        </form>
+
+        {% if result %}
+          <div class="mt-5 p-4 rounded-lg text-center animate-glow" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(16, 185, 129, 0.3) 100%); border: 2px solid var(--amber-accent);">
+            <span class="badge-agro badge-agro-amber mb-2"><i class="fas fa-chart-column"></i> Production Estimation</span>
+            <h1 class="display-3 font-weight-extrabold text-white mb-1">{{ result }} <span class="fs-4 text-muted">Tonnes</span></h1>
+            <p class="text-white-50 mb-0">Predicted harvest output derived from district land area metrics.</p>
+          </div>
+        {% endif %}
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
