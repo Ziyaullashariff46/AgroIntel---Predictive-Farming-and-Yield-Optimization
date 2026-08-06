@@ -5,9 +5,9 @@
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-lg-10">
-      <div class="text-center mb-5">
-        <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-wheat-field"></i> Random Forest Regressor</span>
-        <h2 class="display-5 font-weight-extrabold text-white">Harvest Yield Prediction</h2>
+      <div class="text-center mb-5 animate-fade-in-up">
+        <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-wheat-awn"></i> Random Forest Regressor</span>
+        <h2 class="display-4 font-weight-extrabold text-bright">Harvest Yield Prediction</h2>
         <p class="text-muted max-w-600 mx-auto">Estimate expected production harvest tonnage based on farm land area and local environmental metrics.</p>
       </div>
 
@@ -15,18 +15,18 @@
         <form action="{{ url_for('farmer_yield_prediction') }}" method="POST">
           <div class="row g-3 mb-3">
             <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted">State</label>
+              <label class="font-weight-bold small text-muted"><i class="fas fa-map-location-dot text-emerald mr-1"></i> State</label>
               <input type="text" name="state" class="form-control form-control-agro" value="Karnataka" required>
             </div>
             <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted">District</label>
+              <label class="font-weight-bold small text-muted"><i class="fas fa-city text-cyan mr-1"></i> District</label>
               <input type="text" name="district" class="form-control form-control-agro" value="BAGALKOT" required>
             </div>
             <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted">Season</label>
+              <label class="font-weight-bold small text-muted"><i class="fas fa-calendar-days text-amber mr-1"></i> Cultivation Season</label>
               <select name="season" class="form-control form-control-agro" required>
-                <option value="Kharif">Kharif</option>
-                <option value="Rabi">Rabi</option>
+                <option value="Kharif" selected>Kharif (Monsoon)</option>
+                <option value="Rabi">Rabi (Winter)</option>
                 <option value="Whole Year">Whole Year</option>
               </select>
             </div>
@@ -34,29 +34,45 @@
 
           <div class="row g-3 mb-4">
             <div class="col-md-6 mb-3">
-              <label class="font-weight-bold small text-muted">Crop Name</label>
+              <label class="font-weight-bold small text-muted"><i class="fas fa-seedling text-success mr-1"></i> Target Crop Name</label>
               <input type="text" name="crop" class="form-control form-control-agro" value="Rice" placeholder="e.g. Rice, Maize" required>
             </div>
             <div class="col-md-6 mb-3">
-              <label class="font-weight-bold small text-muted">Farm Land Size (Hectares)</label>
-              <input type="number" step="any" name="area" class="form-control form-control-agro" value="100" placeholder="e.g. 150" required>
+              <div class="p-3 rounded-lg" style="background: var(--bg-input); border: 1px solid var(--border-glass);">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <label class="font-weight-bold text-bright mb-0"><i class="fas fa-ruler-combined text-primary mr-1"></i> Land Area (Hectares)</label>
+                  <span class="badge badge-success px-2 py-1" id="areaVal">100 Ha</span>
+                </div>
+                <input type="range" min="1" max="500" value="100" class="custom-range" id="areaSlider" oninput="syncArea(this.value)">
+                <input type="number" step="any" name="area" id="areaInput" class="form-control form-control-agro mt-2" value="100" placeholder="e.g. 150" required>
+              </div>
             </div>
           </div>
 
-          <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold">
+          <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold shadow-lg">
             <i class="fas fa-calculator mr-2"></i> Compute Expected Yield Tonnage
           </button>
         </form>
 
         {% if result %}
-          <div class="mt-5 p-4 rounded-lg text-center animate-glow" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.25) 0%, rgba(16, 185, 129, 0.3) 100%); border: 2px solid var(--amber-accent);">
+          <div class="mt-5 result-card-glow text-center animate-fade-in-up" style="background: linear-gradient(135deg, rgba(245, 158, 11, 0.22) 0%, rgba(16, 185, 129, 0.35) 100%); border: 1.5px solid var(--amber-accent);">
             <span class="badge-agro badge-agro-amber mb-2"><i class="fas fa-chart-column"></i> Production Estimation</span>
-            <h1 class="display-3 font-weight-extrabold text-white mb-1">{{ result }} <span class="fs-4 text-muted">Tonnes</span></h1>
-            <p class="text-white-50 mb-0">Predicted harvest output derived from district land area metrics.</p>
+            <span class="text-muted d-block small uppercase tracking-wider font-weight-bold mb-1">Total Forecasted Harvest</span>
+            <h1 class="display-2 font-weight-extrabold text-bright mb-1 gradient-text">{{ result }} <span class="fs-4 text-muted">Tonnes</span></h1>
+            <p class="text-muted mb-0">Calculated using Random Forest Regressor models based on historical land yield metrics.</p>
           </div>
         {% endif %}
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function syncArea(val) {
+  document.getElementById('areaInput').value = val;
+  document.getElementById('areaVal').innerText = val + ' Ha';
+}
+</script>
 {% endblock %}

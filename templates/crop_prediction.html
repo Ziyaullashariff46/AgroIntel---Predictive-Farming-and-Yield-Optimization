@@ -5,52 +5,74 @@
 <div class="container py-5">
   <div class="row justify-content-center">
     <div class="col-lg-10">
-      <div class="text-center mb-5">
+      <div class="text-center mb-5 animate-fade-in-up">
         <span class="badge-agro badge-agro-amber mb-2"><i class="fas fa-chart-line"></i> Regional Market Intelligence</span>
-        <h2 class="display-5 font-weight-extrabold text-white">Crop Price & Selection Predictor</h2>
+        <h2 class="display-4 font-weight-extrabold text-bright">Crop Price & Selection Predictor</h2>
         <p class="text-muted max-w-600 mx-auto">Analyze regional historical yield performance to identify high-value suitable crops for your district.</p>
       </div>
 
       <div class="glass-card p-4 p-md-5 mb-5">
+        
+        <!-- Quick Regional Presets -->
+        <div class="mb-4">
+          <label class="font-weight-bold small text-muted d-block mb-2"><i class="fas fa-wand-magic-sparkles text-amber mr-1"></i> Quick Regional Presets (1-Click Fill):</label>
+          <div class="soil-preset-container">
+            <button type="button" class="soil-preset-btn" onclick="applyRegionPreset('Karnataka', 'BAGALKOT', 'Kharif')">
+              📍 Karnataka - Bagalkot
+            </button>
+            <button type="button" class="soil-preset-btn" onclick="applyRegionPreset('Maharashtra', 'PUNE', 'Rabi')">
+              📍 Maharashtra - Pune
+            </button>
+            <button type="button" class="soil-preset-btn" onclick="applyRegionPreset('Punjab', 'LUDHIANA', 'Kharif')">
+              📍 Punjab - Ludhiana
+            </button>
+            <button type="button" class="soil-preset-btn" onclick="applyRegionPreset('Tamil Nadu', 'THANJAVUR', 'Whole Year')">
+              📍 Tamil Nadu - Thanjavur
+            </button>
+          </div>
+        </div>
+
         <form action="{{ url_for('farmer_crop_prediction') }}" method="POST">
           <div class="row g-3 mb-4">
             <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted">State</label>
-              <input type="text" name="state" class="form-control form-control-agro" value="Karnataka" required>
+              <label class="font-weight-bold small text-muted"><i class="fas fa-map-location-dot text-emerald mr-1"></i> State</label>
+              <input type="text" name="state" id="stateInput" class="form-control form-control-agro" value="Karnataka" required>
             </div>
             <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted">District</label>
-              <input type="text" name="district" class="form-control form-control-agro" value="BAGALKOT" required>
+              <label class="font-weight-bold small text-muted"><i class="fas fa-city text-cyan mr-1"></i> District</label>
+              <input type="text" name="district" id="districtInput" class="form-control form-control-agro" value="BAGALKOT" required>
             </div>
             <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted">Season</label>
-              <select name="season" class="form-control form-control-agro" required>
-                <option value="Kharif">Kharif</option>
-                <option value="Rabi">Rabi</option>
+              <label class="font-weight-bold small text-muted"><i class="fas fa-calendar-days text-amber mr-1"></i> Season</label>
+              <select name="season" id="seasonSelect" class="form-control form-control-agro" required>
+                <option value="Kharif" selected>Kharif (Monsoon)</option>
+                <option value="Rabi">Rabi (Winter)</option>
                 <option value="Whole Year">Whole Year</option>
                 <option value="Summer">Summer</option>
               </select>
             </div>
           </div>
 
-          <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold">
-            <i class="fas fa-magnifying-glass-chart mr-2"></i> Predict Suitable Crops
+          <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold shadow-lg">
+            <i class="fas fa-magnifying-glass-chart mr-2"></i> Predict Suitable High-Value Crops
           </button>
         </form>
 
         {% if result %}
-          <div class="mt-5 p-4 rounded-lg" style="background: rgba(4, 15, 11, 0.8); border: 1px solid var(--border-glass-strong);">
-            <h4 class="text-white font-weight-bold mb-3"><i class="fas fa-award text-warning mr-2"></i> Predicted High-Yield Crops</h4>
+          <div class="mt-5 p-4 rounded-lg animate-fade-in-up" style="background: var(--bg-input); border: 1.5px solid var(--border-glass-strong);">
+            <h4 class="text-bright font-weight-bold mb-3"><i class="fas fa-award text-warning mr-2"></i> Predicted High-Yield Suitable Crops</h4>
             <div class="row g-3">
               {% if result is string %}
                 <div class="col-12"><p class="text-warning mb-0">{{ result }}</p></div>
               {% else %}
                 {% for crop, suitability in result.items() %}
                   <div class="col-md-4 mb-3">
-                    <div class="p-3 rounded text-center" style="background: rgba(16, 185, 129, 0.1); border: 1px solid var(--border-glass);">
-                      <i class="fas fa-seedling text-emerald fs-3 mb-2"></i>
-                      <h5 class="text-white font-weight-bold text-capitalize mb-1">{{ crop }}</h5>
-                      <span class="badge badge-success font-weight-bold">{{ suitability }} Profit Potential</span>
+                    <div class="p-4 rounded-lg text-center h-100" style="background: var(--bg-card); border: 1px solid var(--border-glass);">
+                      <div class="bg-gradient-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 50px; height: 50px; background: linear-gradient(135deg, #10b981, #059669);">
+                        <i class="fas fa-seedling text-white fs-4"></i>
+                      </div>
+                      <h5 class="text-bright font-weight-bold text-capitalize mb-2">{{ crop }}</h5>
+                      <span class="badge badge-success font-weight-bold py-1.5 px-3">{{ suitability }} Profit Potential</span>
                     </div>
                   </div>
                 {% endfor %}
@@ -62,4 +84,14 @@
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+function applyRegionPreset(state, district, season) {
+  document.getElementById('stateInput').value = state;
+  document.getElementById('districtInput').value = district;
+  document.getElementById('seasonSelect').value = season;
+}
+</script>
 {% endblock %}

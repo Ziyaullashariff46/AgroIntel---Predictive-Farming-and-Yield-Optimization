@@ -384,10 +384,12 @@ def customer_buy_crops():
             else:
                 conn.execute('UPDATE farmer_crops_trade SET Crop_quantity = ? WHERE trade_id = ?', (avail_qty - buy_qty, trade_id))
 
-            # Record history
+            # Record history with computed History_id
+            max_h = conn.execute('SELECT MAX(History_id) FROM farmer_history').fetchone()[0]
+            next_h_id = (max_h + 1) if max_h is not None else 1
             conn.execute(
-                'INSERT INTO farmer_history (farmer_id, farmer_crop, farmer_quantity, farmer_price, date) VALUES (?, ?, ?, ?, ?)',
-                (item['farmer_fkid'], item['Trade_crop'], buy_qty, int(buy_qty * item['costperkg']), '01/08/2026')
+                'INSERT INTO farmer_history (History_id, farmer_id, farmer_crop, farmer_quantity, farmer_price, date) VALUES (?, ?, ?, ?, ?, ?)',
+                (next_h_id, item['farmer_fkid'], item['Trade_crop'], buy_qty, int(buy_qty * item['costperkg']), '01/08/2026')
             )
             conn.commit()
             flash('Purchase successful! Thank you for buying fresh crops directly from farmers.', 'success')

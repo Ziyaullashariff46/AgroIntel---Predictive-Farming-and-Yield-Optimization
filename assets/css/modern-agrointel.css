@@ -1,5 +1,6 @@
 /* ==========================================================================
-   AgroIntel Modern Design System & Dual Theme Engine (Light / Dark)
+   AgroIntel Next-Gen Design System & Responsive Framework
+   Theme: Bio-Luminescent Smart Agriculture & High-Visibility Controls
    ========================================================================== */
 
 @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
@@ -10,70 +11,74 @@
   --emerald-primary: #10b981;
   --emerald-dark: #059669;
   --emerald-light: #34d399;
-  --emerald-glow: rgba(16, 185, 129, 0.3);
+  --emerald-glow: rgba(16, 185, 129, 0.35);
   
   --amber-accent: #f59e0b;
   --cyan-accent: #06b6d4;
   --purple-accent: #8b5cf6;
   --rose-accent: #f43f5e;
 
-  --radius-sm: 10px;
-  --radius-md: 16px;
-  --radius-lg: 24px;
-  --radius-xl: 32px;
+  --radius-sm: 12px;
+  --radius-md: 18px;
+  --radius-lg: 26px;
+  --radius-xl: 36px;
 
-  --transition-theme: background-color 0.35s ease, color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
+  --transition-theme: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
   --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 
 /* ==========================================
-   DARK THEME VARIABLES (Default)
+   DARK THEME VARIABLES (Deep Bio-Green Slate)
    ========================================== */
 [data-theme="dark"], :root {
-  --bg-deep: #061410;
-  --bg-card: rgba(12, 35, 27, 0.85);
-  --bg-card-hover: rgba(18, 51, 39, 0.95);
-  --bg-input: rgba(4, 15, 11, 0.85);
-  --bg-navbar: rgba(6, 20, 16, 0.94);
-  --bg-footer: #030d0a;
+  --bg-deep: #061a14;
+  --bg-card: rgba(12, 38, 29, 0.85);
+  --bg-card-hover: rgba(18, 54, 41, 0.95);
+  --bg-input: rgba(4, 18, 13, 0.85);
+  --bg-navbar: rgba(6, 26, 20, 0.95);
+  --bg-footer: #03100c;
   
   --text-bright: #ffffff;
   --text-main: #f1f5f9;
   --text-muted: #94a3b8;
 
   --border-glass: rgba(52, 211, 153, 0.22);
-  --border-glass-strong: rgba(52, 211, 153, 0.48);
-  --shadow-card: 0 20px 45px -10px rgba(0, 0, 0, 0.6);
-  --table-header-bg: rgba(4, 15, 11, 0.9);
+  --border-glass-strong: rgba(52, 211, 153, 0.5);
+  --shadow-card: 0 22px 50px -10px rgba(0, 0, 0, 0.65);
+  --table-header-bg: rgba(4, 18, 13, 0.92);
   --footer-text-bright: #ffffff;
+  --grid-pattern: radial-gradient(rgba(16, 185, 129, 0.12) 1px, transparent 1px);
 }
 
 /* ==========================================
-   LIGHT THEME VARIABLES (High Contrast Crisp)
+   LIGHT THEME VARIABLES (Crisp Bio-Fresh Mint)
    ========================================== */
 [data-theme="light"] {
-  --bg-deep: #f8fafc;
+  --bg-deep: #f0fdf4;
   --bg-card: #ffffff;
   --bg-card-hover: #ffffff;
   --bg-input: #f1f5f9;
-  --bg-navbar: rgba(255, 255, 255, 0.94);
+  --bg-navbar: rgba(255, 255, 255, 0.96);
   --bg-footer: #0f172a;
   
-  --text-bright: #0f172a;
-  --text-main: #1e293b;
+  --text-bright: #064e3b;
+  --text-main: #0f172a;
   --text-muted: #475569;
 
-  --border-glass: rgba(16, 185, 129, 0.25);
-  --border-glass-strong: rgba(16, 185, 129, 0.55);
-  --shadow-card: 0 15px 35px -5px rgba(15, 23, 42, 0.08);
-  --table-header-bg: #f1f5f9;
+  --border-glass: rgba(16, 185, 129, 0.28);
+  --border-glass-strong: rgba(16, 185, 129, 0.6);
+  --shadow-card: 0 15px 35px -5px rgba(6, 78, 59, 0.08);
+  --table-header-bg: #e6f4ea;
   --footer-text-bright: #ffffff;
+  --grid-pattern: radial-gradient(rgba(16, 185, 129, 0.18) 1px, transparent 1px);
 }
 
 /* Global Reset & Body Styling */
 body {
   font-family: var(--font-primary);
   background-color: var(--bg-deep);
+  background-image: var(--grid-pattern);
+  background-size: 28px 28px;
   color: var(--text-main);
   transition: var(--transition-theme);
   min-height: 100vh;
@@ -93,7 +98,7 @@ h1, h2, h3, h4, h5, h6 {
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, var(--emerald-light) 0%, var(--emerald-primary) 100%);
+  background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
 }
@@ -113,28 +118,41 @@ h1, h2, h3, h4, h5, h6 {
 /* Glassmorphism Card System */
 .glass-card {
   background: var(--bg-card);
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
   border: 1px solid var(--border-glass);
   border-radius: var(--radius-lg);
   box-shadow: var(--shadow-card);
   padding: 2.5rem;
   margin-bottom: 2.5rem;
   transition: var(--transition-normal);
+  position: relative;
+  overflow: hidden;
+}
+
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--emerald-primary), transparent);
+  opacity: 0.6;
 }
 
 .glass-card:hover {
   background: var(--bg-card-hover);
   border-color: var(--border-glass-strong);
-  box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.18), 0 0 30px var(--emerald-glow);
+  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25), 0 0 35px var(--emerald-glow);
   transform: translateY(-4px);
 }
 
 /* Header & Navbar Alignment */
 .navbar-glass {
   background: var(--bg-navbar) !important;
-  backdrop-filter: blur(20px);
-  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(25px);
+  -webkit-backdrop-filter: blur(25px);
   border-bottom: 1px solid var(--border-glass);
   padding: 0.85rem 2rem;
   transition: var(--transition-theme);
@@ -156,10 +174,10 @@ h1, h2, h3, h4, h5, h6 {
 
 .nav-link-custom:hover, .nav-link-custom.active {
   color: var(--emerald-primary) !important;
-  background: rgba(16, 185, 129, 0.12);
+  background: rgba(16, 185, 129, 0.14);
 }
 
-/* Glassmorphism Dropdown Menu */
+/* Dropdown Menu */
 .dropdown-menu-agro {
   background: var(--bg-card) !important;
   backdrop-filter: blur(25px) !important;
@@ -169,7 +187,7 @@ h1, h2, h3, h4, h5, h6 {
   box-shadow: var(--shadow-card) !important;
   padding: 0.6rem !important;
   margin-top: 0.5rem !important;
-  min-width: 230px !important;
+  min-width: 240px !important;
 }
 
 .dropdown-item-custom {
@@ -189,7 +207,7 @@ h1, h2, h3, h4, h5, h6 {
   color: var(--emerald-primary) !important;
 }
 
-/* Right Controls Container */
+/* Navbar Controls */
 .navbar-controls {
   display: flex;
   align-items: center;
@@ -269,37 +287,81 @@ h1, h2, h3, h4, h5, h6 {
   background-color: #f59e0b;
 }
 
-/* High Visibility Logout Button */
-.btn-logout-danger {
+/* HIGH-VISIBILITY BOLD LOGOUT BUTTON */
+.btn-logout-bold {
   background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
   color: #ffffff !important;
-  font-weight: 700 !important;
-  border: none !important;
+  font-weight: 800 !important;
+  font-size: 0.88rem !important;
+  letter-spacing: 0.05em !important;
+  text-transform: uppercase !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
   border-radius: var(--radius-sm) !important;
-  padding: 0.45rem 1.1rem !important;
-  box-shadow: 0 4px 12px rgba(239, 68, 68, 0.35) !important;
+  padding: 0.6rem 1.3rem !important;
+  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.45) !important;
   transition: var(--transition-normal) !important;
   display: inline-flex !important;
   align-items: center !important;
-  gap: 0.4rem !important;
+  justify-content: center !important;
+  gap: 0.5rem !important;
   white-space: nowrap !important;
   flex-shrink: 0 !important;
+  text-decoration: none !important;
 }
 
-.btn-logout-danger:hover {
+.btn-logout-bold:hover {
   background: linear-gradient(135deg, #f87171 0%, #ef4444 100%) !important;
-  box-shadow: 0 6px 18px rgba(239, 68, 68, 0.5) !important;
-  transform: translateY(-2px);
+  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.65) !important;
+  transform: translateY(-2px) scale(1.02);
+  color: #ffffff !important;
 }
 
-/* Button Sizing */
+/* Interactive Soil NPK Preset Pill Buttons */
+.soil-preset-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.65rem;
+  margin-bottom: 1.5rem;
+}
+
+.soil-preset-btn {
+  background: var(--bg-input);
+  border: 1px solid var(--border-glass);
+  color: var(--text-bright);
+  padding: 0.45rem 1rem;
+  border-radius: 50px;
+  font-size: 0.85rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-normal);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.soil-preset-btn:hover {
+  background: rgba(16, 185, 129, 0.18);
+  border-color: var(--emerald-primary);
+  color: var(--emerald-primary);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px var(--emerald-glow);
+}
+
+.soil-preset-btn.active {
+  background: var(--emerald-primary);
+  border-color: var(--emerald-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 14px var(--emerald-glow);
+}
+
+/* Buttons */
 .btn-agro-primary {
   background: linear-gradient(135deg, var(--emerald-primary) 0%, var(--emerald-dark) 100%);
   color: #ffffff !important;
   font-weight: 700;
   border: none;
   border-radius: var(--radius-md);
-  padding: 0.8rem 1.5rem;
+  padding: 0.85rem 1.6rem;
   box-shadow: 0 6px 20px var(--emerald-glow);
   transition: var(--transition-normal);
   display: inline-flex;
@@ -320,7 +382,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   border: 1.5px solid var(--border-glass);
   border-radius: var(--radius-md);
-  padding: 0.8rem 1.5rem;
+  padding: 0.85rem 1.6rem;
   transition: var(--transition-normal);
   display: inline-flex;
   align-items: center;
@@ -340,7 +402,7 @@ h1, h2, h3, h4, h5, h6 {
   font-weight: 700;
   border: none;
   border-radius: var(--radius-md);
-  padding: 0.8rem 1.5rem;
+  padding: 0.85rem 1.6rem;
   box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
   transition: var(--transition-normal);
   display: inline-flex;
@@ -363,7 +425,7 @@ h1, h2, h3, h4, h5, h6 {
   border-radius: var(--radius-sm) !important;
 }
 
-/* Form Controls & Select Option Fix */
+/* Form Controls & Range Inputs */
 .form-group {
   margin-bottom: 1.8rem;
 }
@@ -404,7 +466,41 @@ select.form-control-agro option {
   white-space: normal !important;
 }
 
-/* Badges & Status Indicators */
+/* Feature Cards Grid */
+.feature-card {
+  padding: 2.5rem;
+  border-radius: var(--radius-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-glass);
+  transition: var(--transition-normal);
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  position: relative;
+  overflow: hidden;
+}
+
+.feature-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--emerald-primary);
+  transform: translateY(-8px) scale(1.01);
+  box-shadow: 0 25px 50px -15px rgba(0, 0, 0, 0.25), 0 0 35px var(--emerald-glow);
+}
+
+.feature-icon-wrapper {
+  width: 64px;
+  height: 64px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.6rem;
+  background: rgba(16, 185, 129, 0.15);
+  color: var(--emerald-primary);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+}
+
+/* Badges */
 .badge-agro {
   padding: 0.5rem 1.1rem;
   border-radius: 50px;
@@ -435,36 +531,13 @@ select.form-control-agro option {
   border: 1px solid rgba(6, 182, 212, 0.35);
 }
 
-/* Feature Cards Grid */
-.feature-card {
-  padding: 2.5rem;
+/* Prediction Result Cards */
+.result-card-glow {
+  background: linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.32) 100%);
+  border: 1.5px solid var(--emerald-primary);
   border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  border: 1px solid var(--border-glass);
-  transition: var(--transition-normal);
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-
-.feature-card:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--emerald-primary);
-  transform: translateY(-8px);
-  box-shadow: 0 25px 50px -15px rgba(0, 0, 0, 0.2), 0 0 30px var(--emerald-glow);
-}
-
-.feature-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-md);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.6rem;
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--emerald-primary);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  padding: 2.2rem;
+  box-shadow: 0 15px 35px rgba(16, 185, 129, 0.25);
 }
 
 /* Data Tables */
@@ -504,22 +577,58 @@ footer h6, footer .font-weight-bold {
   color: var(--footer-text-bright) !important;
 }
 
-/* Mobile Responsiveness */
+/* Comprehensive Responsive Device Rules */
 @media (max-width: 991px) {
+  .navbar-glass {
+    padding: 0.75rem 1.25rem !important;
+  }
+
   .navbar-collapse {
     background: var(--bg-card) !important;
     backdrop-filter: blur(25px);
-    padding: 2rem;
+    padding: 1.8rem;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-glass);
     margin-top: 1rem;
   }
-  
-  .glass-card {
-    padding: 1.8rem;
+
+  .navbar-controls {
+    flex-direction: column;
+    width: 100%;
+    align-items: stretch;
+    gap: 1rem;
+    margin-top: 1.5rem;
+    padding-top: 1.5rem;
+    border-top: 1px solid var(--border-glass);
   }
 
-  .theme-switch-wrapper {
-    margin: 0.5rem 0;
+  .btn-logout-bold {
+    width: 100% !important;
+    justify-content: center !important;
+    padding: 0.75rem 1.5rem !important;
+  }
+
+  .glass-card {
+    padding: 1.5rem;
+  }
+}
+
+@media (max-width: 576px) {
+  .display-4 {
+    font-size: 2.2rem !important;
+  }
+
+  .display-3 {
+    font-size: 2rem !important;
+  }
+
+  .glass-card {
+    padding: 1.2rem;
+    border-radius: var(--radius-md);
+  }
+
+  .btn-agro-primary, .btn-agro-secondary, .btn-agro-admin {
+    width: 100%;
+    margin-bottom: 0.5rem;
   }
 }

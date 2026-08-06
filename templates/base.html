@@ -38,12 +38,13 @@
   <nav class="navbar navbar-expand-lg navbar-glass sticky-top">
     <div class="container-fluid px-lg-4">
       <a href="{{ url_for('index') }}" class="navbar-brand d-flex align-items-center mr-lg-3 py-0">
-        <div class="bg-gradient-success rounded-circle d-flex align-items-center justify-content-center mr-2" style="width: 40px; height: 40px; background: linear-gradient(135deg, #10b981, #059669);">
+        <div class="bg-gradient-success rounded-circle d-flex align-items-center justify-content-center mr-2" style="width: 42px; height: 42px; background: linear-gradient(135deg, #10b981, #059669);">
           <i class="fas fa-leaf text-white fs-5"></i>
         </div>
-        <span class="font-weight-extrabold text-bright text-xl tracking-tight" style="font-size: 1.45rem;">Agro<span class="text-success">Intel</span></span>
+        <span class="font-weight-extrabold text-bright text-xl tracking-tight" style="font-size: 1.5rem;">Agro<span class="text-success">Intel</span></span>
       </a>
 
+      <!-- Mobile Right Controls & Toggler -->
       <div class="d-flex align-items-center d-lg-none">
         <!-- Sliding Pill Theme Switcher Mobile -->
         <div class="theme-switch-wrapper mr-2">
@@ -56,6 +57,13 @@
             <div class="theme-switch-thumb"></div>
           </label>
         </div>
+
+        {% if session.get('user_type') and (is_farmer_page or is_customer_page or is_admin_page) %}
+          <!-- Prominent Mobile Logout Button -->
+          <a href="{{ url_for('logout') }}" class="btn-logout-bold px-2.5 py-1.5 mr-2" style="font-size: 0.78rem !important;" title="Logout">
+            <i class="fas fa-power-off"></i> LOGOUT
+          </a>
+        {% endif %}
 
         <button class="navbar-toggler border-0 p-2" type="button" data-toggle="collapse" data-target="#navbarMain" aria-controls="navbarMain" aria-expanded="false" aria-label="Toggle navigation">
           <i class="fas fa-bars text-bright fs-4"></i>
@@ -165,7 +173,7 @@
             </li>
 
           {% else %}
-            <!-- OTHER PUBLIC PAGES (e.g. Contact Us) -->
+            <!-- OTHER PUBLIC PAGES -->
             <li class="nav-item">
               <a href="{{ url_for('index') }}" class="nav-link-custom">
                 <i class="fas fa-house"></i> Home
@@ -181,7 +189,7 @@
 
         <!-- Right Controls Bar -->
         <div class="navbar-controls mt-3 mt-lg-0">
-          <!-- Sliding Pill Theme Switcher -->
+          <!-- Sliding Pill Theme Switcher Desktop -->
           <div class="theme-switch-wrapper d-none d-lg-inline-flex">
             <label class="theme-switch-label mb-0" title="Toggle Light/Dark Theme">
               <input type="checkbox" class="theme-switch-checkbox" onchange="toggleTheme()">
@@ -209,7 +217,7 @@
             </a>
 
           {% elif session.get('user_type') and (is_farmer_page or is_customer_page or is_admin_page) %}
-            <!-- LOGGED-IN PORTAL TOOL PAGES: Profile Badge & Logout -->
+            <!-- LOGGED-IN PORTAL TOOL PAGES: Profile Badge & BOLD RED LOGOUT BUTTON -->
             <div class="badge-agro badge-agro-emerald">
               <i class="fas fa-user-circle"></i>
               {% if session.get('user_type') == 'farmer' %}
@@ -220,8 +228,9 @@
                 Admin
               {% endif %}
             </div>
-            <a href="{{ url_for('logout') }}" class="btn-logout-danger" title="Logout of Session">
-              <i class="fas fa-right-from-bracket"></i> Logout
+
+            <a href="{{ url_for('logout') }}" class="btn-logout-bold" title="Logout of Session">
+              <i class="fas fa-power-off"></i> LOGOUT
             </a>
 
           {% else %}
