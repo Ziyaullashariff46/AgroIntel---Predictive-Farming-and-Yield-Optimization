@@ -1,232 +1,397 @@
 /* ==========================================================================
-   AgroIntel Next-Gen Design System & Responsive Framework
-   Theme: Bio-Luminescent Smart Agriculture & High-Visibility Controls
+   AgroIntel — Luxury Bio-Minimalist Design System
+   Aesthetic: Organic Precision / Agrarian Sophistication
+   Skills Applied: frontend-design, design-spells, ui-tokens, wcag-audit-patterns
    ========================================================================== */
 
-@import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Inter:wght@300;400;500;600;700&display=swap');
-
+/* ==========================================================================
+   DESIGN TOKENS (CSS Custom Properties)
+   ========================================================================== */
 :root {
-  --font-primary: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-  
-  --emerald-primary: #10b981;
-  --emerald-dark: #059669;
-  --emerald-light: #34d399;
-  --emerald-glow: rgba(16, 185, 129, 0.35);
-  
-  --amber-accent: #f59e0b;
-  --cyan-accent: #06b6d4;
-  --purple-accent: #8b5cf6;
-  --rose-accent: #f43f5e;
+  /* Typography */
+  --font-display: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-body: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
 
-  --radius-sm: 12px;
-  --radius-md: 18px;
-  --radius-lg: 26px;
-  --radius-xl: 36px;
+  /* Brand Accent Colors — single dominant hue, one accent */
+  --emerald-50:  #ecfdf5;
+  --emerald-100: #d1fae5;
+  --emerald-400: #34d399;
+  --emerald-500: #10b981;
+  --emerald-600: #059669;
+  --emerald-700: #047857;
+  --emerald-glow: rgba(16, 185, 129, 0.28);
 
-  --transition-theme: background-color 0.35s cubic-bezier(0.4, 0, 0.2, 1), color 0.35s ease, border-color 0.35s ease, box-shadow 0.35s ease;
-  --transition-normal: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  --amber-400: #fbbf24;
+  --amber-500: #f59e0b;
+  --cyan-400:  #22d3ee;
+  --cyan-500:  #06b6d4;
+  --rose-500:  #f43f5e;
+  --red-500:   #ef4444;
+  --red-600:   #dc2626;
+
+  /* Radius Scale */
+  --r-xs:  6px;
+  --r-sm:  10px;
+  --r-md:  14px;
+  --r-lg:  20px;
+  --r-xl:  28px;
+  --r-full: 9999px;
+
+  /* Spacing Scale (8px base) */
+  --sp-1: 0.25rem;
+  --sp-2: 0.5rem;
+  --sp-3: 0.75rem;
+  --sp-4: 1rem;
+  --sp-5: 1.25rem;
+  --sp-6: 1.5rem;
+  --sp-8: 2rem;
+  --sp-10: 2.5rem;
+  --sp-12: 3rem;
+
+  /* Motion */
+  --ease-out: cubic-bezier(0.0, 0.0, 0.2, 1);
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1);
+  --dur-fast: 150ms;
+  --dur-normal: 280ms;
+  --dur-slow: 400ms;
+
+  --transition-ui: color var(--dur-normal) var(--ease-out),
+                   background-color var(--dur-normal) var(--ease-out),
+                   border-color var(--dur-normal) var(--ease-out),
+                   box-shadow var(--dur-normal) var(--ease-out),
+                   transform var(--dur-normal) var(--ease-out);
 }
 
-/* ==========================================
-   DARK THEME VARIABLES (Deep Bio-Green Slate)
-   ========================================== */
-[data-theme="dark"], :root {
-  --bg-deep: #061a14;
-  --bg-card: rgba(12, 38, 29, 0.85);
-  --bg-card-hover: rgba(18, 54, 41, 0.95);
-  --bg-input: rgba(4, 18, 13, 0.85);
-  --bg-navbar: rgba(6, 26, 20, 0.95);
-  --bg-footer: #03100c;
-  
-  --text-bright: #ffffff;
-  --text-main: #f1f5f9;
-  --text-muted: #94a3b8;
+/* ==========================================================================
+   DARK THEME (default) — Deep Obsidian-Emerald
+   ========================================================================== */
+[data-theme="dark"], html:not([data-theme]) {
+  --bg-base:    #071410;
+  --bg-surface: rgba(13, 32, 24, 0.90);
+  --bg-elevated:rgba(18, 46, 35, 0.95);
+  --bg-input:   rgba(5, 15, 11, 0.85);
+  --bg-nav:     rgba(7, 20, 16, 0.96);
 
-  --border-glass: rgba(52, 211, 153, 0.22);
-  --border-glass-strong: rgba(52, 211, 153, 0.5);
-  --shadow-card: 0 22px 50px -10px rgba(0, 0, 0, 0.65);
-  --table-header-bg: rgba(4, 18, 13, 0.92);
-  --footer-text-bright: #ffffff;
-  --grid-pattern: radial-gradient(rgba(16, 185, 129, 0.12) 1px, transparent 1px);
+  --text-primary:   #f8fafc;
+  --text-secondary: #cbd5e1;
+  --text-muted:     #64748b;
+
+  --border-subtle: rgba(52, 211, 153, 0.14);
+  --border-normal: rgba(52, 211, 153, 0.24);
+  --border-strong: rgba(52, 211, 153, 0.48);
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.4);
+  --shadow-md: 0 8px 24px rgba(0,0,0,0.5);
+  --shadow-lg: 0 20px 48px rgba(0,0,0,0.65);
+  --shadow-glow: 0 0 30px rgba(16, 185, 129, 0.22);
+
+  --table-head-bg: rgba(4, 12, 9, 0.95);
+  --grid-dot: rgba(16, 185, 129, 0.10);
 }
 
-/* ==========================================
-   LIGHT THEME VARIABLES (Crisp Bio-Fresh Mint)
-   ========================================== */
+/* ==========================================================================
+   LIGHT THEME — Crisp Sage & Mint
+   ========================================================================== */
 [data-theme="light"] {
-  --bg-deep: #f0fdf4;
-  --bg-card: #ffffff;
-  --bg-card-hover: #ffffff;
-  --bg-input: #f1f5f9;
-  --bg-navbar: rgba(255, 255, 255, 0.96);
-  --bg-footer: #0f172a;
-  
-  --text-bright: #064e3b;
-  --text-main: #0f172a;
-  --text-muted: #475569;
+  --bg-base:    #f2faf6;
+  --bg-surface: #ffffff;
+  --bg-elevated:#f8fffe;
+  --bg-input:   #f1f5f9;
+  --bg-nav:     rgba(255, 255, 255, 0.97);
 
-  --border-glass: rgba(16, 185, 129, 0.28);
-  --border-glass-strong: rgba(16, 185, 129, 0.6);
-  --shadow-card: 0 15px 35px -5px rgba(6, 78, 59, 0.08);
-  --table-header-bg: #e6f4ea;
-  --footer-text-bright: #ffffff;
-  --grid-pattern: radial-gradient(rgba(16, 185, 129, 0.18) 1px, transparent 1px);
+  --text-primary:   #042b1e;
+  --text-secondary: #334155;
+  --text-muted:     #64748b;
+
+  --border-subtle: rgba(16, 185, 129, 0.15);
+  --border-normal: rgba(16, 185, 129, 0.28);
+  --border-strong: rgba(16, 185, 129, 0.55);
+
+  --shadow-sm: 0 2px 8px rgba(4,78,59,0.06);
+  --shadow-md: 0 8px 24px rgba(4,78,59,0.10);
+  --shadow-lg: 0 20px 48px rgba(4,78,59,0.12);
+  --shadow-glow: 0 0 30px rgba(16, 185, 129, 0.18);
+
+  --table-head-bg: #e6f4ec;
+  --grid-dot: rgba(16, 185, 129, 0.15);
 }
 
-/* Global Reset & Body Styling */
+/* ==========================================================================
+   BASE RESET & BODY
+   ========================================================================== */
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
-  font-family: var(--font-primary);
-  background-color: var(--bg-deep);
-  background-image: var(--grid-pattern);
-  background-size: 28px 28px;
-  color: var(--text-main);
-  transition: var(--transition-theme);
+  font-family: var(--font-body);
+  background-color: var(--bg-base);
+  background-image: radial-gradient(var(--grid-dot) 1px, transparent 1px);
+  background-size: 26px 26px;
+  color: var(--text-primary);
+  transition: background-color var(--dur-slow) var(--ease-out),
+              color var(--dur-normal) var(--ease-out);
   min-height: 100vh;
   margin: 0;
   padding: 0;
   overflow-x: hidden;
-  line-height: 1.8;
+  line-height: 1.75;
 }
 
-/* Typography Utilities */
+/* ==========================================================================
+   TYPOGRAPHY
+   ========================================================================== */
 h1, h2, h3, h4, h5, h6 {
-  font-family: var(--font-primary);
+  font-family: var(--font-display);
   font-weight: 700;
-  letter-spacing: -0.025em;
-  color: var(--text-bright);
-  transition: var(--transition-theme);
+  letter-spacing: -0.02em;
+  color: var(--text-primary);
+  line-height: 1.25;
+  margin-bottom: var(--sp-4);
+  transition: color var(--dur-normal) var(--ease-out);
 }
+
+.text-bright { color: var(--text-primary) !important; }
+.text-muted  { color: var(--text-muted) !important; }
 
 .gradient-text {
-  background: linear-gradient(135deg, #34d399 0%, #10b981 50%, #059669 100%);
+  background: linear-gradient(135deg, var(--emerald-400) 0%, var(--emerald-500) 60%, var(--emerald-600) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
 [data-theme="light"] .gradient-text {
-  background: linear-gradient(135deg, #059669 0%, #10b981 100%);
+  background: linear-gradient(135deg, var(--emerald-600) 0%, var(--emerald-500) 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
+  background-clip: text;
 }
 
-.gradient-text-gold {
-  background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 50%, #d97706 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-/* Glassmorphism Card System */
-.glass-card {
-  background: var(--bg-card);
-  backdrop-filter: blur(24px);
-  -webkit-backdrop-filter: blur(24px);
-  border: 1px solid var(--border-glass);
-  border-radius: var(--radius-lg);
-  box-shadow: var(--shadow-card);
-  padding: 2.5rem;
-  margin-bottom: 2.5rem;
-  transition: var(--transition-normal);
-  position: relative;
-  overflow: hidden;
-}
-
-.glass-card::before {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, transparent, var(--emerald-primary), transparent);
-  opacity: 0.6;
-}
-
-.glass-card:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--border-glass-strong);
-  box-shadow: 0 30px 60px -12px rgba(0, 0, 0, 0.25), 0 0 35px var(--emerald-glow);
-  transform: translateY(-4px);
-}
-
-/* Header & Navbar Alignment */
+/* ==========================================================================
+   NAVBAR — Fixed & Responsive
+   The core issue: too much content → use flex with proper overflow strategies
+   ========================================================================== */
 .navbar-glass {
-  background: var(--bg-navbar) !important;
-  backdrop-filter: blur(25px);
-  -webkit-backdrop-filter: blur(25px);
-  border-bottom: 1px solid var(--border-glass);
-  padding: 0.85rem 2rem;
-  transition: var(--transition-theme);
+  background: var(--bg-nav) !important;
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 1px solid var(--border-subtle);
+  /* Critical: fixed height for predictable layout */
+  min-height: 68px;
+  padding: 0 var(--sp-6) !important;
+  transition: background-color var(--dur-normal) var(--ease-out),
+              border-color var(--dur-normal) var(--ease-out);
 }
 
-.nav-link-custom {
-  color: var(--text-muted) !important;
-  font-weight: 600;
-  font-size: 0.95rem;
-  padding: 0.55rem 1rem !important;
-  margin: 0 0.2rem;
-  border-radius: var(--radius-md);
-  transition: var(--transition-normal);
-  display: inline-flex;
+/* Navbar inner container: space-between with no overflow */
+.navbar-glass .container-fluid {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  flex-wrap: nowrap !important;
+  gap: var(--sp-3) !important;
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+
+/* Brand Logo */
+.navbar-brand {
+  flex-shrink: 0;
+  display: flex !important;
+  align-items: center !important;
+  gap: var(--sp-2);
+  padding: 0 !important;
+  margin: 0 !important;
+  text-decoration: none !important;
+}
+
+.brand-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--emerald-500), var(--emerald-600));
+  display: flex;
   align-items: center;
-  gap: 0.45rem;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(16,185,129,0.35);
+}
+
+.brand-icon i { color: #fff; font-size: 1rem; }
+
+.brand-text {
+  font-family: var(--font-display);
+  font-weight: 800;
+  font-size: 1.35rem;
+  letter-spacing: -0.03em;
+  color: var(--text-primary) !important;
   white-space: nowrap;
 }
 
-.nav-link-custom:hover, .nav-link-custom.active {
-  color: var(--emerald-primary) !important;
-  background: rgba(16, 185, 129, 0.14);
+.brand-text .brand-accent { color: var(--emerald-500) !important; }
+
+/* ==========================================================================
+   NAVBAR NAV LINKS
+   ========================================================================== */
+.nav-link-custom {
+  color: var(--text-muted) !important;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.9rem;
+  padding: var(--sp-2) var(--sp-3) !important;
+  border-radius: var(--r-sm);
+  transition: var(--transition-ui);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  white-space: nowrap;
+  text-decoration: none !important;
+  min-height: 40px;
 }
 
-/* Dropdown Menu */
+.nav-link-custom:hover {
+  color: var(--emerald-500) !important;
+  background: rgba(16, 185, 129, 0.10);
+}
+
+.nav-link-custom.active {
+  color: var(--emerald-500) !important;
+  background: rgba(16, 185, 129, 0.12);
+}
+
+/* ==========================================================================
+   NAVBAR DROPDOWN
+   ========================================================================== */
 .dropdown-menu-agro {
-  background: var(--bg-card) !important;
-  backdrop-filter: blur(25px) !important;
-  -webkit-backdrop-filter: blur(25px) !important;
-  border: 1px solid var(--border-glass-strong) !important;
-  border-radius: var(--radius-md) !important;
-  box-shadow: var(--shadow-card) !important;
-  padding: 0.6rem !important;
-  margin-top: 0.5rem !important;
-  min-width: 240px !important;
+  background: var(--bg-elevated) !important;
+  backdrop-filter: blur(20px) !important;
+  -webkit-backdrop-filter: blur(20px) !important;
+  border: 1px solid var(--border-normal) !important;
+  border-radius: var(--r-md) !important;
+  box-shadow: var(--shadow-lg) !important;
+  padding: var(--sp-2) !important;
+  margin-top: var(--sp-2) !important;
+  min-width: 230px !important;
 }
 
 .dropdown-item-custom {
-  color: var(--text-main) !important;
+  color: var(--text-secondary) !important;
   font-weight: 600 !important;
-  font-size: 0.92rem !important;
-  padding: 0.65rem 1.1rem !important;
-  border-radius: var(--radius-sm) !important;
-  transition: var(--transition-normal) !important;
+  font-size: 0.9rem !important;
+  padding: 0.6rem 1rem !important;
+  border-radius: var(--r-sm) !important;
+  transition: var(--transition-ui) !important;
   display: flex !important;
   align-items: center !important;
-  gap: 0.65rem !important;
+  gap: var(--sp-3) !important;
+  text-decoration: none !important;
+  min-height: 42px;
 }
 
-.dropdown-item-custom:hover, .dropdown-item-custom.active {
-  background: rgba(16, 185, 129, 0.15) !important;
-  color: var(--emerald-primary) !important;
+.dropdown-item-custom:hover {
+  background: rgba(16, 185, 129, 0.12) !important;
+  color: var(--emerald-500) !important;
 }
 
-/* Navbar Controls */
-.navbar-controls {
+.dropdown-item-custom.active {
+  background: rgba(16, 185, 129, 0.18) !important;
+  color: var(--emerald-500) !important;
+}
+
+/* ==========================================================================
+   NAVBAR RIGHT SIDE CONTROLS — THE FIX
+   Key: use flex-shrink: 0, gap, and never let logout overflow
+   ========================================================================== */
+.navbar-right-controls {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  flex-shrink: 0;
+  gap: var(--sp-3);
+  flex-shrink: 0;          /* Never compress */
+  flex-wrap: nowrap;
 }
 
-/* Sliding Pill Theme Switcher */
+/* Profile Badge in Navbar */
+.nav-profile-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-3);
+  background: rgba(16, 185, 129, 0.12);
+  border: 1px solid var(--border-normal);
+  border-radius: var(--r-full);
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--emerald-500) !important;
+  white-space: nowrap;
+  max-width: 180px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* ==========================================================================
+   HIGH-VISIBILITY LOGOUT BUTTON (Design Spell: Magnetic Red)
+   Critical requirement — always fully visible
+   ========================================================================== */
+.btn-logout-bold {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  gap: var(--sp-2) !important;
+  /* Explicit sizing — never shrink below this */
+  min-width: 110px !important;
+  min-height: 42px !important;
+  padding: 0.5rem 1.1rem !important;
+  /* Vibrant Red Identity */
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
+  color: #ffffff !important;
+  border: 1.5px solid rgba(255, 255, 255, 0.25) !important;
+  border-radius: var(--r-sm) !important;
+  /* Typography */
+  font-family: var(--font-display) !important;
+  font-weight: 800 !important;
+  font-size: 0.82rem !important;
+  letter-spacing: 0.06em !important;
+  text-transform: uppercase !important;
+  text-decoration: none !important;
+  white-space: nowrap !important;
+  flex-shrink: 0 !important;
+  /* Shadow & Glow */
+  box-shadow: 0 4px 14px rgba(239, 68, 68, 0.40) !important;
+  transition: var(--transition-ui) !important;
+  cursor: pointer !important;
+}
+
+.btn-logout-bold:hover {
+  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%) !important;
+  box-shadow: 0 6px 22px rgba(239, 68, 68, 0.60) !important;
+  transform: translateY(-2px) !important;
+  color: #ffffff !important;
+}
+
+.btn-logout-bold:focus-visible {
+  outline: 3px solid #ef4444 !important;
+  outline-offset: 3px !important;
+}
+
+/* ==========================================================================
+   THEME SWITCHER — Sliding Pill
+   ========================================================================== */
 .theme-switch-wrapper {
   display: inline-flex;
   align-items: center;
-  margin: 0;
   flex-shrink: 0;
 }
 
 .theme-switch-label {
   position: relative;
   display: inline-block;
-  width: 60px;
+  width: 58px;
   height: 30px;
   margin-bottom: 0;
   cursor: pointer;
@@ -242,32 +407,19 @@ h1, h2, h3, h4, h5, h6 {
 
 .theme-switch-track {
   position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  bottom: 0;
-  background-color: var(--bg-input);
-  border: 1.5px solid var(--border-glass-strong);
-  border-radius: 30px;
-  transition: var(--transition-normal);
+  inset: 0;
+  background: var(--bg-input);
+  border: 1.5px solid var(--border-normal);
+  border-radius: var(--r-full);
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 7px;
-  box-shadow: inset 0 2px 4px rgba(0, 0, 0, 0.1);
+  padding: 0 6px;
+  transition: var(--transition-ui);
 }
 
-.theme-switch-track .fa-moon {
-  color: #38bdf8;
-  font-size: 0.8rem;
-  z-index: 1;
-}
-
-.theme-switch-track .fa-sun {
-  color: #f59e0b;
-  font-size: 0.8rem;
-  z-index: 1;
-}
+.theme-switch-track .fa-moon { color: #60a5fa; font-size: 0.75rem; z-index: 1; }
+.theme-switch-track .fa-sun  { color: var(--amber-500); font-size: 0.75rem; z-index: 1; }
 
 .theme-switch-thumb {
   position: absolute;
@@ -275,204 +427,419 @@ h1, h2, h3, h4, h5, h6 {
   left: 3px;
   width: 22px;
   height: 22px;
-  background-color: var(--emerald-primary);
+  background: var(--emerald-500);
   border-radius: 50%;
-  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1), background-color 0.3s ease;
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.3);
+  transition: transform var(--dur-normal) var(--ease-spring),
+              background-color var(--dur-normal) var(--ease-out);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.3);
   z-index: 2;
 }
 
 [data-theme="light"] .theme-switch-thumb {
-  transform: translateX(30px);
-  background-color: #f59e0b;
+  transform: translateX(28px);
+  background: var(--amber-500);
 }
 
-/* HIGH-VISIBILITY BOLD LOGOUT BUTTON */
-.btn-logout-bold {
-  background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%) !important;
-  color: #ffffff !important;
-  font-weight: 800 !important;
-  font-size: 0.88rem !important;
-  letter-spacing: 0.05em !important;
-  text-transform: uppercase !important;
-  border: 1.5px solid rgba(255, 255, 255, 0.4) !important;
-  border-radius: var(--radius-sm) !important;
-  padding: 0.6rem 1.3rem !important;
-  box-shadow: 0 4px 15px rgba(239, 68, 68, 0.45) !important;
-  transition: var(--transition-normal) !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  gap: 0.5rem !important;
-  white-space: nowrap !important;
-  flex-shrink: 0 !important;
-  text-decoration: none !important;
-}
-
-.btn-logout-bold:hover {
-  background: linear-gradient(135deg, #f87171 0%, #ef4444 100%) !important;
-  box-shadow: 0 8px 25px rgba(239, 68, 68, 0.65) !important;
-  transform: translateY(-2px) scale(1.02);
-  color: #ffffff !important;
-}
-
-/* Interactive Soil NPK Preset Pill Buttons */
-.soil-preset-container {
+/* ==========================================================================
+   NAVBAR LANDING PAGE ACTION BUTTONS
+   ========================================================================== */
+.nav-portal-btns {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.65rem;
-  margin-bottom: 1.5rem;
-}
-
-.soil-preset-btn {
-  background: var(--bg-input);
-  border: 1px solid var(--border-glass);
-  color: var(--text-bright);
-  padding: 0.45rem 1rem;
-  border-radius: 50px;
-  font-size: 0.85rem;
-  font-weight: 600;
-  cursor: pointer;
-  transition: var(--transition-normal);
-  display: inline-flex;
   align-items: center;
-  gap: 0.45rem;
+  gap: var(--sp-2);
+  flex-wrap: nowrap;
 }
 
-.soil-preset-btn:hover {
-  background: rgba(16, 185, 129, 0.18);
-  border-color: var(--emerald-primary);
-  color: var(--emerald-primary);
-  transform: translateY(-2px);
-  box-shadow: 0 4px 12px var(--emerald-glow);
+/* ==========================================================================
+   MOBILE NAVBAR COLLAPSE
+   ========================================================================== */
+@media (max-width: 991.98px) {
+  .navbar-glass {
+    padding: 0 var(--sp-4) !important;
+    min-height: 62px;
+  }
+
+  /* Mobile right section: theme toggle + logout (if logged in) + hamburger */
+  .navbar-mobile-right {
+    display: flex;
+    align-items: center;
+    gap: var(--sp-2);
+    flex-shrink: 0;
+  }
+
+  /* Mobile collapsed menu panel */
+  .navbar-collapse {
+    background: var(--bg-elevated) !important;
+    border: 1px solid var(--border-normal);
+    border-radius: var(--r-lg);
+    margin-top: var(--sp-3);
+    padding: var(--sp-5);
+    box-shadow: var(--shadow-lg);
+  }
+
+  /* Stack nav links vertically in mobile */
+  .navbar-nav {
+    flex-direction: column !important;
+    width: 100%;
+    gap: var(--sp-1);
+  }
+
+  .nav-link-custom {
+    width: 100%;
+    padding: var(--sp-3) var(--sp-4) !important;
+    font-size: 0.95rem;
+  }
+
+  /* Mobile controls section at bottom of collapse */
+  .navbar-mobile-controls {
+    margin-top: var(--sp-4);
+    padding-top: var(--sp-4);
+    border-top: 1px solid var(--border-subtle);
+    display: flex;
+    flex-direction: column;
+    gap: var(--sp-3);
+    width: 100%;
+  }
+
+  /* Full-width logout in mobile collapse */
+  .btn-logout-mobile {
+    width: 100% !important;
+    min-height: 48px !important;
+    justify-content: center !important;
+    padding: 0.65rem 1.5rem !important;
+    font-size: 0.9rem !important;
+  }
+
+  .nav-portal-btns {
+    flex-direction: column;
+    width: 100%;
+  }
+
+  .nav-portal-btns .btn-agro-primary,
+  .nav-portal-btns .btn-agro-secondary,
+  .nav-portal-btns .btn-agro-admin {
+    width: 100%;
+    justify-content: center;
+    min-height: 48px;
+  }
 }
 
-.soil-preset-btn.active {
-  background: var(--emerald-primary);
-  border-color: var(--emerald-primary);
-  color: #ffffff;
-  box-shadow: 0 4px 14px var(--emerald-glow);
+/* ==========================================================================
+   GLASS CARDS
+   ========================================================================== */
+.glass-card {
+  background: var(--bg-surface);
+  backdrop-filter: blur(24px);
+  -webkit-backdrop-filter: blur(24px);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-md);
+  padding: var(--sp-8);
+  margin-bottom: var(--sp-8);
+  transition: var(--transition-ui);
+  position: relative;
+  overflow: hidden;
 }
 
-/* Buttons */
+/* Subtle top-edge accent line — design spell */
+.glass-card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 1.5px;
+  background: linear-gradient(90deg, transparent 0%, var(--emerald-500) 50%, transparent 100%);
+  opacity: 0.5;
+}
+
+.glass-card:hover {
+  border-color: var(--border-normal);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
+  transform: translateY(-3px);
+}
+
+/* ==========================================================================
+   BUTTONS
+   ========================================================================== */
 .btn-agro-primary {
-  background: linear-gradient(135deg, var(--emerald-primary) 0%, var(--emerald-dark) 100%);
-  color: #ffffff !important;
-  font-weight: 700;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 0.85rem 1.6rem;
-  box-shadow: 0 6px 20px var(--emerald-glow);
-  transition: var(--transition-normal);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--sp-2);
+  background: linear-gradient(135deg, var(--emerald-500) 0%, var(--emerald-600) 100%);
+  color: #ffffff !important;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  border: none;
+  border-radius: var(--r-md);
+  padding: 0.7rem 1.4rem;
+  min-height: 44px;
+  box-shadow: 0 4px 14px rgba(16, 185, 129, 0.35);
+  transition: var(--transition-ui);
+  text-decoration: none !important;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .btn-agro-primary:hover {
-  background: linear-gradient(135deg, var(--emerald-light) 0%, var(--emerald-primary) 100%);
-  box-shadow: 0 8px 30px rgba(16, 185, 129, 0.5);
-  transform: translateY(-3px);
+  background: linear-gradient(135deg, var(--emerald-400) 0%, var(--emerald-500) 100%);
+  box-shadow: 0 6px 22px rgba(16, 185, 129, 0.50);
+  transform: translateY(-2px);
+  color: #ffffff !important;
 }
 
 .btn-agro-secondary {
-  background: rgba(16, 185, 129, 0.08);
-  color: var(--text-bright) !important;
-  font-weight: 700;
-  border: 1.5px solid var(--border-glass);
-  border-radius: var(--radius-md);
-  padding: 0.85rem 1.6rem;
-  transition: var(--transition-normal);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--sp-2);
+  background: transparent;
+  color: var(--text-primary) !important;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  border: 1.5px solid var(--border-normal);
+  border-radius: var(--r-md);
+  padding: 0.7rem 1.4rem;
+  min-height: 44px;
+  transition: var(--transition-ui);
+  text-decoration: none !important;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .btn-agro-secondary:hover {
-  background: rgba(16, 185, 129, 0.18);
-  border-color: var(--border-glass-strong);
-  transform: translateY(-3px);
+  background: rgba(16, 185, 129, 0.08);
+  border-color: var(--border-strong);
+  transform: translateY(-2px);
 }
 
 .btn-agro-admin {
-  background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
-  color: #ffffff !important;
-  font-weight: 700;
-  border: none;
-  border-radius: var(--radius-md);
-  padding: 0.85rem 1.6rem;
-  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.35);
-  transition: var(--transition-normal);
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  gap: 0.5rem;
+  gap: var(--sp-2);
+  background: linear-gradient(135deg, var(--amber-500) 0%, #d97706 100%);
+  color: #ffffff !important;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.92rem;
+  border: none;
+  border-radius: var(--r-md);
+  padding: 0.7rem 1.4rem;
+  min-height: 44px;
+  box-shadow: 0 4px 14px rgba(245, 158, 11, 0.30);
+  transition: var(--transition-ui);
+  text-decoration: none !important;
+  cursor: pointer;
+  white-space: nowrap;
 }
 
 .btn-agro-admin:hover {
-  box-shadow: 0 8px 25px rgba(245, 158, 11, 0.5);
-  transform: translateY(-3px);
+  box-shadow: 0 6px 20px rgba(245, 158, 11, 0.50);
+  transform: translateY(-2px);
 }
 
-/* Compact Sub-nav Buttons */
-.btn-sm, .btn-group-sm > .btn {
-  min-width: auto !important;
-  padding: 0.5rem 1.25rem !important;
-  font-size: 0.88rem !important;
-  line-height: 1.4 !important;
-  border-radius: var(--radius-sm) !important;
+/* btn-sm override */
+.btn-agro-primary.btn-sm,
+.btn-agro-secondary.btn-sm,
+.btn-agro-admin.btn-sm {
+  padding: 0.5rem 1rem;
+  font-size: 0.84rem;
+  min-height: 38px;
 }
 
-/* Form Controls & Range Inputs */
-.form-group {
-  margin-bottom: 1.8rem;
-}
-
+/* ==========================================================================
+   FORMS
+   ========================================================================== */
 .form-control-agro {
+  display: block;
+  width: 100% !important;
   background: var(--bg-input) !important;
-  border: 1px solid var(--border-glass) !important;
-  color: var(--text-bright) !important;
-  border-radius: var(--radius-md) !important;
-  padding: 0.95rem 1.4rem !important;
-  font-family: var(--font-primary) !important;
-  font-size: 1rem !important;
-  transition: var(--transition-normal) !important;
+  border: 1.5px solid var(--border-subtle) !important;
+  color: var(--text-primary) !important;
+  border-radius: var(--r-md) !important;
+  padding: 0.75rem 1rem !important;
+  font-family: var(--font-body) !important;
+  font-size: 0.95rem !important;
+  line-height: 1.5 !important;
+  min-height: 48px !important;
+  transition: var(--transition-ui) !important;
 }
 
 .form-control-agro:focus {
-  background: var(--bg-card-hover) !important;
-  border-color: var(--emerald-primary) !important;
-  box-shadow: 0 0 0 4px var(--emerald-glow) !important;
+  background: var(--bg-elevated) !important;
+  border-color: var(--emerald-500) !important;
+  box-shadow: 0 0 0 3px rgba(16, 185, 129, 0.22) !important;
   outline: none !important;
+  color: var(--text-primary) !important;
+}
+
+.form-control-agro::placeholder {
+  color: var(--text-muted) !important;
+  opacity: 0.75;
 }
 
 select.form-control-agro {
-  width: 100% !important;
-  text-overflow: clip !important;
-  white-space: normal !important;
-  word-wrap: break-word !important;
-  padding-right: 2.2rem !important;
-  height: auto !important;
+  padding-right: 2.5rem !important;
   appearance: auto !important;
+  cursor: pointer;
 }
 
 select.form-control-agro option {
-  background-color: var(--bg-card) !important;
-  color: var(--text-bright) !important;
-  padding: 0.6rem 1rem !important;
-  font-size: 0.95rem !important;
-  white-space: normal !important;
+  background-color: var(--bg-elevated) !important;
+  color: var(--text-primary) !important;
 }
 
-/* Feature Cards Grid */
+label {
+  display: block;
+  margin-bottom: var(--sp-2);
+  font-weight: 600;
+  font-size: 0.88rem;
+  color: var(--text-secondary);
+  letter-spacing: 0.01em;
+}
+
+/* Custom Range Slider */
+.custom-range {
+  width: 100%;
+  height: 6px;
+  border-radius: var(--r-full);
+  background: var(--border-subtle);
+  outline: none;
+  cursor: pointer;
+  accent-color: var(--emerald-500);
+  margin: var(--sp-2) 0;
+}
+
+/* ==========================================================================
+   SOIL PRESET PILLS — Design Spell: Magnetic hover
+   ========================================================================== */
+.soil-preset-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: var(--sp-2);
+  margin-bottom: var(--sp-5);
+}
+
+.soil-preset-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-2) var(--sp-4);
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-full);
+  color: var(--text-secondary);
+  font-family: var(--font-body);
+  font-size: 0.84rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: var(--transition-ui);
+  white-space: nowrap;
+  min-height: 36px;
+}
+
+.soil-preset-btn:hover {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: var(--emerald-500);
+  color: var(--emerald-500);
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.20);
+}
+
+/* ==========================================================================
+   BADGES
+   ========================================================================== */
+.badge-agro {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--sp-2);
+  padding: var(--sp-1) var(--sp-3);
+  border-radius: var(--r-full);
+  font-weight: 700;
+  font-size: 0.78rem;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.badge-agro-emerald {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--emerald-500);
+  border: 1px solid rgba(16, 185, 129, 0.30);
+}
+
+.badge-agro-amber {
+  background: rgba(245, 158, 11, 0.12);
+  color: var(--amber-500);
+  border: 1px solid rgba(245, 158, 11, 0.30);
+}
+
+.badge-agro-cyan {
+  background: rgba(6, 182, 212, 0.12);
+  color: var(--cyan-500);
+  border: 1px solid rgba(6, 182, 212, 0.30);
+}
+
+/* ==========================================================================
+   RESULT CARDS
+   ========================================================================== */
+.result-card-glow {
+  background: linear-gradient(135deg, rgba(16,185,129,0.12) 0%, rgba(5,150,105,0.24) 100%);
+  border: 1.5px solid var(--emerald-500);
+  border-radius: var(--r-xl);
+  padding: var(--sp-8);
+  box-shadow: 0 12px 32px rgba(16, 185, 129, 0.20);
+}
+
+/* ==========================================================================
+   DATA TABLES — Responsive
+   ========================================================================== */
+.table-responsive {
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  border-radius: var(--r-md);
+}
+
+.table-agro {
+  width: 100%;
+  color: var(--text-secondary);
+  border-collapse: collapse;
+}
+
+.table-agro thead th {
+  background: var(--table-head-bg);
+  color: var(--emerald-500);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.78rem;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-normal);
+  white-space: nowrap;
+}
+
+.table-agro tbody td {
+  padding: 0.9rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+  font-size: 0.92rem;
+}
+
+.table-agro tbody tr:hover {
+  background: rgba(16, 185, 129, 0.04);
+}
+
+/* ==========================================================================
+   FEATURE CARDS
+   ========================================================================== */
 .feature-card {
-  padding: 2.5rem;
-  border-radius: var(--radius-lg);
-  background: var(--bg-card);
-  border: 1px solid var(--border-glass);
-  transition: var(--transition-normal);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-xl);
+  padding: var(--sp-8);
+  transition: var(--transition-ui);
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -481,154 +848,119 @@ select.form-control-agro option {
 }
 
 .feature-card:hover {
-  background: var(--bg-card-hover);
-  border-color: var(--emerald-primary);
-  transform: translateY(-8px) scale(1.01);
-  box-shadow: 0 25px 50px -15px rgba(0, 0, 0, 0.25), 0 0 35px var(--emerald-glow);
+  border-color: var(--border-normal);
+  transform: translateY(-6px);
+  box-shadow: var(--shadow-lg), var(--shadow-glow);
 }
 
 .feature-icon-wrapper {
-  width: 64px;
-  height: 64px;
-  border-radius: var(--radius-md);
+  width: 56px;
+  height: 56px;
+  border-radius: var(--r-md);
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.6rem;
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--emerald-primary);
-  border: 1px solid rgba(16, 185, 129, 0.3);
+  font-size: 1.4rem;
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--emerald-500);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  margin-bottom: var(--sp-4);
+  flex-shrink: 0;
 }
 
-/* Badges */
-.badge-agro {
-  padding: 0.5rem 1.1rem;
-  border-radius: 50px;
-  font-weight: 700;
-  font-size: 0.82rem;
-  letter-spacing: 0.04em;
-  text-transform: uppercase;
-  display: inline-flex;
-  align-items: center;
-  gap: 0.5rem;
-}
-
-.badge-agro-emerald {
-  background: rgba(16, 185, 129, 0.15);
-  color: var(--emerald-primary);
-  border: 1px solid rgba(16, 185, 129, 0.35);
-}
-
-.badge-agro-amber {
-  background: rgba(245, 158, 11, 0.15);
-  color: var(--amber-accent);
-  border: 1px solid rgba(245, 158, 11, 0.35);
-}
-
-.badge-agro-cyan {
-  background: rgba(6, 182, 212, 0.15);
-  color: var(--cyan-accent);
-  border: 1px solid rgba(6, 182, 212, 0.35);
-}
-
-/* Prediction Result Cards */
-.result-card-glow {
-  background: linear-gradient(135deg, rgba(16, 185, 129, 0.16) 0%, rgba(5, 150, 105, 0.32) 100%);
-  border: 1.5px solid var(--emerald-primary);
-  border-radius: var(--radius-lg);
-  padding: 2.2rem;
-  box-shadow: 0 15px 35px rgba(16, 185, 129, 0.25);
-}
-
-/* Data Tables */
-.table-agro {
-  width: 100%;
-  color: var(--text-main);
-  margin-bottom: 0;
-}
-
-.table-agro th {
-  background: var(--table-header-bg);
-  color: var(--emerald-primary);
-  font-weight: 700;
-  text-transform: uppercase;
-  font-size: 0.85rem;
-  letter-spacing: 0.05em;
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid var(--border-glass);
-}
-
-.table-agro td {
-  padding: 1.2rem 1.5rem;
-  border-bottom: 1px solid var(--border-glass);
-  vertical-align: middle;
-}
-
-/* Footer Styling */
+/* ==========================================================================
+   FOOTER
+   ========================================================================== */
 footer {
-  background: var(--bg-footer) !important;
-  color: #94a3b8;
-  border-top: 1px solid var(--border-glass) !important;
-  padding: 4rem 0 2rem;
-  transition: var(--transition-theme);
+  background: var(--bg-base) !important;
+  border-top: 1px solid var(--border-subtle) !important;
+  padding: var(--sp-12) 0 var(--sp-8);
+  transition: var(--transition-ui);
 }
 
-footer h6, footer .font-weight-bold {
-  color: var(--footer-text-bright) !important;
+footer a {
+  color: var(--text-muted) !important;
+  text-decoration: none;
+  transition: color var(--dur-fast) ease;
 }
 
-/* Comprehensive Responsive Device Rules */
-@media (max-width: 991px) {
-  .navbar-glass {
-    padding: 0.75rem 1.25rem !important;
-  }
+footer a:hover {
+  color: var(--emerald-500) !important;
+}
 
-  .navbar-collapse {
-    background: var(--bg-card) !important;
-    backdrop-filter: blur(25px);
-    padding: 1.8rem;
-    border-radius: var(--radius-lg);
-    border: 1px solid var(--border-glass);
-    margin-top: 1rem;
-  }
+/* ==========================================================================
+   ALERT / FLASH MESSAGES
+   ========================================================================== */
+.alert.glass-card {
+  padding: var(--sp-4) var(--sp-5);
+  border-radius: var(--r-md);
+  margin-bottom: var(--sp-4);
+}
 
-  .navbar-controls {
-    flex-direction: column;
-    width: 100%;
-    align-items: stretch;
-    gap: 1rem;
-    margin-top: 1.5rem;
-    padding-top: 1.5rem;
-    border-top: 1px solid var(--border-glass);
-  }
+/* ==========================================================================
+   ANIMATIONS — Design Spells: Purposeful & Sparse
+   ========================================================================== */
+@keyframes fadeInUp {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
 
-  .btn-logout-bold {
-    width: 100% !important;
-    justify-content: center !important;
-    padding: 0.75rem 1.5rem !important;
-  }
+.animate-fade-in-up {
+  animation: fadeInUp var(--dur-slow) var(--ease-out) forwards;
+}
 
+/* ==========================================================================
+   RESPONSIVE UTILITIES
+   ========================================================================== */
+
+/* Tablet */
+@media (max-width: 991.98px) {
+  .glass-card { padding: var(--sp-6); }
+  .result-card-glow { padding: var(--sp-6); }
+}
+
+/* Mobile */
+@media (max-width: 575.98px) {
   .glass-card {
-    padding: 1.5rem;
+    padding: var(--sp-4);
+    border-radius: var(--r-lg);
+    margin-bottom: var(--sp-5);
   }
+
+  .result-card-glow { padding: var(--sp-5); }
+
+  h1.display-4 { font-size: 1.9rem !important; }
+  h2.display-4 { font-size: 1.75rem !important; }
+  h1.display-3 { font-size: 1.75rem !important; }
+
+  /* Full-width primary action buttons on mobile */
+  .btn-block-mobile {
+    width: 100%;
+  }
+
+  /* Soil preset wraps neatly */
+  .soil-preset-btn {
+    font-size: 0.8rem;
+    padding: var(--sp-1) var(--sp-3);
+  }
+
+  /* Table: horizontal scroll */
+  .table-responsive { border-radius: var(--r-sm); }
 }
 
-@media (max-width: 576px) {
-  .display-4 {
-    font-size: 2.2rem !important;
-  }
+/* Large desktop */
+@media (min-width: 1280px) {
+  .navbar-glass { padding: 0 var(--sp-10) !important; }
+}
 
-  .display-3 {
-    font-size: 2rem !important;
-  }
-
-  .glass-card {
-    padding: 1.2rem;
-    border-radius: var(--radius-md);
-  }
-
-  .btn-agro-primary, .btn-agro-secondary, .btn-agro-admin {
-    width: 100%;
-    margin-bottom: 0.5rem;
-  }
+/* ==========================================================================
+   ACCESSIBILITY — Visible Focus Indicators (WCAG 2.2 AAA)
+   ========================================================================== */
+a:focus-visible,
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+textarea:focus-visible {
+  outline: 3px solid var(--emerald-500) !important;
+  outline-offset: 2px !important;
 }

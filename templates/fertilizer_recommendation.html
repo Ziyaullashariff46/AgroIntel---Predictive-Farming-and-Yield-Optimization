@@ -1,127 +1,111 @@
-{% extends 'base.html' %}
+{% extends 'farmer_base.html' %}
 {% block title %}Fertilizer Advisory | AgroIntel AI{% endblock %}
+{% block page_title %}Fertilizer Advisory{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-10">
-      <div class="text-center mb-5 animate-fade-in-up">
-        <span class="badge-agro badge-agro-cyan mb-2"><i class="fas fa-flask"></i> Soil & Nutrient Optimization</span>
-        <h2 class="display-4 font-weight-extrabold text-bright">Fertilizer Advisory System</h2>
-        <p class="text-muted max-w-600 mx-auto">Calculate precise fertilizer formulas based on soil composition, moisture level, and target crop.</p>
-      </div>
+{% block farmer_content %}
+<div class="py-3">
+  <div class="mb-4">
+    <span class="badge-agro badge-agro-cyan"><i class="fas fa-flask" aria-hidden="true"></i> Soil & Nutrient Optimization</span>
+    <h2 class="mt-2 mb-1" style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary);">Fertilizer Advisory System</h2>
+    <p class="text-muted mb-0" style="font-size: 0.9rem;">Calculate precise fertilizer formulas based on soil composition and target crop.</p>
+  </div>
 
-      <div class="glass-card p-4 p-md-5 mb-5">
-        
-        <!-- Quick Presets -->
-        <div class="mb-4">
-          <label class="font-weight-bold small text-muted d-block mb-2"><i class="fas fa-wand-magic-sparkles text-cyan mr-1"></i> Quick Soil Presets (1-Click Fill):</label>
-          <div class="soil-preset-container">
-            <button type="button" class="soil-preset-btn" onclick="applyFertPreset(37, 0, 0, 26, 52, 38, 'Loamy', 'Maize')">
-              🌽 Nitrogen Deficient Maize
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyFertPreset(12, 40, 10, 29, 60, 45, 'Clayey', 'Paddy')">
-              🌾 High Moisture Paddy
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyFertPreset(25, 25, 25, 24, 50, 30, 'Black', 'Cotton')">
-              ☁️ Black Soil Cotton
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyFertPreset(10, 10, 35, 22, 48, 25, 'Sandy', 'Wheat')">
-              🌾 Sandy Wheat Field
-            </button>
-          </div>
-        </div>
-
-        <form action="{{ url_for('farmer_fertilizer_recommendation') }}" method="POST">
-          <div class="row g-3 mb-4">
-            <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-leaf text-success mr-1"></i> Nitrogen (N)</label>
-              <input type="number" name="n" id="nFert" class="form-control form-control-agro" value="37" required>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-vial text-info mr-1"></i> Phosphorus (P)</label>
-              <input type="number" name="p" id="pFert" class="form-control form-control-agro" value="0" required>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-atom text-warning mr-1"></i> Potassium (K)</label>
-              <input type="number" name="k" id="kFert" class="form-control form-control-agro" value="0" required>
-            </div>
-          </div>
-
-          <div class="row g-3 mb-4">
-            <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-temperature-half text-warning mr-1"></i> Temperature (°C)</label>
-              <input type="number" name="t" id="tFert" class="form-control form-control-agro" value="26" required>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-droplet text-info mr-1"></i> Humidity (%)</label>
-              <input type="number" name="h" id="hFert" class="form-control form-control-agro" value="52" required>
-            </div>
-            <div class="col-md-4 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-water text-primary mr-1"></i> Soil Moisture Level</label>
-              <input type="number" name="sm" id="smFert" class="form-control form-control-agro" value="38" required>
-            </div>
-          </div>
-
-          <div class="row g-3 mb-4">
-            <div class="col-md-6 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-mountain-sun text-emerald mr-1"></i> Soil Type</label>
-              <select name="soil" id="soilFert" class="form-control form-control-agro" required>
-                <option value="Sandy">Sandy Soil</option>
-                <option value="Loamy" selected>Loamy Soil</option>
-                <option value="Black">Black Soil</option>
-                <option value="Red">Red Soil</option>
-                <option value="Clayey">Clayey Soil</option>
-              </select>
-            </div>
-            <div class="col-md-6 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-wheat-awn text-warning mr-1"></i> Target Crop</label>
-              <select name="crop" id="cropFert" class="form-control form-control-agro" required>
-                <option value="Maize" selected>Maize</option>
-                <option value="Sugarcane">Sugarcane</option>
-                <option value="Cotton">Cotton</option>
-                <option value="Tobacco">Tobacco</option>
-                <option value="Paddy">Paddy / Rice</option>
-                <option value="Barley">Barley</option>
-                <option value="Wheat">Wheat</option>
-                <option value="Millets">Millets</option>
-                <option value="Oil seeds">Oil seeds</option>
-                <option value="Pulses">Pulses</option>
-                <option value="Ground Nuts">Ground Nuts</option>
-              </select>
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold shadow-lg">
-            <i class="fas fa-flask-vial mr-2"></i> Compute Recommended Fertilizer
-          </button>
-        </form>
-
-        {% if result %}
-          <div class="mt-5 result-card-glow text-center animate-fade-in-up" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.22) 0%, rgba(139, 92, 246, 0.35) 100%); border: 1.5px solid var(--cyan-accent);">
-            <span class="badge-agro badge-agro-cyan mb-2"><i class="fas fa-circle-check"></i> Eco-Fertilizer Formula Recommended</span>
-            <span class="text-muted d-block small uppercase tracking-wider font-weight-bold mb-1">Optimal Treatment Application</span>
-            <h1 class="display-3 font-weight-extrabold text-bright text-capitalize mb-2 gradient-text">{{ result }}</h1>
-            <p class="text-muted mb-0">Trained on soil nutrient deficiency logs using Decision Tree classification algorithms.</p>
-          </div>
-        {% endif %}
+  <div class="glass-card">
+    <div class="mb-4">
+      <label class="d-block mb-2" style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
+        <i class="fas fa-wand-magic-sparkles" style="color: var(--cyan-500);" aria-hidden="true"></i> Quick Presets
+      </label>
+      <div class="soil-preset-container">
+        <button type="button" class="soil-preset-btn" onclick="applyFertPreset(37,0,0,26,52,38,'Loamy','Maize')">🌽 N-Deficient Maize</button>
+        <button type="button" class="soil-preset-btn" onclick="applyFertPreset(12,40,10,29,60,45,'Clayey','Paddy')">🌾 High Moisture Paddy</button>
+        <button type="button" class="soil-preset-btn" onclick="applyFertPreset(25,25,25,24,50,30,'Black','Cotton')">☁️ Black Soil Cotton</button>
+        <button type="button" class="soil-preset-btn" onclick="applyFertPreset(10,10,35,22,48,25,'Sandy','Wheat')">🌾 Sandy Wheat</button>
       </div>
     </div>
+
+    <form action="{{ url_for('farmer_fertilizer_recommendation') }}" method="POST">
+      <div class="row">
+        <div class="col-sm-6 col-md-4 mb-3">
+          <label><i class="fas fa-leaf" style="color: var(--emerald-500);" aria-hidden="true"></i> Nitrogen (N)</label>
+          <input type="number" name="n" id="nFert" class="form-control form-control-agro" value="37" required>
+        </div>
+        <div class="col-sm-6 col-md-4 mb-3">
+          <label><i class="fas fa-vial" style="color: var(--cyan-500);" aria-hidden="true"></i> Phosphorus (P)</label>
+          <input type="number" name="p" id="pFert" class="form-control form-control-agro" value="0" required>
+        </div>
+        <div class="col-sm-6 col-md-4 mb-3">
+          <label><i class="fas fa-atom" style="color: var(--amber-500);" aria-hidden="true"></i> Potassium (K)</label>
+          <input type="number" name="k" id="kFert" class="form-control form-control-agro" value="0" required>
+        </div>
+        <div class="col-sm-6 col-md-4 mb-3">
+          <label><i class="fas fa-temperature-half" style="color: var(--amber-500);" aria-hidden="true"></i> Temperature (°C)</label>
+          <input type="number" name="t" id="tFert" class="form-control form-control-agro" value="26" required>
+        </div>
+        <div class="col-sm-6 col-md-4 mb-3">
+          <label><i class="fas fa-droplet" style="color: var(--cyan-500);" aria-hidden="true"></i> Humidity (%)</label>
+          <input type="number" name="h" id="hFert" class="form-control form-control-agro" value="52" required>
+        </div>
+        <div class="col-sm-6 col-md-4 mb-3">
+          <label><i class="fas fa-water" aria-hidden="true"></i> Soil Moisture</label>
+          <input type="number" name="sm" id="smFert" class="form-control form-control-agro" value="38" required>
+        </div>
+        <div class="col-sm-6 mb-3">
+          <label><i class="fas fa-mountain-sun" style="color: var(--emerald-500);" aria-hidden="true"></i> Soil Type</label>
+          <select name="soil" id="soilFert" class="form-control form-control-agro" required>
+            <option value="Sandy">Sandy Soil</option>
+            <option value="Loamy" selected>Loamy Soil</option>
+            <option value="Black">Black Soil</option>
+            <option value="Red">Red Soil</option>
+            <option value="Clayey">Clayey Soil</option>
+          </select>
+        </div>
+        <div class="col-sm-6 mb-3">
+          <label><i class="fas fa-wheat-awn" style="color: var(--amber-500);" aria-hidden="true"></i> Target Crop</label>
+          <select name="crop" id="cropFert" class="form-control form-control-agro" required>
+            <option value="Maize" selected>Maize</option>
+            <option value="Sugarcane">Sugarcane</option>
+            <option value="Cotton">Cotton</option>
+            <option value="Tobacco">Tobacco</option>
+            <option value="Paddy">Paddy / Rice</option>
+            <option value="Barley">Barley</option>
+            <option value="Wheat">Wheat</option>
+            <option value="Millets">Millets</option>
+            <option value="Oil seeds">Oil Seeds</option>
+            <option value="Pulses">Pulses</option>
+            <option value="Ground Nuts">Ground Nuts</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-agro-primary w-100" style="min-height: 52px; font-size: 1rem;">
+        <i class="fas fa-flask-vial" aria-hidden="true"></i> Compute Recommended Fertilizer
+      </button>
+    </form>
+
+    {% if result %}
+    <div class="mt-4 result-card-glow text-center animate-fade-in-up" style="background: linear-gradient(135deg, rgba(6,182,212,0.16) 0%, rgba(139,92,246,0.28) 100%); border-color: var(--cyan-500);">
+      <span class="badge-agro badge-agro-cyan mb-3"><i class="fas fa-circle-check" aria-hidden="true"></i> Eco-Fertilizer Formula Ready</span>
+      <p class="text-muted mb-1" style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">Optimal Treatment</p>
+      <h1 class="gradient-text" style="font-size: 2.5rem; font-weight: 800; text-transform: capitalize;">{{ result }}</h1>
+      <p class="text-muted mb-0" style="font-size: 0.85rem;">Decision Tree classification trained on soil nutrient deficiency records.</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+{{ super() }}
 <script>
-function applyFertPreset(n, p, k, t, h, sm, soil, crop) {
-  document.getElementById('nFert').value = n;
-  document.getElementById('pFert').value = p;
-  document.getElementById('kFert').value = k;
-  document.getElementById('tFert').value = t;
-  document.getElementById('hFert').value = h;
-  document.getElementById('smFert').value = sm;
-  document.getElementById('soilFert').value = soil;
-  document.getElementById('cropFert').value = crop;
+function applyFertPreset(n,p,k,t,h,sm,soil,crop){
+  document.getElementById('nFert').value=n;
+  document.getElementById('pFert').value=p;
+  document.getElementById('kFert').value=k;
+  document.getElementById('tFert').value=t;
+  document.getElementById('hFert').value=h;
+  document.getElementById('smFert').value=sm;
+  document.getElementById('soilFert').value=soil;
+  document.getElementById('cropFert').value=crop;
 }
 </script>
 {% endblock %}

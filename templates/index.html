@@ -1,263 +1,531 @@
 {% extends 'base.html' %}
 
-{% block title %}AgroIntel - AI-Powered Smart Agriculture Platform{% endblock %}
+{% block title %}AgroIntel – AI-Powered Smart Agriculture Platform{% endblock %}
 
-{% block content %}
-<!-- Hero Section -->
-<section class="hero-wrapper">
-  <div class="hero-glow-bg"></div>
-  <div class="container hero-content py-4">
-    <div class="row align-items-center gy-5">
-      <div class="col-lg-7 text-center text-lg-left pr-lg-5 mb-5 mb-lg-0">
-        <div class="mb-4">
-          <span class="badge-agro badge-agro-emerald">
-            <i class="fas fa-sparkles"></i> Next-Gen Smart Farming Solution
-          </span>
-        </div>
-        
-        <h1 class="display-4 font-weight-extrabold mb-4">
-          Empowering Agriculture with <span class="gradient-text">Machine Learning</span> Intelligence
-        </h1>
-        
-        <p class="lead text-muted mb-5 max-w-600">
-          Optimize crop yields, predict upcoming market price trends, receive scientific fertilizer plans, and eliminate middleman markups by trading produce directly.
-        </p>
-
-        <!-- Well-Spaced Hero Portal Action Buttons: Farmer, Buyer, Admin -->
-        <div class="hero-action-buttons justify-content-center justify-content-lg-start mb-5">
-          <a href="{{ url_for('login', role='farmer') }}" class="btn btn-agro-primary btn-lg">
-            <i class="fas fa-tractor"></i> Farmer Portal
-          </a>
-          <a href="{{ url_for('customer_buy_crops') }}" class="btn btn-agro-secondary btn-lg">
-            <i class="fas fa-basket-shopping"></i> Buyer Marketplace
-          </a>
-          <a href="{{ url_for('login', role='admin') }}" class="btn btn-agro-admin btn-lg">
-            <i class="fas fa-user-shield"></i> Admin Portal
-          </a>
-        </div>
-
-        <!-- Live Platform Stats -->
-        <div class="row g-4 pt-2">
-          <div class="col-4 col-sm-4">
-            <div class="stat-pill text-center py-3 px-2">
-              <h3 class="font-weight-extrabold text-emerald mb-1 gradient-text">5+</h3>
-              <span class="text-muted small font-weight-bold">ML AI Models</span>
-            </div>
-          </div>
-          <div class="col-4 col-sm-4">
-            <div class="stat-pill text-center py-3 px-2">
-              <h3 class="font-weight-extrabold text-warning mb-1 gradient-text-gold">98.4%</h3>
-              <span class="text-muted small font-weight-bold">ML Accuracy</span>
-            </div>
-          </div>
-          <div class="col-4 col-sm-4">
-            <div class="stat-pill text-center py-3 px-2">
-              <h3 class="font-weight-extrabold text-cyan mb-1" style="color: var(--cyan-accent);">100%</h3>
-              <span class="text-muted small font-weight-bold">Direct Trade</span>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- Hero Interactive Preview Graphic Card -->
-      <div class="col-lg-5">
-        <div class="glass-card p-4 p-md-5">
-          <div class="d-flex align-items-center justify-content-between mb-4 pb-2 border-bottom" style="border-color: var(--border-glass) !important;">
-            <div class="d-flex align-items-center gap-3">
-              <div class="bg-gradient-success rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; background: linear-gradient(135deg, #10b981, #059669);">
-                <i class="fas fa-microchip text-white fs-5"></i>
-              </div>
-              <div>
-                <h5 class="mb-0 text-bright font-weight-bold">Live AI Engine</h5>
-                <span class="badge badge-success small py-1 px-2 mt-1">Operational</span>
-              </div>
-            </div>
-            <span class="text-muted small"><i class="fas fa-bolt text-warning mr-1"></i> Interactive</span>
-          </div>
-
-          <div class="p-3 mb-4 rounded" style="background: var(--bg-input); border: 1px solid var(--border-glass);">
-            <div class="d-flex justify-content-between small text-muted mb-2">
-              <span class="font-weight-bold">Nitrogen (N) Level</span>
-              <span class="text-emerald font-weight-extrabold" id="heroNVal">90 kg/ha</span>
-            </div>
-            <input type="range" class="custom-range" min="10" max="140" value="90" id="heroNInput" oninput="updateHeroSim()">
-          </div>
-
-          <div class="p-3 mb-4 rounded" style="background: var(--bg-input); border: 1px solid var(--border-glass);">
-            <div class="d-flex justify-content-between small text-muted mb-2">
-              <span class="font-weight-bold">Rainfall Level</span>
-              <span class="text-cyan font-weight-extrabold" id="heroRVal">203 mm</span>
-            </div>
-            <input type="range" class="custom-range" min="20" max="300" value="203" id="heroRInput" oninput="updateHeroSim()">
-          </div>
-
-          <div class="p-4 rounded-lg text-center" style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.18) 0%, rgba(5, 150, 105, 0.35) 100%); border: 1.5px solid var(--emerald-primary);">
-            <span class="text-muted small uppercase font-weight-bold d-block mb-1">Predicted Optimal Crop</span>
-            <h2 class="font-weight-extrabold text-bright mb-2 gradient-text text-capitalize" id="heroResult">Rice</h2>
-            <span class="badge badge-pill badge-success font-weight-bold py-1 px-3"><i class="fas fa-circle-check mr-1"></i> High Yield Match</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- AI Core Features Grid with Explicit Badges and Sizing -->
-<section class="py-5">
-  <div class="container py-4">
-    <div class="text-center max-w-700 mx-auto mb-5">
-      <span class="badge-agro badge-agro-cyan mb-3"><i class="fas fa-brain"></i> Machine Learning Suite</span>
-      <h2 class="display-5 font-weight-extrabold text-bright mb-3">Intelligent Tools for High Yield Farming</h2>
-      <p class="text-muted">Designed to assist farmers with data-driven decision making across every stage of cultivation.</p>
-    </div>
-
-    <div class="row g-4">
-      <!-- Feature 1 -->
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="feature-card p-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <div class="feature-icon-wrapper mb-0">
-              <i class="fas fa-seedling"></i>
-            </div>
-            <span class="badge-agro badge-agro-emerald">Crop AI</span>
-          </div>
-          <h4 class="text-bright font-weight-bold mb-3">Crop Recommendation</h4>
-          <p class="text-muted small flex-grow-1 mb-4">Evaluates soil NPK levels, pH balance, temperature, humidity, and rainfall using Random Forest algorithms to recommend optimal crops.</p>
-          <a href="{{ url_for('farmer_crop_recommendation') }}" class="btn btn-agro-secondary btn-sm mt-auto w-100">
-            Run Crop Model <i class="fas fa-arrow-right ml-1"></i>
-          </a>
-        </div>
-      </div>
-
-      <!-- Feature 2 -->
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="feature-card p-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <div class="feature-icon-wrapper mb-0" style="background: rgba(6, 182, 212, 0.2); color: var(--cyan-accent); border-color: rgba(6, 182, 212, 0.3);">
-              <i class="fas fa-vial"></i>
-            </div>
-            <span class="badge-agro badge-agro-cyan">Soil Science</span>
-          </div>
-          <h4 class="text-bright font-weight-bold mb-3">Fertilizer Advisory</h4>
-          <p class="text-muted small flex-grow-1 mb-4">Computes exact NPK nutrient deficits for target crops and suggests tailored eco-friendly fertilizer applications.</p>
-          <a href="{{ url_for('farmer_fertilizer_recommendation') }}" class="btn btn-agro-secondary btn-sm mt-auto w-100">
-            Get Fertilizer Plan <i class="fas fa-arrow-right ml-1"></i>
-          </a>
-        </div>
-      </div>
-
-      <!-- Feature 3 -->
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="feature-card p-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <div class="feature-icon-wrapper mb-0" style="background: rgba(245, 158, 11, 0.2); color: var(--amber-accent); border-color: rgba(245, 158, 11, 0.3);">
-              <i class="fas fa-chart-line"></i>
-            </div>
-            <span class="badge-agro badge-agro-amber">Market Trends</span>
-          </div>
-          <h4 class="text-bright font-weight-bold mb-3">Price & Suitability</h4>
-          <p class="text-muted small flex-grow-1 mb-4">Predicts upcoming market price trends and crop suitability across Indian districts using trained Decision Trees.</p>
-          <a href="{{ url_for('farmer_crop_prediction') }}" class="btn btn-agro-secondary btn-sm mt-auto w-100">
-            Check Price Predictions <i class="fas fa-arrow-right ml-1"></i>
-          </a>
-        </div>
-      </div>
-
-      <!-- Feature 4 -->
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="feature-card p-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <div class="feature-icon-wrapper mb-0" style="background: rgba(139, 92, 246, 0.2); color: var(--purple-accent); border-color: rgba(139, 92, 246, 0.3);">
-              <i class="fas fa-wheat-awn"></i>
-            </div>
-            <span class="badge-agro badge-agro-emerald">Harvest Forecast</span>
-          </div>
-          <h4 class="text-bright font-weight-bold mb-3">Yield Production Output</h4>
-          <p class="text-muted small flex-grow-1 mb-4">Estimates total crop output production (in Tonnes) based on land size and district historical metrics.</p>
-          <a href="{{ url_for('farmer_yield_prediction') }}" class="btn btn-agro-secondary btn-sm mt-auto w-100">
-            Estimate Yield Output <i class="fas fa-arrow-right ml-1"></i>
-          </a>
-        </div>
-      </div>
-
-      <!-- Feature 5 -->
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="feature-card p-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <div class="feature-icon-wrapper mb-0" style="background: rgba(244, 63, 94, 0.2); color: var(--rose-accent); border-color: rgba(244, 63, 94, 0.3);">
-              <i class="fas fa-cloud-showers-heavy"></i>
-            </div>
-            <span class="badge-agro badge-agro-cyan">Meteorology</span>
-          </div>
-          <h4 class="text-bright font-weight-bold mb-3">Rainfall Forecasting</h4>
-          <p class="text-muted small flex-grow-1 mb-4">Provides monthly rainfall estimations across all subdivisions in India derived from 115-year IMD meteorological logs.</p>
-          <a href="{{ url_for('farmer_rainfall_prediction') }}" class="btn btn-agro-secondary btn-sm mt-auto w-100">
-            View Rainfall Forecast <i class="fas fa-arrow-right ml-1"></i>
-          </a>
-        </div>
-      </div>
-
-      <!-- Feature 6 -->
-      <div class="col-md-6 col-lg-4 mb-4">
-        <div class="feature-card p-4">
-          <div class="d-flex align-items-center justify-content-between mb-3">
-            <div class="feature-icon-wrapper mb-0" style="background: rgba(16, 185, 129, 0.2); color: var(--emerald-light); border-color: rgba(16, 185, 129, 0.3);">
-              <i class="fas fa-store"></i>
-            </div>
-            <span class="badge-agro badge-agro-amber">Direct Trade</span>
-          </div>
-          <h4 class="text-bright font-weight-bold mb-3">Direct Marketplace Trade</h4>
-          <p class="text-muted small flex-grow-1 mb-4">Connects farmers directly with buyers to trade harvested produce at fair prices without commission markups.</p>
-          <a href="{{ url_for('customer_buy_crops') }}" class="btn btn-agro-secondary btn-sm mt-auto w-100">
-            Explore Marketplace <i class="fas fa-arrow-right ml-1"></i>
-          </a>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- Call to Action Banner featuring Farmer, Buyer, and Admin Options -->
-<section class="py-5">
-  <div class="container py-4">
-    <div class="quick-calc-box text-center py-5 px-4 px-md-5">
-      <h2 class="display-4 font-weight-extrabold text-bright mb-3">Ready to Access AgroIntel Portals?</h2>
-      <p class="lead text-muted mb-5 max-w-600 mx-auto">Choose your portal access below to get started immediately.</p>
-      
-      <div class="hero-action-buttons justify-content-center">
-        <a href="{{ url_for('login', role='farmer') }}" class="btn btn-agro-primary btn-lg">
-          <i class="fas fa-tractor mr-2"></i> Farmer Portal
-        </a>
-        <a href="{{ url_for('login', role='customer') }}" class="btn btn-agro-secondary btn-lg">
-          <i class="fas fa-basket-shopping mr-2"></i> Buyer Marketplace
-        </a>
-        <a href="{{ url_for('login', role='admin') }}" class="btn btn-agro-admin btn-lg">
-          <i class="fas fa-user-shield mr-2"></i> Admin Portal
-        </a>
-      </div>
-    </div>
-  </div>
-</section>
-{% endblock %}
-
-{% block extra_scripts %}
-<script>
-function updateHeroSim() {
-  const n = parseInt(document.getElementById('heroNInput').value);
-  const r = parseInt(document.getElementById('heroRInput').value);
-  document.getElementById('heroNVal').innerText = n + ' kg/ha';
-  document.getElementById('heroRVal').innerText = r + ' mm';
-
-  let crop = "Rice";
-  if (r < 80) {
-    crop = (n > 60) ? "Maize" : "Bajra";
-  } else if (r < 150) {
-    crop = (n > 80) ? "Cotton" : "Chickpea";
-  } else {
-    crop = (n > 100) ? "Jute" : "Rice";
+{% block extra_head %}
+<style>
+  /* ═══════════════════════════════
+     HERO
+  ═══════════════════════════════ */
+  .hero-section {
+    position: relative;
+    padding: 5.5rem 0 4.5rem;
+    overflow: hidden;
   }
 
-  document.getElementById('heroResult').innerText = crop;
-}
-</script>
+  .hero-glow {
+    position: absolute;
+    inset: 0;
+    background:
+      radial-gradient(ellipse 65% 55% at 50% 30%, rgba(16, 185, 129, 0.09) 0%, transparent 68%),
+      radial-gradient(ellipse 40% 45% at 15% 85%, rgba(6, 182, 212, 0.06) 0%, transparent 60%),
+      radial-gradient(ellipse 35% 40% at 85% 75%, rgba(245, 158, 11, 0.05) 0%, transparent 60%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .hero-content {
+    position: relative;
+    z-index: 1;
+    text-align: center;
+  }
+
+  .hero-eyebrow {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.35rem 1.1rem;
+    border-radius: 999px;
+    border: 1px solid rgba(16, 185, 129, 0.30);
+    background: rgba(16, 185, 129, 0.08);
+    color: var(--emerald-500);
+    font-size: 0.78rem;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+    margin-bottom: 1.75rem;
+  }
+
+  .hero-headline {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(2.2rem, 5.5vw, 3.6rem);
+    line-height: 1.13;
+    letter-spacing: -0.038em;
+    color: var(--text-primary);
+    margin-bottom: 1.35rem;
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+
+  .hero-sub {
+    font-family: var(--font-body);
+    font-size: 1.08rem;
+    line-height: 1.78;
+    color: var(--text-muted);
+    max-width: 560px;
+    margin: 0 auto 2.75rem;
+  }
+
+  /* 3 CTA buttons */
+  .hero-cta-group {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.9rem;
+    margin-bottom: 3.25rem;
+  }
+
+  .hero-cta-group .btn-agro-primary,
+  .hero-cta-group .btn-agro-secondary,
+  .hero-cta-group .btn-agro-admin {
+    padding: 0.85rem 1.75rem;
+    font-size: 0.95rem;
+  }
+
+  /* Stats divider row */
+  .hero-stats {
+    display: inline-flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0 2.5rem;
+    padding-top: 2rem;
+    border-top: 1px solid var(--border-subtle);
+    width: 100%;
+    max-width: 640px;
+    margin: 0 auto;
+  }
+
+  .hero-stats .stat-item {
+    text-align: center;
+    padding: 0.5rem 0;
+  }
+
+  .hero-stats .stat-item h3 {
+    font-family: var(--font-display);
+    font-size: 1.75rem;
+    font-weight: 800;
+    letter-spacing: -0.025em;
+    margin: 0 0 0.15rem;
+    line-height: 1;
+  }
+
+  .hero-stats .stat-item p {
+    font-size: 0.75rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--text-muted);
+    margin: 0;
+  }
+
+  /* ═══════════════════════════════
+     SECTION COMMON
+  ═══════════════════════════════ */
+  .section-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--emerald-500);
+    background: rgba(16, 185, 129, 0.08);
+    border: 1px solid rgba(16, 185, 129, 0.22);
+    padding: 0.3rem 0.9rem;
+    border-radius: 999px;
+    margin-bottom: 1rem;
+  }
+
+  .section-headline {
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: clamp(1.65rem, 4vw, 2.5rem);
+    letter-spacing: -0.032em;
+    color: var(--text-primary);
+    margin-bottom: 0.75rem;
+  }
+
+  /* ═══════════════════════════════
+     FEATURE GRID
+  ═══════════════════════════════ */
+  .feat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(272px, 1fr));
+    gap: 1.25rem;
+  }
+
+  .feat-item {
+    background: var(--bg-surface);
+    border: 1px solid var(--border-subtle);
+    border-radius: 18px;
+    padding: 1.75rem 1.65rem;
+    transition: var(--transition-ui);
+    position: relative;
+    overflow: hidden;
+  }
+
+  .feat-item::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 1.5px;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+  }
+
+  .feat-item.c-emerald::before { background: linear-gradient(90deg, transparent, var(--emerald-500), transparent); }
+  .feat-item.c-cyan::before    { background: linear-gradient(90deg, transparent, var(--cyan-500),    transparent); }
+  .feat-item.c-amber::before   { background: linear-gradient(90deg, transparent, var(--amber-500),   transparent); }
+  .feat-item.c-violet::before  { background: linear-gradient(90deg, transparent, #8b5cf6,            transparent); }
+  .feat-item.c-rose::before    { background: linear-gradient(90deg, transparent, #f43f5e,            transparent); }
+
+  .feat-item:hover {
+    border-color: var(--border-normal);
+    transform: translateY(-4px);
+    box-shadow: var(--shadow-md), 0 0 24px rgba(16, 185, 129, 0.07);
+  }
+
+  .feat-item:hover::before { opacity: 0.75; }
+
+  .feat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.2rem;
+    margin-bottom: 1.1rem;
+    flex-shrink: 0;
+  }
+
+  .feat-item h5 {
+    font-family: var(--font-display);
+    font-size: 1rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    color: var(--text-primary);
+  }
+
+  .feat-item p {
+    font-size: 0.875rem;
+    color: var(--text-muted);
+    line-height: 1.67;
+    margin: 0;
+  }
+
+  /* ═══════════════════════════════
+     HOW IT WORKS
+  ═══════════════════════════════ */
+  .step-number {
+    width: 44px;
+    height: 44px;
+    border-radius: 50%;
+    background: rgba(16, 185, 129, 0.11);
+    border: 1px solid rgba(16, 185, 129, 0.28);
+    color: var(--emerald-500);
+    font-family: var(--font-display);
+    font-weight: 800;
+    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+
+  .step-connector {
+    width: 1px;
+    flex: 1;
+    min-height: 28px;
+    background: linear-gradient(to bottom, rgba(16, 185, 129, 0.28), transparent);
+    margin: 0 auto;
+  }
+
+  /* ═══════════════════════════════
+     RESPONSIVE
+  ═══════════════════════════════ */
+  @media (max-width: 767.98px) {
+    .hero-section { padding: 3.5rem 0 3rem; }
+    .feat-grid    { grid-template-columns: 1fr; }
+    .hero-stats   { gap: 0 1.5rem; }
+
+    .hero-cta-group .btn-agro-primary,
+    .hero-cta-group .btn-agro-secondary,
+    .hero-cta-group .btn-agro-admin {
+      width: 100%;
+      justify-content: center;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block content %}
+
+{# ══════════════════════════════════════════════════════════
+   HERO — centered, full-width
+   ══════════════════════════════════════════════════════════ #}
+<section class="hero-section" aria-labelledby="hero-heading">
+  <div class="hero-glow" aria-hidden="true"></div>
+  <div class="container hero-content">
+
+    <div class="hero-eyebrow">
+      <i class="fas fa-leaf" aria-hidden="true"></i>
+      Next-Gen Smart Agriculture Platform
+    </div>
+
+    <h1 id="hero-heading" class="hero-headline">
+      Grow Smarter with<br>
+      <span class="gradient-text">AI-Powered Farming</span>
+    </h1>
+
+    <p class="hero-sub">
+      AgroIntel brings together machine-learning models and real agricultural data so Indian
+      farmers can choose the right crop, predict yields, and sell directly to buyers — no middlemen.
+    </p>
+
+    {# ── Exactly 3 login CTAs — the ONLY login buttons on this page ── #}
+    <div class="hero-cta-group" role="group" aria-label="Portal login options">
+      <a href="{{ url_for('login', role='farmer') }}"
+         class="btn-agro-primary"
+         aria-label="Login to the Farmer Portal">
+        <i class="fas fa-tractor" aria-hidden="true"></i> Farmer Portal
+      </a>
+      <a href="{{ url_for('login', role='customer') }}"
+         class="btn-agro-secondary"
+         aria-label="Login to the Buyer Marketplace">
+        <i class="fas fa-basket-shopping" aria-hidden="true"></i> Buyer Marketplace
+      </a>
+      <a href="{{ url_for('login', role='admin') }}"
+         class="btn-agro-admin"
+         aria-label="Login to the Admin Portal">
+        <i class="fas fa-user-shield" aria-hidden="true"></i> Admin Portal
+      </a>
+    </div>
+
+    {# ── 4-stat strip ── #}
+    <div class="hero-stats" aria-label="Platform statistics">
+      <div class="stat-item">
+        <h3 class="gradient-text">6</h3>
+        <p>AI Models</p>
+      </div>
+      <div class="stat-item">
+        <h3 style="color: var(--amber-500);">22+</h3>
+        <p>Crop Types</p>
+      </div>
+      <div class="stat-item">
+        <h3 style="color: var(--cyan-500);">100%</h3>
+        <p>Direct Trade</p>
+      </div>
+      <div class="stat-item">
+        <h3 class="gradient-text">115 yr</h3>
+        <p>Weather Data</p>
+      </div>
+    </div>
+
+  </div>
+</section>
+
+
+{# ══════════════════════════════════════════════════════════
+   FEATURE INFO — 8 informational tiles, no action links
+   ══════════════════════════════════════════════════════════ #}
+<section class="py-5" aria-labelledby="features-heading">
+  <div class="container py-4">
+
+    <div class="text-center mb-5">
+      <div class="section-label">
+        <i class="fas fa-brain" aria-hidden="true"></i> Platform Capabilities
+      </div>
+      <h2 id="features-heading" class="section-headline">What AgroIntel Can Do</h2>
+      <p style="color: var(--text-muted); max-width: 520px; margin: 0 auto; font-size: 0.95rem; line-height: 1.7;">
+        One platform covering everything a modern farmer needs — from soil analysis to marketplace sales.
+      </p>
+    </div>
+
+    <div class="feat-grid">
+
+      {# 1 — Crop Recommendation #}
+      <article class="feat-item c-emerald">
+        <div class="feat-icon" style="background: rgba(16,185,129,0.13); color: var(--emerald-500);">
+          <i class="fas fa-seedling" aria-hidden="true"></i>
+        </div>
+        <h5>Crop Recommendation</h5>
+        <p>
+          Enter your soil's NPK values, temperature, humidity, and rainfall — our Random Forest model
+          instantly tells you which crop to grow for maximum yield potential.
+        </p>
+      </article>
+
+      {# 2 — Fertilizer Advisory #}
+      <article class="feat-item c-cyan">
+        <div class="feat-icon" style="background: rgba(6,182,212,0.13); color: var(--cyan-500);">
+          <i class="fas fa-vial" aria-hidden="true"></i>
+        </div>
+        <h5>Fertilizer Advisory</h5>
+        <p>
+          Know exactly how much Nitrogen, Phosphorus, and Potassium your soil needs. The AI calculates
+          the optimal fertilizer mix tailored to your target crop and soil condition.
+        </p>
+      </article>
+
+      {# 3 — Price Predictor #}
+      <article class="feat-item c-amber">
+        <div class="feat-icon" style="background: rgba(245,158,11,0.13); color: var(--amber-500);">
+          <i class="fas fa-chart-line" aria-hidden="true"></i>
+        </div>
+        <h5>Price Predictor</h5>
+        <p>
+          Predict upcoming market prices and crop suitability across Indian districts using
+          Decision Tree models trained on historical commodity data — plan before you harvest.
+        </p>
+      </article>
+
+      {# 4 — Yield Forecast #}
+      <article class="feat-item c-violet">
+        <div class="feat-icon" style="background: rgba(139,92,246,0.13); color: #8b5cf6;">
+          <i class="fas fa-wheat-awn" aria-hidden="true"></i>
+        </div>
+        <h5>Yield Forecast</h5>
+        <p>
+          Estimate total crop output in tonnes based on your land area and district-level
+          historical production metrics — know your harvest numbers before you sow.
+        </p>
+      </article>
+
+      {# 5 — Rainfall Estimation #}
+      <article class="feat-item c-rose">
+        <div class="feat-icon" style="background: rgba(244,63,94,0.13); color: #f43f5e;">
+          <i class="fas fa-cloud-showers-heavy" aria-hidden="true"></i>
+        </div>
+        <h5>Rainfall Estimation</h5>
+        <p>
+          Monthly rainfall predictions for every subdivision in India, derived from 115 years of
+          IMD meteorological records — plan irrigation schedules with real confidence.
+        </p>
+      </article>
+
+      {# 6 — Weather Forecast #}
+      <article class="feat-item c-amber">
+        <div class="feat-icon" style="background: rgba(251,191,36,0.13); color: var(--amber-500);">
+          <i class="fas fa-sun" aria-hidden="true"></i>
+        </div>
+        <h5>Weather Forecast</h5>
+        <p>
+          Get temperature, humidity, wind speed, and weather condition predictions for any Indian
+          city — plan your field operations around accurate short-term climate data.
+        </p>
+      </article>
+
+      {# 7 — Marketplace #}
+      <article class="feat-item c-emerald">
+        <div class="feat-icon" style="background: rgba(16,185,129,0.13); color: var(--emerald-500);">
+          <i class="fas fa-store" aria-hidden="true"></i>
+        </div>
+        <h5>Marketplace</h5>
+        <p>
+          Farmers list harvested produce; buyers purchase directly at fair market rates.
+          Zero commission, zero middlemen — pure farm-to-table economics that benefit both sides.
+        </p>
+      </article>
+
+      {# 8 — Selling History #}
+      <article class="feat-item c-cyan">
+        <div class="feat-icon" style="background: rgba(6,182,212,0.13); color: var(--cyan-500);">
+          <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+        </div>
+        <h5>Selling History</h5>
+        <p>
+          Farmers get a complete log of every transaction — crop sold, buyer name, quantity,
+          and price — all organised in one clear dashboard view for easy record-keeping.
+        </p>
+      </article>
+
+    </div>
+  </div>
+</section>
+
+
+{# ══════════════════════════════════════════════════════════
+   HOW IT WORKS — 3 plain-text steps
+   ══════════════════════════════════════════════════════════ #}
+<section class="py-5" aria-labelledby="how-heading" style="background: var(--bg-surface);">
+  <div class="container py-4">
+    <div class="row align-items-center gy-5">
+
+      {# Left — Section intro #}
+      <div class="col-lg-5">
+        <div class="section-label">
+          <i class="fas fa-route" aria-hidden="true"></i> How It Works
+        </div>
+        <h2 id="how-heading" class="section-headline">Simple. Fast. Accurate.</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 400px; line-height: 1.75; margin: 0;">
+          Getting started takes under a minute. Create your account, pick your role, and unlock
+          the full AI suite immediately — no technical background required.
+        </p>
+      </div>
+
+      {# Right — Steps #}
+      <div class="col-lg-6 offset-lg-1">
+        <ol class="list-unstyled d-flex flex-column" style="gap: 0;" aria-label="Steps to get started">
+
+          {# Step 1 #}
+          <li class="d-flex align-items-start" style="gap: 1.25rem; margin-bottom: 0;">
+            <div class="d-flex flex-column align-items-center" style="min-width: 44px;">
+              <div class="step-number" aria-hidden="true">1</div>
+              <div class="step-connector mt-2"></div>
+            </div>
+            <div class="pb-4">
+              <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; color: var(--text-primary);">
+                Create Your Account
+              </h5>
+              <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; margin: 0;">
+                Register as a Farmer, Buyer, or Admin. Each role unlocks a tailored portal with the
+                specific tools and data views relevant to your work.
+              </p>
+            </div>
+          </li>
+
+          {# Step 2 #}
+          <li class="d-flex align-items-start" style="gap: 1.25rem; margin-bottom: 0;">
+            <div class="d-flex flex-column align-items-center" style="min-width: 44px;">
+              <div class="step-number" aria-hidden="true">2</div>
+              <div class="step-connector mt-2"></div>
+            </div>
+            <div class="pb-4">
+              <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; color: var(--text-primary);">
+                Input Your Farm Data
+              </h5>
+              <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; margin: 0;">
+                Enter soil readings, location, crop type, or market conditions using simple dropdowns
+                and number fields — everything is designed for farmers, not data scientists.
+              </p>
+            </div>
+          </li>
+
+          {# Step 3 #}
+          <li class="d-flex align-items-start" style="gap: 1.25rem;">
+            <div class="d-flex flex-column align-items-center" style="min-width: 44px;">
+              <div class="step-number" aria-hidden="true">3</div>
+            </div>
+            <div>
+              <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; color: var(--text-primary);">
+                Get AI-Driven Results
+              </h5>
+              <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; margin: 0;">
+                Receive instant recommendations, yield predictions, and market insights — all computed
+                locally by trained ML models, with no external data sharing required.
+              </p>
+            </div>
+          </li>
+
+        </ol>
+      </div>
+
+    </div>
+  </div>
+</section>
+
 {% endblock %}

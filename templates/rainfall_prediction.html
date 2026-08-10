@@ -1,96 +1,81 @@
-{% extends 'base.html' %}
-{% block title %}Subdivision Rainfall Forecast | AgroIntel AI{% endblock %}
+{% extends 'farmer_base.html' %}
+{% block title %}Rainfall Forecast | AgroIntel AI{% endblock %}
+{% block page_title %}Rainfall Estimation{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-9">
-      <div class="text-center mb-5 animate-fade-in-up">
-        <span class="badge-agro badge-agro-cyan mb-2"><i class="fas fa-cloud-showers-heavy"></i> Meteorological Data</span>
-        <h2 class="display-4 font-weight-extrabold text-bright">Subdivision Rainfall Forecast</h2>
-        <p class="text-muted max-w-600 mx-auto">Historical 115-year IMD rainfall data analysis across Indian meteorological subdivisions.</p>
-      </div>
+{% block farmer_content %}
+<div class="py-3">
+  <div class="mb-4">
+    <span class="badge-agro badge-agro-cyan"><i class="fas fa-cloud-showers-heavy" aria-hidden="true"></i> Meteorological Data (115 Years)</span>
+    <h2 class="mt-2 mb-1" style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary);">Subdivision Rainfall Forecast</h2>
+    <p class="text-muted mb-0" style="font-size: 0.9rem;">Monthly rainfall estimations derived from IMD records across Indian meteorological zones.</p>
+  </div>
 
-      <div class="glass-card p-4 p-md-5 mb-5">
-        
-        <!-- Quick Subdivision Presets -->
-        <div class="mb-4">
-          <label class="font-weight-bold small text-muted d-block mb-2"><i class="fas fa-wand-magic-sparkles text-cyan mr-1"></i> Quick Region Presets (1-Click Fill):</label>
-          <div class="soil-preset-container">
-            <button type="button" class="soil-preset-btn" onclick="applyRainPreset('COASTAL KARNATAKA', 'JUL')">
-              🌧️ Coastal Karnataka (July)
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyRainPreset('NORTH INTERIOR KARNATAKA', 'AUG')">
-              🌦️ North Interior Karnataka (August)
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyRainPreset('TAMIL NADU', 'OCT')">
-              🌧️ Tamil Nadu (October)
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyRainPreset('KERALA', 'JUN')">
-              ⛈️ Kerala Monsoon (June)
-            </button>
-          </div>
-        </div>
-
-        <form action="{{ url_for('farmer_rainfall_prediction') }}" method="POST">
-          <div class="form-group mb-3">
-            <label class="font-weight-bold small text-muted"><i class="fas fa-map-location-dot text-emerald mr-1"></i> Subdivision / Meteorological Zone</label>
-            <select name="region" id="regionSelect" class="form-control form-control-agro" required>
-              <option value="COASTAL KARNATAKA" selected>COASTAL KARNATAKA</option>
-              <option value="NORTH INTERIOR KARNATAKA">NORTH INTERIOR KARNATAKA</option>
-              <option value="SOUTH INTERIOR KARNATAKA">SOUTH INTERIOR KARNATAKA</option>
-              <option value="ANDAMAN & NICOBAR ISLANDS">ANDAMAN & NICOBAR ISLANDS</option>
-              <option value="TAMIL NADU">TAMIL NADU</option>
-              <option value="KERALA">KERALA</option>
-              <option value="MAHARASHTRA">MAHARASHTRA</option>
-              <option value="GUJARAT">GUJARAT</option>
-              <option value="PUNJAB">PUNJAB</option>
-              <option value="WEST BENGAL">WEST BENGAL</option>
-            </select>
-          </div>
-
-          <div class="form-group mb-4">
-            <label class="font-weight-bold small text-muted"><i class="fas fa-calendar-alt text-cyan mr-1"></i> Target Month</label>
-            <select name="month" id="monthSelect" class="form-control form-control-agro" required>
-              <option value="JAN">January</option>
-              <option value="FEB">February</option>
-              <option value="MAR">March</option>
-              <option value="APR">April</option>
-              <option value="MAY">May</option>
-              <option value="JUN">June</option>
-              <option value="JUL" selected>July</option>
-              <option value="AUG">August</option>
-              <option value="SEP">September</option>
-              <option value="OCT">October</option>
-              <option value="NOV">November</option>
-              <option value="DEC">December</option>
-            </select>
-          </div>
-
-          <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold shadow-lg">
-            <i class="fas fa-droplet mr-2"></i> Compute Expected Rainfall
-          </button>
-        </form>
-
-        {% if result %}
-          <div class="mt-5 result-card-glow text-center animate-fade-in-up" style="background: linear-gradient(135deg, rgba(6, 182, 212, 0.22) 0%, rgba(16, 185, 129, 0.35) 100%); border: 1.5px solid var(--cyan-accent);">
-            <span class="badge-agro badge-agro-cyan mb-2"><i class="fas fa-cloud-rain"></i> Forecasted Precipitation</span>
-            <span class="text-muted d-block small uppercase tracking-wider font-weight-bold mb-1">Expected Monthly Rainfall Volume</span>
-            <h1 class="display-3 font-weight-extrabold text-bright mb-1 gradient-text">{{ result }} <span class="fs-4 text-muted">mm</span></h1>
-            <p class="text-muted mb-0">Average expected precipitation computed from 1901-2015 IMD meteorological records.</p>
-          </div>
-        {% endif %}
+  <div class="glass-card">
+    <div class="mb-4">
+      <label class="d-block mb-2" style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
+        <i class="fas fa-wand-magic-sparkles" style="color: var(--cyan-500);" aria-hidden="true"></i> Quick Region Presets
+      </label>
+      <div class="soil-preset-container">
+        <button type="button" class="soil-preset-btn" onclick="applyRainPreset('COASTAL KARNATAKA','JUL')">🌧️ Coastal Karnataka (Jul)</button>
+        <button type="button" class="soil-preset-btn" onclick="applyRainPreset('NORTH INTERIOR KARNATAKA','AUG')">🌦️ N. Interior Karnataka (Aug)</button>
+        <button type="button" class="soil-preset-btn" onclick="applyRainPreset('TAMIL NADU','OCT')">🌧️ Tamil Nadu (Oct)</button>
+        <button type="button" class="soil-preset-btn" onclick="applyRainPreset('KERALA','JUN')">⛈️ Kerala Monsoon (Jun)</button>
       </div>
     </div>
+
+    <form action="{{ url_for('farmer_rainfall_prediction') }}" method="POST">
+      <div class="row">
+        <div class="col-md-6 mb-3">
+          <label><i class="fas fa-map-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> Meteorological Zone</label>
+          <select name="region" id="regionSelect" class="form-control form-control-agro" required>
+            <option value="COASTAL KARNATAKA" selected>COASTAL KARNATAKA</option>
+            <option value="NORTH INTERIOR KARNATAKA">NORTH INTERIOR KARNATAKA</option>
+            <option value="SOUTH INTERIOR KARNATAKA">SOUTH INTERIOR KARNATAKA</option>
+            <option value="ANDAMAN &amp; NICOBAR ISLANDS">ANDAMAN &amp; NICOBAR ISLANDS</option>
+            <option value="TAMIL NADU">TAMIL NADU</option>
+            <option value="KERALA">KERALA</option>
+            <option value="MAHARASHTRA">MAHARASHTRA</option>
+            <option value="GUJARAT">GUJARAT</option>
+            <option value="PUNJAB">PUNJAB</option>
+            <option value="WEST BENGAL">WEST BENGAL</option>
+          </select>
+        </div>
+        <div class="col-md-6 mb-3">
+          <label><i class="fas fa-calendar-alt" style="color: var(--cyan-500);" aria-hidden="true"></i> Target Month</label>
+          <select name="month" id="monthSelect" class="form-control form-control-agro" required>
+            <option value="JAN">January</option><option value="FEB">February</option>
+            <option value="MAR">March</option><option value="APR">April</option>
+            <option value="MAY">May</option><option value="JUN">June</option>
+            <option value="JUL" selected>July</option><option value="AUG">August</option>
+            <option value="SEP">September</option><option value="OCT">October</option>
+            <option value="NOV">November</option><option value="DEC">December</option>
+          </select>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-agro-primary w-100" style="min-height: 52px; font-size: 1rem;">
+        <i class="fas fa-droplet" aria-hidden="true"></i> Compute Expected Rainfall
+      </button>
+    </form>
+
+    {% if result %}
+    <div class="mt-4 result-card-glow text-center animate-fade-in-up" style="background: linear-gradient(135deg, rgba(6,182,212,0.16) 0%, rgba(16,185,129,0.28) 100%); border-color: var(--cyan-500);">
+      <span class="badge-agro badge-agro-cyan mb-3"><i class="fas fa-cloud-rain" aria-hidden="true"></i> Forecasted Precipitation</span>
+      <p class="text-muted mb-1" style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">Expected Monthly Rainfall</p>
+      <h1 class="gradient-text" style="font-size: 3rem; font-weight: 800;">{{ result }} <span style="font-size: 1.2rem; color: var(--text-muted); font-weight: 600;">mm</span></h1>
+      <p class="text-muted mb-0" style="font-size: 0.85rem;">Averaged from 1901–2015 IMD meteorological records.</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+{{ super() }}
 <script>
-function applyRainPreset(region, month) {
-  document.getElementById('regionSelect').value = region;
-  document.getElementById('monthSelect').value = month;
+function applyRainPreset(region,month){
+  document.getElementById('regionSelect').value=region;
+  document.getElementById('monthSelect').value=month;
 }
 </script>
 {% endblock %}

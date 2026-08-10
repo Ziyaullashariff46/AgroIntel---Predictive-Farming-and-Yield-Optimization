@@ -1,133 +1,119 @@
-{% extends 'base.html' %}
+{% extends 'farmer_base.html' %}
 {% block title %}Crop Recommendation | AgroIntel AI{% endblock %}
+{% block page_title %}Crop Recommendation{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-10">
-      <div class="text-center mb-5 animate-fade-in-up">
-        <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-microchip"></i> Random Forest Classifier</span>
-        <h2 class="display-4 font-weight-extrabold text-bright">Smart Crop Recommendation</h2>
-        <p class="text-muted max-w-600 mx-auto">Adjust your soil's chemical composition and weather metrics or pick a quick soil preset to discover the highest-yielding crop.</p>
-      </div>
+{% block farmer_content %}
+<div class="py-3">
+  <div class="mb-4">
+    <span class="badge-agro badge-agro-emerald"><i class="fas fa-microchip" aria-hidden="true"></i> Random Forest Classifier</span>
+    <h2 class="mt-2 mb-1" style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary);">Smart Crop Recommendation</h2>
+    <p class="text-muted mb-0" style="font-size: 0.9rem;">Adjust soil & weather metrics or pick a quick preset to get the highest-yielding crop.</p>
+  </div>
 
-      <div class="glass-card p-4 p-md-5 mb-5">
-        
-        <!-- Interactive Soil NPK Quick-Preset Buttons -->
-        <div class="mb-4">
-          <label class="font-weight-bold small text-muted d-block mb-2"><i class="fas fa-wand-magic-sparkles text-emerald mr-1"></i> Quick Soil Presets (1-Click Fill):</label>
-          <div class="soil-preset-container">
-            <button type="button" class="soil-preset-btn" onclick="applyPreset(90, 42, 43, 20.8, 82.0, 6.5, 202.9)">
-              🌾 Paddy Rice Soil
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyPreset(70, 55, 40, 24.5, 65.0, 6.8, 85.0)">
-              🌽 Maize & Corn Loam
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyPreset(110, 45, 38, 28.0, 75.0, 7.2, 90.0)">
-              ☁️ Cotton Alluvial
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyPreset(100, 25, 30, 25.0, 80.0, 6.2, 160.0)">
-              🎍 Sugarcane Soil
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyPreset(20, 135, 200, 27.0, 85.0, 5.8, 240.0)">
-              ☕ Coffee & Spice Plantation
-            </button>
-          </div>
-        </div>
-
-        <form action="{{ url_for('farmer_crop_recommendation') }}" method="POST">
-          <div class="row g-4 mb-4">
-            <!-- Nitrogen -->
-            <div class="col-md-4 mb-3">
-              <div class="p-3 rounded-lg" style="background: var(--bg-input); border: 1px solid var(--border-glass);">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <label class="font-weight-bold text-bright mb-0">Nitrogen (N)</label>
-                  <span class="badge badge-success px-2 py-1" id="nVal">90</span>
-                </div>
-                <input type="range" name="n" min="0" max="140" value="90" class="custom-range" id="nInput" oninput="document.getElementById('nVal').innerText = this.value">
-                <div class="d-flex justify-content-between text-muted small mt-1"><span>0</span><span>70</span><span>140 kg/ha</span></div>
-              </div>
-            </div>
-
-            <!-- Phosphorus -->
-            <div class="col-md-4 mb-3">
-              <div class="p-3 rounded-lg" style="background: var(--bg-input); border: 1px solid var(--border-glass);">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <label class="font-weight-bold text-bright mb-0">Phosphorus (P)</label>
-                  <span class="badge badge-info px-2 py-1" id="pVal">42</span>
-                </div>
-                <input type="range" name="p" min="5" max="145" value="42" class="custom-range" id="pInput" oninput="document.getElementById('pVal').innerText = this.value">
-                <div class="d-flex justify-content-between text-muted small mt-1"><span>5</span><span>75</span><span>145 kg/ha</span></div>
-              </div>
-            </div>
-
-            <!-- Potassium -->
-            <div class="col-md-4 mb-3">
-              <div class="p-3 rounded-lg" style="background: var(--bg-input); border: 1px solid var(--border-glass);">
-                <div class="d-flex justify-content-between align-items-center mb-2">
-                  <label class="font-weight-bold text-bright mb-0">Potassium (K)</label>
-                  <span class="badge badge-warning px-2 py-1" id="kVal">43</span>
-                </div>
-                <input type="range" name="k" min="5" max="205" value="43" class="custom-range" id="kInput" oninput="document.getElementById('kVal').innerText = this.value">
-                <div class="d-flex justify-content-between text-muted small mt-1"><span>5</span><span>100</span><span>205 kg/ha</span></div>
-              </div>
-            </div>
-          </div>
-
-          <div class="row g-4 mb-4">
-            <!-- Temp -->
-            <div class="col-md-3 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-temperature-half text-warning mr-1"></i> Temperature (°C)</label>
-              <input type="number" step="0.1" name="t" id="tInput" class="form-control form-control-agro" value="20.8" placeholder="e.g. 25" required>
-            </div>
-            <!-- Humidity -->
-            <div class="col-md-3 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-droplet text-info mr-1"></i> Humidity (%)</label>
-              <input type="number" step="0.1" name="h" id="hInput" class="form-control form-control-agro" value="82.0" placeholder="e.g. 70" required>
-            </div>
-            <!-- pH -->
-            <div class="col-md-3 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-flask text-emerald mr-1"></i> Soil pH Level</label>
-              <input type="number" step="0.1" name="ph" id="phInput" class="form-control form-control-agro" value="6.5" placeholder="e.g. 6.5" required>
-            </div>
-            <!-- Rainfall -->
-            <div class="col-md-3 mb-3">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-cloud-rain text-primary mr-1"></i> Rainfall (mm)</label>
-              <input type="number" step="0.1" name="r" id="rInput" class="form-control form-control-agro" value="202.9" placeholder="e.g. 200" required>
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold fs-5 shadow-lg">
-            <i class="fas fa-wand-magic-sparkles mr-2"></i> Compute AI Crop Recommendation
-          </button>
-        </form>
-
-        {% if result %}
-          <div class="mt-5 result-card-glow text-center animate-fade-in-up">
-            <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-circle-check"></i> Highest AI Prediction Accuracy</span>
-            <span class="text-muted d-block small uppercase tracking-wider font-weight-bold mb-1">Recommended Crop to Cultivate</span>
-            <h1 class="display-3 font-weight-extrabold text-bright text-capitalize mb-2 gradient-text">{{ result }}</h1>
-            <p class="text-muted mb-0">Evaluated across 2,200 agricultural dataset observations using ensemble Random Forests.</p>
-          </div>
-        {% endif %}
+  <div class="glass-card">
+    <!-- Quick Presets -->
+    <div class="mb-4">
+      <label class="d-block mb-2" style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
+        <i class="fas fa-wand-magic-sparkles" style="color: var(--emerald-500);" aria-hidden="true"></i> Quick Soil Presets
+      </label>
+      <div class="soil-preset-container">
+        <button type="button" class="soil-preset-btn" onclick="applyPreset(90, 42, 43, 20.8, 82.0, 6.5, 202.9)">🌾 Paddy Rice</button>
+        <button type="button" class="soil-preset-btn" onclick="applyPreset(70, 55, 40, 24.5, 65.0, 6.8, 85.0)">🌽 Maize Loam</button>
+        <button type="button" class="soil-preset-btn" onclick="applyPreset(110, 45, 38, 28.0, 75.0, 7.2, 90.0)">☁️ Cotton Alluvial</button>
+        <button type="button" class="soil-preset-btn" onclick="applyPreset(100, 25, 30, 25.0, 80.0, 6.2, 160.0)">🎍 Sugarcane</button>
+        <button type="button" class="soil-preset-btn" onclick="applyPreset(20, 135, 200, 27.0, 85.0, 5.8, 240.0)">☕ Coffee & Spice</button>
       </div>
     </div>
+
+    <form action="{{ url_for('farmer_crop_recommendation') }}" method="POST">
+      <div class="row">
+        <!-- Nitrogen -->
+        <div class="col-md-4 mb-4">
+          <div class="p-3 rounded" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="mb-0" style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Nitrogen (N)</label>
+              <span class="badge badge-success px-2 py-1" id="nVal">90</span>
+            </div>
+            <input type="range" name="n" min="0" max="140" value="90" class="custom-range" id="nInput"
+                   oninput="document.getElementById('nVal').innerText = this.value" aria-label="Nitrogen level">
+            <div class="d-flex justify-content-between mt-1" style="font-size: 0.72rem; color: var(--text-muted);">
+              <span>0</span><span>70</span><span>140 kg/ha</span>
+            </div>
+          </div>
+        </div>
+        <!-- Phosphorus -->
+        <div class="col-md-4 mb-4">
+          <div class="p-3 rounded" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="mb-0" style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Phosphorus (P)</label>
+              <span class="badge badge-info px-2 py-1" id="pVal">42</span>
+            </div>
+            <input type="range" name="p" min="5" max="145" value="42" class="custom-range" id="pInput"
+                   oninput="document.getElementById('pVal').innerText = this.value" aria-label="Phosphorus level">
+            <div class="d-flex justify-content-between mt-1" style="font-size: 0.72rem; color: var(--text-muted);">
+              <span>5</span><span>75</span><span>145 kg/ha</span>
+            </div>
+          </div>
+        </div>
+        <!-- Potassium -->
+        <div class="col-md-4 mb-4">
+          <div class="p-3 rounded" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+            <div class="d-flex justify-content-between align-items-center mb-2">
+              <label class="mb-0" style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">Potassium (K)</label>
+              <span class="badge badge-warning px-2 py-1" id="kVal">43</span>
+            </div>
+            <input type="range" name="k" min="5" max="205" value="43" class="custom-range" id="kInput"
+                   oninput="document.getElementById('kVal').innerText = this.value" aria-label="Potassium level">
+            <div class="d-flex justify-content-between mt-1" style="font-size: 0.72rem; color: var(--text-muted);">
+              <span>5</span><span>100</span><span>205 kg/ha</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="row">
+        <div class="col-sm-6 col-md-3 mb-3">
+          <label><i class="fas fa-temperature-half" style="color: var(--amber-500);" aria-hidden="true"></i> Temperature (°C)</label>
+          <input type="number" step="0.1" name="t" id="tInput" class="form-control form-control-agro" value="20.8" required>
+        </div>
+        <div class="col-sm-6 col-md-3 mb-3">
+          <label><i class="fas fa-droplet" style="color: var(--cyan-500);" aria-hidden="true"></i> Humidity (%)</label>
+          <input type="number" step="0.1" name="h" id="hInput" class="form-control form-control-agro" value="82.0" required>
+        </div>
+        <div class="col-sm-6 col-md-3 mb-3">
+          <label><i class="fas fa-flask" style="color: var(--emerald-500);" aria-hidden="true"></i> Soil pH Level</label>
+          <input type="number" step="0.1" name="ph" id="phInput" class="form-control form-control-agro" value="6.5" required>
+        </div>
+        <div class="col-sm-6 col-md-3 mb-3">
+          <label><i class="fas fa-cloud-rain" style="color: var(--cyan-500);" aria-hidden="true"></i> Rainfall (mm)</label>
+          <input type="number" step="0.1" name="r" id="rInput" class="form-control form-control-agro" value="202.9" required>
+        </div>
+      </div>
+
+      <button type="submit" class="btn-agro-primary w-100" style="min-height: 52px; font-size: 1rem;">
+        <i class="fas fa-wand-magic-sparkles" aria-hidden="true"></i> Compute AI Crop Recommendation
+      </button>
+    </form>
+
+    {% if result %}
+    <div class="mt-4 result-card-glow text-center animate-fade-in-up">
+      <span class="badge-agro badge-agro-emerald mb-3"><i class="fas fa-circle-check" aria-hidden="true"></i> AI Recommendation Ready</span>
+      <p class="text-muted mb-1" style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">Recommended Crop</p>
+      <h1 class="gradient-text" style="font-size: 3rem; font-weight: 800; text-transform: capitalize; letter-spacing: -0.03em;">{{ result }}</h1>
+      <p class="text-muted mb-0" style="font-size: 0.85rem;">Evaluated across 2,200 agricultural records using Random Forest ensemble.</p>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+{{ super() }}
 <script>
 function applyPreset(n, p, k, t, h, ph, r) {
-  document.getElementById('nInput').value = n;
-  document.getElementById('nVal').innerText = n;
-  
-  document.getElementById('pInput').value = p;
-  document.getElementById('pVal').innerText = p;
-  
-  document.getElementById('kInput').value = k;
-  document.getElementById('kVal').innerText = k;
-
+  document.getElementById('nInput').value = n; document.getElementById('nVal').innerText = n;
+  document.getElementById('pInput').value = p; document.getElementById('pVal').innerText = p;
+  document.getElementById('kInput').value = k; document.getElementById('kVal').innerText = k;
   document.getElementById('tInput').value = t;
   document.getElementById('hInput').value = h;
   document.getElementById('phInput').value = ph;

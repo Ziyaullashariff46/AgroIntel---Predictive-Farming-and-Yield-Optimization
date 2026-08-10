@@ -1,106 +1,93 @@
-{% extends 'base.html' %}
-{% block title %}Real-Time Weather Forecast | AgroIntel{% endblock %}
+{% extends 'farmer_base.html' %}
+{% block title %}Weather Forecast | AgroIntel{% endblock %}
+{% block page_title %}Weather Forecast{% endblock %}
 
-{% block content %}
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-lg-9">
-      <div class="text-center mb-5 animate-fade-in-up">
-        <span class="badge-agro badge-agro-amber mb-2"><i class="fas fa-sun"></i> Live Environmental Radar</span>
-        <h2 class="display-4 font-weight-extrabold text-bright">Live Regional Weather Forecast</h2>
-        <p class="text-muted max-w-600 mx-auto">Get real-time temperature, humidity, wind velocity, and atmospheric conditions for your city.</p>
-      </div>
+{% block farmer_content %}
+<div class="py-3">
+  <div class="mb-4">
+    <span class="badge-agro badge-agro-amber"><i class="fas fa-sun" aria-hidden="true"></i> Live Environmental Radar</span>
+    <h2 class="mt-2 mb-1" style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary);">Live Regional Weather Forecast</h2>
+    <p class="text-muted mb-0" style="font-size: 0.9rem;">Real-time temperature, humidity, wind speed & conditions for any Indian city.</p>
+  </div>
 
-      <div class="glass-card p-4 p-md-5 mb-5">
-        
-        <!-- Quick City Presets -->
-        <div class="mb-4">
-          <label class="font-weight-bold small text-muted d-block mb-2"><i class="fas fa-wand-magic-sparkles text-amber mr-1"></i> Quick City Presets (1-Click Search):</label>
-          <div class="soil-preset-container">
-            <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Udupi')">
-              📍 Udupi
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Bangalore')">
-              📍 Bangalore
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Mumbai')">
-              📍 Mumbai
-            </button>
-            <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Delhi')">
-              📍 Delhi
-            </button>
-          </div>
-        </div>
-
-        <form action="{{ url_for('farmer_weather_forecast') }}" method="POST" class="mb-4">
-          <div class="form-group mb-0">
-            <label class="font-weight-bold small text-muted"><i class="fas fa-magnifying-glass-location text-emerald mr-1"></i> City / Location Search</label>
-            <div class="input-group">
-              <input type="text" name="city" id="cityInput" class="form-control form-control-agro" placeholder="e.g. Udupi, Mandya, Bangalore, Delhi" value="{{ city or 'Udupi' }}" required>
-              <div class="input-group-append">
-                <button type="submit" class="btn btn-agro-primary px-4 shadow-lg">
-                  <i class="fas fa-search mr-1"></i> Fetch Live Weather
-                </button>
-              </div>
-            </div>
-          </div>
-        </form>
-
-        {% if weather %}
-          <div class="p-4 rounded-lg animate-fade-in-up" style="background: var(--bg-input); border: 1.5px solid var(--border-glass-strong);">
-            <div class="d-flex align-items-center justify-content-between mb-4 border-bottom pb-3" style="border-color: var(--border-glass) !important;">
-              <div>
-                <h3 class="text-bright font-weight-bold mb-0"><i class="fas fa-location-dot text-emerald mr-2"></i> {{ weather.city }}</h3>
-                <span class="text-muted small">Live OpenWeather Metrics</span>
-              </div>
-              <span class="badge-agro badge-agro-amber">{{ weather.desc }}</span>
-            </div>
-
-            <div class="row text-center g-3">
-              <div class="col-6 col-md-3 mb-3 mb-md-0">
-                <div class="p-3 rounded-lg" style="background: var(--bg-card); border: 1px solid var(--border-glass);">
-                  <i class="fas fa-temperature-three-quarters text-warning fs-2 mb-2"></i>
-                  <span class="text-muted small d-block">Temperature</span>
-                  <h3 class="text-bright font-weight-bold mb-0">{{ weather.temp }}°C</h3>
-                </div>
-              </div>
-
-              <div class="col-6 col-md-3 mb-3 mb-md-0">
-                <div class="p-3 rounded-lg" style="background: var(--bg-card); border: 1px solid var(--border-glass);">
-                  <i class="fas fa-droplet text-cyan fs-2 mb-2"></i>
-                  <span class="text-muted small d-block">Humidity</span>
-                  <h3 class="text-bright font-weight-bold mb-0">{{ weather.humidity }}%</h3>
-                </div>
-              </div>
-
-              <div class="col-6 col-md-3">
-                <div class="p-3 rounded-lg" style="background: var(--bg-card); border: 1px solid var(--border-glass);">
-                  <i class="fas fa-wind text-purple fs-2 mb-2"></i>
-                  <span class="text-muted small d-block">Wind Speed</span>
-                  <h3 class="text-bright font-weight-bold mb-0">{{ weather.wind }} m/s</h3>
-                </div>
-              </div>
-
-              <div class="col-6 col-md-3">
-                <div class="p-3 rounded-lg" style="background: var(--bg-card); border: 1px solid var(--border-glass);">
-                  <i class="fas fa-eye text-amber fs-2 mb-2"></i>
-                  <span class="text-muted small d-block">Sky Condition</span>
-                  <h5 class="text-bright font-weight-bold mb-0 mt-1">{{ weather.desc }}</h5>
-                </div>
-              </div>
-            </div>
-          </div>
-        {% endif %}
+  <div class="glass-card">
+    <div class="mb-4">
+      <label class="d-block mb-2" style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
+        <i class="fas fa-wand-magic-sparkles" style="color: var(--amber-500);" aria-hidden="true"></i> Quick City Presets
+      </label>
+      <div class="soil-preset-container">
+        <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Udupi')">📍 Udupi</button>
+        <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Bangalore')">📍 Bangalore</button>
+        <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Mumbai')">📍 Mumbai</button>
+        <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Delhi')">📍 Delhi</button>
       </div>
     </div>
+
+    <form action="{{ url_for('farmer_weather_forecast') }}" method="POST" class="mb-4">
+      <label><i class="fas fa-magnifying-glass-location" style="color: var(--emerald-500);" aria-hidden="true"></i> City / Location Search</label>
+      <div class="input-group">
+        <input type="text" name="city" id="cityInput" class="form-control form-control-agro"
+               placeholder="e.g. Udupi, Bangalore, Mumbai..." value="{{ city or 'Udupi' }}" required>
+        <div class="input-group-append">
+          <button type="submit" class="btn-agro-primary" style="border-radius: 0 var(--r-md) var(--r-md) 0; min-height: 48px; padding: 0 1.25rem;">
+            <i class="fas fa-search" aria-hidden="true"></i> Fetch Weather
+          </button>
+        </div>
+      </div>
+    </form>
+
+    {% if weather %}
+    <div class="p-4 rounded animate-fade-in-up" style="background: var(--bg-input); border: 1.5px solid var(--border-normal);">
+      <div class="d-flex align-items-center justify-content-between mb-4 pb-3" style="border-bottom: 1px solid var(--border-subtle);">
+        <div>
+          <h4 class="mb-0" style="font-weight: 800; color: var(--text-primary);">
+            <i class="fas fa-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> {{ weather.city }}
+          </h4>
+          <span class="text-muted" style="font-size: 0.82rem;">Live OpenWeather Metrics</span>
+        </div>
+        <span class="badge-agro badge-agro-amber">{{ weather.desc }}</span>
+      </div>
+      <div class="row text-center">
+        <div class="col-6 col-md-3 mb-3">
+          <div class="p-3 rounded" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
+            <i class="fas fa-temperature-three-quarters" style="color: var(--amber-500); font-size: 1.75rem;" aria-hidden="true"></i>
+            <p class="text-muted mb-1 mt-2" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Temperature</p>
+            <h4 class="mb-0" style="font-weight: 800; color: var(--text-primary);">{{ weather.temp }}°C</h4>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="p-3 rounded" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
+            <i class="fas fa-droplet" style="color: var(--cyan-500); font-size: 1.75rem;" aria-hidden="true"></i>
+            <p class="text-muted mb-1 mt-2" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Humidity</p>
+            <h4 class="mb-0" style="font-weight: 800; color: var(--text-primary);">{{ weather.humidity }}%</h4>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="p-3 rounded" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
+            <i class="fas fa-wind" style="color: #8b5cf6; font-size: 1.75rem;" aria-hidden="true"></i>
+            <p class="text-muted mb-1 mt-2" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Wind Speed</p>
+            <h4 class="mb-0" style="font-weight: 800; color: var(--text-primary);">{{ weather.wind }} m/s</h4>
+          </div>
+        </div>
+        <div class="col-6 col-md-3 mb-3">
+          <div class="p-3 rounded" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
+            <i class="fas fa-eye" style="color: var(--amber-500); font-size: 1.75rem;" aria-hidden="true"></i>
+            <p class="text-muted mb-1 mt-2" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Sky Condition</p>
+            <h5 class="mb-0" style="font-weight: 800; color: var(--text-primary); font-size: 0.95rem;">{{ weather.desc }}</h5>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endif %}
   </div>
 </div>
 {% endblock %}
 
 {% block extra_scripts %}
+{{ super() }}
 <script>
-function applyCityPreset(city) {
-  document.getElementById('cityInput').value = city;
+function applyCityPreset(city){
+  document.getElementById('cityInput').value=city;
 }
 </script>
 {% endblock %}

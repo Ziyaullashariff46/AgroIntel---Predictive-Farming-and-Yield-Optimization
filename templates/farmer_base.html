@@ -1,0 +1,448 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="farmer-portal-wrapper">
+
+  {# ══════════════════════════════════════════════════════
+     LEFT SIDEBAR — AI Suite Navigation
+     ══════════════════════════════════════════════════════ #}
+  <aside class="farmer-sidebar" id="farmerSidebar" aria-label="Farmer Portal Navigation">
+
+    {# Mobile close button #}
+    <button class="sidebar-close-btn d-lg-none" onclick="closeSidebar()" aria-label="Close sidebar">
+      <i class="fas fa-times" aria-hidden="true"></i>
+    </button>
+
+    {# Farmer identity chip #}
+    <div class="sidebar-identity">
+      <div class="sidebar-avatar">
+        <i class="fas fa-user" aria-hidden="true"></i>
+      </div>
+      <div class="sidebar-identity-text">
+        <p class="sidebar-name">{{ session.get('farmer_name', 'Farmer') }}</p>
+        <span class="sidebar-role">Farmer Portal</span>
+      </div>
+    </div>
+
+    {# Navigation sections #}
+    <nav class="sidebar-nav" aria-label="AI Tools">
+      <p class="sidebar-section-label">AI Science Suite</p>
+
+      <a href="{{ url_for('farmer_crop_recommendation') }}"
+         class="sidebar-nav-item {% if request.endpoint == 'farmer_crop_recommendation' %}active{% endif %}"
+         aria-label="Crop Recommendation">
+        <div class="sidebar-nav-icon" style="background: rgba(16,185,129,0.12); color: var(--emerald-500);">
+          <i class="fas fa-seedling" aria-hidden="true"></i>
+        </div>
+        <div class="sidebar-nav-text">
+          <span class="sidebar-nav-title">Crop Recommendation</span>
+          <span class="sidebar-nav-sub">Best crop for your soil</span>
+        </div>
+      </a>
+
+      <a href="{{ url_for('farmer_fertilizer_recommendation') }}"
+         class="sidebar-nav-item {% if request.endpoint == 'farmer_fertilizer_recommendation' %}active{% endif %}"
+         aria-label="Fertilizer Advisory">
+        <div class="sidebar-nav-icon" style="background: rgba(6,182,212,0.12); color: var(--cyan-500);">
+          <i class="fas fa-vial" aria-hidden="true"></i>
+        </div>
+        <div class="sidebar-nav-text">
+          <span class="sidebar-nav-title">Fertilizer Advisory</span>
+          <span class="sidebar-nav-sub">Optimal NPK formula</span>
+        </div>
+      </a>
+
+      <a href="{{ url_for('farmer_crop_prediction') }}"
+         class="sidebar-nav-item {% if request.endpoint == 'farmer_crop_prediction' %}active{% endif %}"
+         aria-label="Price Trend Predictor">
+        <div class="sidebar-nav-icon" style="background: rgba(245,158,11,0.12); color: var(--amber-500);">
+          <i class="fas fa-chart-line" aria-hidden="true"></i>
+        </div>
+        <div class="sidebar-nav-text">
+          <span class="sidebar-nav-title">Price Trend Predictor</span>
+          <span class="sidebar-nav-sub">Market price forecast</span>
+        </div>
+      </a>
+
+      <a href="{{ url_for('farmer_yield_prediction') }}"
+         class="sidebar-nav-item {% if request.endpoint == 'farmer_yield_prediction' %}active{% endif %}"
+         aria-label="Yield Harvest Forecast">
+        <div class="sidebar-nav-icon" style="background: rgba(139,92,246,0.12); color: #8b5cf6;">
+          <i class="fas fa-wheat-awn" aria-hidden="true"></i>
+        </div>
+        <div class="sidebar-nav-text">
+          <span class="sidebar-nav-title">Yield Harvest Forecast</span>
+          <span class="sidebar-nav-sub">Estimate output in tonnes</span>
+        </div>
+      </a>
+
+      <a href="{{ url_for('farmer_rainfall_prediction') }}"
+         class="sidebar-nav-item {% if request.endpoint == 'farmer_rainfall_prediction' %}active{% endif %}"
+         aria-label="Rainfall Estimation">
+        <div class="sidebar-nav-icon" style="background: rgba(244,63,94,0.12); color: #f43f5e;">
+          <i class="fas fa-cloud-showers-heavy" aria-hidden="true"></i>
+        </div>
+        <div class="sidebar-nav-text">
+          <span class="sidebar-nav-title">Rainfall Estimation</span>
+          <span class="sidebar-nav-sub">Monthly rain forecast</span>
+        </div>
+      </a>
+
+      <a href="{{ url_for('farmer_weather_forecast') }}"
+         class="sidebar-nav-item {% if request.endpoint == 'farmer_weather_forecast' %}active{% endif %}"
+         aria-label="Weather Forecast">
+        <div class="sidebar-nav-icon" style="background: rgba(251,191,36,0.12); color: #fbbf24;">
+          <i class="fas fa-sun" aria-hidden="true"></i>
+        </div>
+        <div class="sidebar-nav-text">
+          <span class="sidebar-nav-title">Weather Forecast</span>
+          <span class="sidebar-nav-sub">City weather conditions</span>
+        </div>
+      </a>
+
+      <p class="sidebar-section-label mt-4">Marketplace</p>
+
+      <a href="{{ url_for('farmer_trade_crops') }}"
+         class="sidebar-nav-item {% if request.endpoint == 'farmer_trade_crops' %}active{% endif %}"
+         aria-label="Trade Produce">
+        <div class="sidebar-nav-icon" style="background: rgba(16,185,129,0.12); color: var(--emerald-500);">
+          <i class="fas fa-store" aria-hidden="true"></i>
+        </div>
+        <div class="sidebar-nav-text">
+          <span class="sidebar-nav-title">Trade Produce</span>
+          <span class="sidebar-nav-sub">List crops for sale</span>
+        </div>
+      </a>
+
+      <a href="{{ url_for('farmer_selling_history') }}"
+         class="sidebar-nav-item {% if request.endpoint == 'farmer_selling_history' %}active{% endif %}"
+         aria-label="Selling History">
+        <div class="sidebar-nav-icon" style="background: rgba(100,116,139,0.12); color: var(--text-muted);">
+          <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
+        </div>
+        <div class="sidebar-nav-text">
+          <span class="sidebar-nav-title">Selling History</span>
+          <span class="sidebar-nav-sub">Past transaction log</span>
+        </div>
+      </a>
+    </nav>
+
+    {# Sidebar footer: logout #}
+    <div class="sidebar-footer">
+      <a href="{{ url_for('logout') }}" class="sidebar-logout" aria-label="Logout">
+        <i class="fas fa-power-off" aria-hidden="true"></i>
+        <span>Logout</span>
+      </a>
+    </div>
+  </aside>
+
+  {# Overlay for mobile #}
+  <div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
+  {# ══════════════════════════════════════════════════════
+     MAIN CONTENT AREA
+     ══════════════════════════════════════════════════════ #}
+  <div class="farmer-main-content">
+
+    {# Mobile top bar with hamburger to open sidebar #}
+    <div class="farmer-mobile-topbar d-lg-none">
+      <button class="sidebar-open-btn" onclick="openSidebar()" aria-label="Open navigation menu">
+        <i class="fas fa-bars" aria-hidden="true"></i>
+      </button>
+      <span class="farmer-mobile-title">{% block page_title %}Farmer Portal{% endblock %}</span>
+    </div>
+
+    {# Page content injected here #}
+    {% block farmer_content %}{% endblock %}
+
+  </div>
+</div>
+
+<style>
+/* ════════════════════════════════════════════════════════
+   FARMER PORTAL LAYOUT — Sidebar + Main
+   ════════════════════════════════════════════════════════ */
+.farmer-portal-wrapper {
+  display: flex;
+  min-height: calc(100vh - 68px); /* subtract navbar height */
+  position: relative;
+}
+
+/* ── Sidebar ── */
+.farmer-sidebar {
+  width: 280px;
+  min-width: 280px;
+  background: var(--bg-surface);
+  border-right: 1px solid var(--border-subtle);
+  display: flex;
+  flex-direction: column;
+  position: sticky;
+  top: 68px;                   /* stick below navbar */
+  height: calc(100vh - 68px);
+  overflow-y: auto;
+  overflow-x: hidden;
+  padding: 1.5rem 1rem;
+  gap: 0;
+  z-index: 200;
+  transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-normal) transparent;
+}
+
+.farmer-sidebar::-webkit-scrollbar { width: 4px; }
+.farmer-sidebar::-webkit-scrollbar-thumb { background: var(--border-normal); border-radius: 9999px; }
+
+/* Sidebar Identity */
+.sidebar-identity {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.75rem 0.75rem 1.25rem;
+  margin-bottom: 0.5rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.sidebar-avatar {
+  width: 42px;
+  height: 42px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, var(--emerald-500), var(--emerald-600));
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+.sidebar-identity-text { overflow: hidden; }
+
+.sidebar-name {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.9rem;
+  color: var(--text-primary);
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-role {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--emerald-500);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+}
+
+/* Section labels */
+.sidebar-section-label {
+  font-size: 0.68rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--text-muted);
+  padding: 0.75rem 0.75rem 0.4rem;
+  margin: 0;
+}
+
+/* Nav items */
+.sidebar-nav { display: flex; flex-direction: column; gap: 2px; flex: 1; }
+
+.sidebar-nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.85rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 12px;
+  text-decoration: none !important;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  border: 1px solid transparent;
+  min-height: 52px;
+}
+
+.sidebar-nav-item:hover {
+  background: rgba(16, 185, 129, 0.06);
+  border-color: var(--border-subtle);
+}
+
+.sidebar-nav-item.active {
+  background: rgba(16, 185, 129, 0.12);
+  border-color: var(--border-normal);
+}
+
+.sidebar-nav-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+}
+
+.sidebar-nav-text {
+  display: flex;
+  flex-direction: column;
+  gap: 1px;
+  overflow: hidden;
+}
+
+.sidebar-nav-title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 0.84rem;
+  color: var(--text-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.sidebar-nav-item.active .sidebar-nav-title { color: var(--emerald-500); }
+
+.sidebar-nav-sub {
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Sidebar footer logout */
+.sidebar-footer {
+  padding-top: 1rem;
+  margin-top: auto;
+  border-top: 1px solid var(--border-subtle);
+}
+
+.sidebar-logout {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.65rem 0.75rem;
+  border-radius: 10px;
+  background: rgba(239, 68, 68, 0.08);
+  border: 1px solid rgba(239, 68, 68, 0.20);
+  color: #ef4444 !important;
+  font-weight: 700;
+  font-size: 0.88rem;
+  text-decoration: none !important;
+  transition: background 0.2s ease, border-color 0.2s ease;
+  min-height: 44px;
+}
+
+.sidebar-logout:hover {
+  background: rgba(239, 68, 68, 0.16);
+  border-color: rgba(239, 68, 68, 0.40);
+}
+
+/* Close button (mobile) */
+.sidebar-close-btn {
+  position: absolute;
+  top: 1rem;
+  right: 1rem;
+  width: 34px;
+  height: 34px;
+  border-radius: 50%;
+  border: 1px solid var(--border-normal);
+  background: var(--bg-input);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+
+/* ── Main content ── */
+.farmer-main-content {
+  flex: 1;
+  min-width: 0;
+  padding: 2rem;
+  overflow-x: hidden;
+}
+
+/* ── Mobile ── */
+@media (max-width: 991.98px) {
+  .farmer-sidebar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    height: 100vh;
+    transform: translateX(-100%);
+    z-index: 1050;
+    padding-top: 3.5rem;
+    border-right: none;
+    box-shadow: var(--shadow-lg);
+  }
+
+  .farmer-sidebar.open { transform: translateX(0); }
+
+  .sidebar-overlay {
+    display: none;
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 0, 0, 0.55);
+    z-index: 1040;
+    backdrop-filter: blur(3px);
+  }
+
+  .sidebar-overlay.active { display: block; }
+
+  .farmer-main-content { padding: 0 1rem 2rem; }
+
+  .farmer-mobile-topbar {
+    display: flex;
+    align-items: center;
+    gap: 1rem;
+    padding: 1rem 0 1.25rem;
+    border-bottom: 1px solid var(--border-subtle);
+    margin-bottom: 1.5rem;
+  }
+
+  .sidebar-open-btn {
+    width: 42px;
+    height: 42px;
+    border-radius: 10px;
+    border: 1px solid var(--border-normal);
+    background: var(--bg-surface);
+    color: var(--text-primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 1.1rem;
+    cursor: pointer;
+    flex-shrink: 0;
+  }
+
+  .farmer-mobile-title {
+    font-family: var(--font-display);
+    font-weight: 700;
+    font-size: 1rem;
+    color: var(--text-primary);
+  }
+}
+
+@media (min-width: 992px) {
+  .farmer-mobile-topbar { display: none !important; }
+  .sidebar-overlay { display: none !important; }
+  .sidebar-close-btn { display: none !important; }
+}
+</style>
+
+{% block extra_scripts %}
+<script>
+function openSidebar() {
+  document.getElementById('farmerSidebar').classList.add('open');
+  document.getElementById('sidebarOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+function closeSidebar() {
+  document.getElementById('farmerSidebar').classList.remove('open');
+  document.getElementById('sidebarOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+</script>
+{% endblock %}
+{% endblock %}

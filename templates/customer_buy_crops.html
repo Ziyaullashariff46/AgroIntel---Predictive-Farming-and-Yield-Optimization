@@ -1,66 +1,563 @@
 {% extends 'base.html' %}
-{% block title %}Direct Crop Marketplace | AgroIntel{% endblock %}
+{% block title %}Fresh Crop Marketplace | AgroIntel{% endblock %}
 
 {% block content %}
-<div class="container py-5">
-  <div class="text-center mb-5">
-    <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-store"></i> Direct Farm-to-Buyer Marketplace</span>
-    <h2 class="display-5 font-weight-extrabold text-white">Fresh Crop Marketplace</h2>
-    <p class="text-muted max-w-600 mx-auto">Purchase fresh organic crops directly from verified local farmers at fair prices.</p>
+<div class="container-fluid py-4 px-3 px-md-4">
+
+  <div class="mb-4">
+    <span class="badge-agro badge-agro-emerald"><i class="fas fa-store" aria-hidden="true"></i> Farm-to-Buyer Marketplace</span>
+    <h2 class="mt-2 mb-1" style="font-size: 1.65rem; font-weight: 800; color: var(--text-primary);">Fresh Crop Marketplace</h2>
+    <p class="text-muted mb-0" style="font-size: 0.9rem;">Add crops to your cart and place a single confirmed order with verified local farmers.</p>
   </div>
 
-  <div class="row g-4">
-    {% if crops %}
-      {% for item in crops %}
-        <div class="col-md-6 col-lg-4 mb-4">
-          <div class="glass-card h-100 p-4 d-flex flex-column justify-content-between">
-            <div>
-              <div class="d-flex align-items-center justify-content-between mb-3">
-                <span class="badge-agro badge-agro-emerald"><i class="fas fa-leaf"></i> Verified Farmer Harvest</span>
-                <span class="text-muted small">ID: #{{ item[0] }}</span>
-              </div>
-
-              <h3 class="text-white font-weight-bold text-capitalize mb-2">{{ item[2] }}</h3>
-              
-              <div class="p-3 mb-3 rounded" style="background: rgba(4, 15, 11, 0.6); border: 1px solid var(--border-glass);">
-                <div class="d-flex justify-content-between text-muted small mb-1">
-                  <span>In Stock</span>
-                  <span class="text-white font-weight-bold">{{ item[3] }} kg</span>
-                </div>
-                <div class="progress" style="height: 6px; background: rgba(255,255,255,0.08);">
-                  <div class="progress-bar bg-success" style="width: 85%;"></div>
-                </div>
-              </div>
-
-              <div class="d-flex align-items-baseline gap-2 mb-4">
-                <h2 class="text-emerald font-weight-extrabold mb-0">₹{{ item[4] }}</h2>
-                <span class="text-muted small">/ per kg</span>
-              </div>
-            </div>
-
-            <form action="{{ url_for('customer_buy_crops') }}" method="POST">
-              <input type="hidden" name="trade_id" value="{{ item[0] }}">
-              <div class="form-group mb-3">
-                <label class="font-weight-bold small text-muted">Select Purchase Quantity (kg)</label>
-                <input type="number" name="buy_quantity" max="{{ item[3] }}" min="1" value="1" class="form-control form-control-agro text-center font-weight-bold" required>
-              </div>
-
-              <button type="submit" class="btn btn-agro-primary w-100 font-weight-bold py-2.5">
-                <i class="fas fa-cart-shopping mr-2"></i> Purchase Directly
-              </button>
-            </form>
-          </div>
+  <!-- Flash messages -->
+  {% with messages = get_flashed_messages(with_categories=true) %}
+    {% if messages %}
+      {% for category, message in messages %}
+        <div class="alert alert-{{ 'success' if category == 'success' else 'warning' }} alert-dismissible" role="alert"
+             style="background: rgba(16,185,129,0.10); border: 1px solid rgba(16,185,129,0.30); color: var(--text-primary); border-radius: 12px; margin-bottom: 1.25rem;">
+          <i class="fas fa-{{ 'check-circle' if category == 'success' else 'exclamation-triangle' }}" aria-hidden="true"></i>
+          {{ message }}
+          <button type="button" class="close ml-auto" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+          </button>
         </div>
       {% endfor %}
-    {% else %}
-      <div class="col-12 text-center py-5">
-        <div class="glass-card p-5 max-w-600 mx-auto">
-          <i class="fas fa-box-open fs-1 text-muted mb-3"></i>
-          <h4 class="text-white font-weight-bold">No Crops Currently Available</h4>
-          <p class="text-muted small mb-0">Farmers have sold out their active produce! Check back soon for fresh crop listings.</p>
+    {% endif %}
+  {% endwith %}
+
+  <div class="row g-4">
+    <!-- ═══════════════════════════════
+         PRODUCT GRID  (col-lg-8)
+         ═══════════════════════════════ -->
+    <div class="col-lg-8">
+
+      {% if crops %}
+        <div class="row g-3" id="productsGrid">
+          {% for item in crops %}
+          <div class="col-sm-6 col-xl-4">
+            <article class="glass-card h-100 d-flex flex-column" style="position: relative; overflow: hidden;"
+                     aria-label="{{ item[2] | capitalize }} product card">
+
+              <!-- Crop header -->
+              <div class="mb-3">
+                <div class="d-flex align-items-center justify-content-between mb-2">
+                  <span class="badge-agro badge-agro-emerald" style="font-size: 0.72rem;">
+                    <i class="fas fa-leaf" aria-hidden="true"></i> Verified Harvest
+                  </span>
+                  <span style="font-size: 0.72rem; color: var(--text-muted);">Seller #{{ item[1] }}</span>
+                </div>
+                <h4 class="mb-0" style="font-weight: 800; color: var(--text-primary); text-transform: capitalize; font-size: 1.15rem;">{{ item[2] }}</h4>
+              </div>
+
+              <!-- Stock bar -->
+              <div class="mb-3 p-3 rounded" style="background: rgba(4,15,11,0.55); border: 1px solid var(--border-subtle);">
+                <div class="d-flex justify-content-between mb-2" style="font-size: 0.8rem;">
+                  <span style="color: var(--text-muted);">In Stock</span>
+                  <span style="font-weight: 700; color: var(--text-primary);">{{ item[3] | round(1) }} kg</span>
+                </div>
+                <div class="progress" style="height: 5px; background: rgba(255,255,255,0.07); border-radius: 99px;">
+                  <div class="progress-bar bg-success" style="width: {% if item[3] | float > 500 %}95{% elif item[3] | float > 200 %}70{% elif item[3] | float > 50 %}40{% else %}15{% endif %}%; border-radius: 99px;"></div>
+                </div>
+              </div>
+
+              <!-- Price -->
+              <div class="d-flex align-items-baseline gap-2 mb-4">
+                <span style="font-size: 1.85rem; font-weight: 900; color: var(--emerald-500); line-height: 1;">₹{{ item[4] }}</span>
+                <span style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">/ kg</span>
+              </div>
+
+              <!-- Quantity + Add to Cart -->
+              <div class="mt-auto">
+                <label class="mb-1" style="font-size: 0.8rem; color: var(--text-muted); font-weight: 600;">Quantity (kg)</label>
+                <div class="d-flex gap-2">
+                  <input type="number" class="form-control form-control-agro qty-input text-center"
+                         min="1" max="{{ item[3] | int }}" value="1"
+                         id="qty-{{ item[0] }}"
+                         style="max-width: 90px; font-weight: 800; font-size: 1rem;"
+                         aria-label="Quantity for {{ item[2] }}">
+                  <button type="button"
+                          class="btn-agro-primary flex-grow-1"
+                          style="border-radius: var(--r-md); min-height: 44px; font-size: 0.88rem;"
+                          onclick="addToCart({{ item[0] }}, '{{ item[2] | capitalize }}', {{ item[4] }}, {{ item[3] | int }})"
+                          aria-label="Add {{ item[2] }} to cart">
+                    <i class="fas fa-cart-plus" aria-hidden="true"></i> Add to Cart
+                  </button>
+                </div>
+              </div>
+            </article>
+          </div>
+          {% endfor %}
+        </div>
+
+      {% else %}
+        <div class="glass-card text-center py-5" style="max-width: 480px; margin: 3rem auto;">
+          <i class="fas fa-box-open" style="font-size: 2.5rem; opacity: 0.3; display: block; margin-bottom: 1rem;" aria-hidden="true"></i>
+          <h5 style="font-weight: 700; color: var(--text-primary);">No Crops Available</h5>
+          <p class="text-muted mb-0" style="font-size: 0.88rem;">Farmers have sold out their active produce! Check back soon.</p>
+        </div>
+      {% endif %}
+    </div>
+
+    <!-- ═══════════════════════════════
+         CART SIDEBAR  (col-lg-4)
+         ═══════════════════════════════ -->
+    <div class="col-lg-4 d-none d-lg-block">
+      <div id="cartPanel" style="position: sticky; top: 88px;">
+        {% include 'cart_panel.html' ignore missing %}
+        <div class="glass-card" id="cartContent">
+          <!-- rendered by JS -->
         </div>
       </div>
-    {% endif %}
+    </div>
   </div>
 </div>
+
+<!-- ══════════════════════════════════════════════
+     MOBILE FLOATING CART BUTTON
+     ══════════════════════════════════════════════ -->
+<button class="mobile-cart-fab d-lg-none" onclick="openMobileCart()" aria-label="Open cart">
+  <i class="fas fa-shopping-cart" aria-hidden="true"></i>
+  <span class="cart-badge-fab" id="cartCountFab" style="display:none;">0</span>
+</button>
+
+<!-- Mobile cart drawer -->
+<div class="mobile-cart-overlay" id="mobileCartOverlay" onclick="closeMobileCart()"></div>
+<div class="mobile-cart-drawer" id="mobileCartDrawer" aria-label="Cart drawer" role="dialog" aria-modal="true">
+  <div class="d-flex align-items-center justify-content-between mb-3 pb-3" style="border-bottom: 1px solid var(--border-subtle);">
+    <h5 class="mb-0" style="font-weight: 800; color: var(--text-primary);">
+      <i class="fas fa-shopping-cart" style="color: var(--emerald-500);" aria-hidden="true"></i> Your Cart
+    </h5>
+    <button onclick="closeMobileCart()" class="btn-icon" aria-label="Close cart">
+      <i class="fas fa-times" aria-hidden="true"></i>
+    </button>
+  </div>
+  <div id="mobileCartContent"></div>
+</div>
+
+<!-- ══════════════════════════════════════════════
+     ORDER CONFIRMATION MODAL
+     ══════════════════════════════════════════════ -->
+<div class="modal fade" id="confirmModal" tabindex="-1" role="dialog"
+     aria-labelledby="confirmModalTitle" aria-modal="true">
+  <div class="modal-dialog modal-dialog-centered" style="max-width: 480px;">
+    <div class="modal-content" style="background: var(--bg-surface); border: 1px solid var(--border-normal); border-radius: 20px; overflow: hidden;">
+
+      <div class="modal-header" style="border-bottom: 1px solid var(--border-subtle); padding: 1.25rem 1.5rem;">
+        <h5 class="modal-title" id="confirmModalTitle" style="font-weight: 800; color: var(--text-primary);">
+          <i class="fas fa-receipt" style="color: var(--emerald-500);" aria-hidden="true"></i> Confirm Your Order
+        </h5>
+        <button type="button" class="close" data-dismiss="modal" aria-label="Close"
+                style="color: var(--text-muted); opacity: 0.7;">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body" style="padding: 1.5rem;">
+        <div id="orderSummaryLines" class="mb-4"></div>
+        <div class="d-flex justify-content-between align-items-center p-3 rounded"
+             style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
+          <span style="font-weight: 700; font-size: 0.9rem; color: var(--text-muted);">Order Total</span>
+          <span id="orderTotalDisplay" style="font-size: 1.4rem; font-weight: 900; color: var(--emerald-500);"></span>
+        </div>
+        <p class="text-muted mt-3 mb-0" style="font-size: 0.8rem;">
+          <i class="fas fa-info-circle" aria-hidden="true"></i>
+          This will process one item at a time. Remaining items can be ordered after.
+        </p>
+      </div>
+
+      <div class="modal-footer" style="border-top: 1px solid var(--border-subtle); padding: 1rem 1.5rem; gap: 0.75rem;">
+        <button type="button" class="btn btn-agro-secondary" data-dismiss="modal"
+                style="flex: 1; min-height: 44px; font-weight: 700;">
+          Cancel
+        </button>
+        <button type="button" class="btn-agro-primary" id="confirmPurchaseBtn"
+                style="flex: 2; min-height: 44px; font-weight: 700; border-radius: var(--r-md);"
+                onclick="submitOrder()">
+          <i class="fas fa-check-circle" aria-hidden="true"></i> Confirm Purchase
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden form for backend POST -->
+<form id="purchaseForm" action="{{ url_for('customer_buy_crops') }}" method="POST" style="display: none;">
+  <input type="hidden" name="trade_id" id="formTradeId">
+  <input type="hidden" name="buy_quantity" id="formBuyQty">
+</form>
+
+<style>
+/* ════ Cart panel ════ */
+#cartContent { padding: 0; min-height: 180px; }
+
+.cart-header {
+  padding: 1rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.cart-item-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.85rem 1.25rem;
+  border-bottom: 1px solid var(--border-subtle);
+}
+
+.cart-item-icon {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  background: rgba(16,185,129,0.12);
+  color: var(--emerald-500);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  font-size: 0.95rem;
+}
+
+.cart-item-name {
+  font-weight: 700;
+  font-size: 0.88rem;
+  color: var(--text-primary);
+  text-transform: capitalize;
+}
+
+.cart-item-price {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+}
+
+.cart-qty-input {
+  width: 58px !important;
+  text-align: center;
+  font-weight: 800;
+  font-size: 0.9rem;
+  padding: 0.3rem 0.4rem;
+  border-radius: 8px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-normal);
+  color: var(--text-primary);
+}
+
+.cart-remove-btn {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid rgba(239,68,68,0.25);
+  background: rgba(239,68,68,0.08);
+  color: #ef4444;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.8rem;
+  flex-shrink: 0;
+  transition: background 0.15s;
+}
+
+.cart-remove-btn:hover { background: rgba(239,68,68,0.18); }
+
+.cart-footer {
+  padding: 1rem 1.25rem;
+}
+
+.cart-empty-state {
+  padding: 2.5rem 1.25rem;
+  text-align: center;
+  color: var(--text-muted);
+}
+
+/* Mobile FAB */
+.mobile-cart-fab {
+  position: fixed;
+  bottom: 1.5rem;
+  right: 1.5rem;
+  width: 58px;
+  height: 58px;
+  border-radius: 18px;
+  background: var(--emerald-500);
+  color: #fff;
+  border: none;
+  font-size: 1.3rem;
+  box-shadow: 0 8px 24px rgba(16,185,129,0.40);
+  cursor: pointer;
+  z-index: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.mobile-cart-fab:hover { transform: scale(1.05); box-shadow: 0 12px 32px rgba(16,185,129,0.55); }
+
+.cart-badge-fab {
+  position: absolute;
+  top: -6px;
+  right: -6px;
+  width: 22px;
+  height: 22px;
+  border-radius: 50%;
+  background: #ef4444;
+  color: #fff;
+  font-size: 0.7rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid var(--bg-surface);
+}
+
+/* Mobile cart drawer */
+.mobile-cart-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.6);
+  z-index: 1200;
+  backdrop-filter: blur(4px);
+}
+
+.mobile-cart-overlay.active { display: block; }
+
+.mobile-cart-drawer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  max-height: 80vh;
+  overflow-y: auto;
+  background: var(--bg-surface);
+  border-top: 1px solid var(--border-normal);
+  border-radius: 24px 24px 0 0;
+  padding: 1.25rem 1.25rem 2rem;
+  z-index: 1300;
+  transform: translateY(100%);
+  transition: transform 0.35s cubic-bezier(0.4, 0, 0.2, 1);
+  box-shadow: 0 -8px 40px rgba(0,0,0,0.35);
+}
+
+.mobile-cart-drawer.open { transform: translateY(0); }
+
+/* Icon button */
+.btn-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-muted);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  font-size: 0.9rem;
+}
+
+/* Order summary modal */
+.order-line-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 0.6rem 0;
+  border-bottom: 1px solid var(--border-subtle);
+  font-size: 0.9rem;
+}
+
+.order-line-item:last-child { border-bottom: none; }
+</style>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+/* ════════════════════════════════════════════════════════
+   CLIENT-SIDE CART ENGINE
+   ════════════════════════════════════════════════════════ */
+let cart = [];   // [{tradeId, name, price, qty, maxStock}, ...]
+
+/* ── Add to cart ── */
+function addToCart(tradeId, name, price, maxStock) {
+  const qtyEl = document.getElementById('qty-' + tradeId);
+  let qty = parseInt(qtyEl.value, 10) || 1;
+  if (qty < 1) qty = 1;
+  if (qty > maxStock) { qty = maxStock; qtyEl.value = maxStock; }
+
+  const existing = cart.find(c => c.tradeId === tradeId);
+  if (existing) {
+    existing.qty = Math.min(existing.qty + qty, maxStock);
+  } else {
+    cart.push({ tradeId, name, price, qty, maxStock });
+  }
+
+  renderCart();
+  showCartToast(name, qty);
+}
+
+/* ── Render cart into both desktop panel and mobile drawer ── */
+function renderCart() {
+  const html = buildCartHTML();
+  document.getElementById('cartContent').innerHTML = html;
+  document.getElementById('mobileCartContent').innerHTML = html;
+
+  const count = cart.reduce((s, c) => s + c.qty, 0);
+
+  // Desktop badge in navbar (if present)
+  const navBadge = document.getElementById('navCartBadge');
+  if (navBadge) { navBadge.textContent = count; navBadge.style.display = count ? 'inline-flex' : 'none'; }
+
+  // Mobile FAB badge
+  const fabBadge = document.getElementById('cartCountFab');
+  if (fabBadge) { fabBadge.textContent = count; fabBadge.style.display = count ? 'flex' : 'none'; }
+}
+
+function buildCartHTML() {
+  if (cart.length === 0) {
+    return `<div class="cart-empty-state">
+      <i class="fas fa-cart-shopping" style="font-size:2rem;opacity:0.25;display:block;margin-bottom:0.75rem;" aria-hidden="true"></i>
+      <p style="font-size:0.88rem;margin:0;">Your cart is empty.<br>Add crops from the left.</p>
+    </div>`;
+  }
+
+  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  let rows = cart.map((c, i) => `
+    <div class="cart-item-row">
+      <div class="cart-item-icon"><i class="fas fa-seedling" aria-hidden="true"></i></div>
+      <div style="flex:1;min-width:0;">
+        <div class="cart-item-name">${c.name}</div>
+        <div class="cart-item-price">₹${c.price}/kg &nbsp;·&nbsp; Total: <strong style="color:var(--emerald-500);">₹${(c.price * c.qty).toLocaleString('en-IN')}</strong></div>
+      </div>
+      <input type="number" class="cart-qty-input" value="${c.qty}" min="1" max="${c.maxStock}"
+             onchange="updateCartQty(${i}, this.value)"
+             aria-label="Quantity for ${c.name}">
+      <button class="cart-remove-btn" onclick="removeFromCart(${i})" aria-label="Remove ${c.name}">
+        <i class="fas fa-trash-can" aria-hidden="true"></i>
+      </button>
+    </div>`).join('');
+
+  return `
+    <div class="cart-header">
+      <span style="font-family:var(--font-display);font-weight:800;color:var(--text-primary);font-size:0.95rem;">
+        <i class="fas fa-shopping-cart" style="color:var(--emerald-500);margin-right:0.4rem;" aria-hidden="true"></i>
+        Your Cart <span style="color:var(--text-muted);font-weight:600;font-size:0.82rem;">(${cart.length} item${cart.length !== 1 ? 's' : ''})</span>
+      </span>
+      <button onclick="clearCart()" style="font-size:0.75rem;color:var(--text-muted);background:none;border:none;cursor:pointer;padding:0.2rem 0.5rem;border-radius:6px;"
+              aria-label="Clear cart">
+        Clear all
+      </button>
+    </div>
+    ${rows}
+    <div class="cart-footer">
+      <div class="d-flex justify-content-between mb-3" style="font-size:0.9rem;">
+        <span style="color:var(--text-muted);font-weight:600;">Subtotal</span>
+        <span style="font-size:1.2rem;font-weight:900;color:var(--emerald-500);">₹${subtotal.toLocaleString('en-IN')}</span>
+      </div>
+      <button class="btn-agro-primary w-100" style="min-height:50px;font-size:0.95rem;border-radius:var(--r-md);"
+              onclick="openConfirmModal()" aria-label="Place order">
+        <i class="fas fa-check-circle" aria-hidden="true"></i> Place Order
+      </button>
+    </div>`;
+}
+
+function updateCartQty(i, val) {
+  let q = parseInt(val, 10) || 1;
+  q = Math.max(1, Math.min(q, cart[i].maxStock));
+  cart[i].qty = q;
+  renderCart();
+}
+
+function removeFromCart(i) {
+  cart.splice(i, 1);
+  renderCart();
+}
+
+function clearCart() {
+  cart = [];
+  renderCart();
+}
+
+/* ── Mobile drawer ── */
+function openMobileCart() {
+  document.getElementById('mobileCartDrawer').classList.add('open');
+  document.getElementById('mobileCartOverlay').classList.add('active');
+  document.body.style.overflow = 'hidden';
+}
+
+function closeMobileCart() {
+  document.getElementById('mobileCartDrawer').classList.remove('open');
+  document.getElementById('mobileCartOverlay').classList.remove('active');
+  document.body.style.overflow = '';
+}
+
+/* ── Confirmation modal ── */
+function openConfirmModal() {
+  if (cart.length === 0) return;
+
+  closeMobileCart();
+
+  const subtotal = cart.reduce((s, c) => s + c.price * c.qty, 0);
+  const lines = cart.map(c => `
+    <div class="order-line-item">
+      <span style="color:var(--text-primary);font-weight:600;text-transform:capitalize;">${c.name} &times; ${c.qty} kg</span>
+      <span style="color:var(--emerald-500);font-weight:700;">₹${(c.price * c.qty).toLocaleString('en-IN')}</span>
+    </div>`).join('');
+
+  document.getElementById('orderSummaryLines').innerHTML = lines;
+  document.getElementById('orderTotalDisplay').textContent = '₹' + subtotal.toLocaleString('en-IN');
+
+  $('#confirmModal').modal('show');
+}
+
+/* ── Submit first cart item to backend ── */
+function submitOrder() {
+  if (cart.length === 0) return;
+  const item = cart[0];
+  document.getElementById('formTradeId').value = item.tradeId;
+  document.getElementById('formBuyQty').value = item.qty;
+
+  $('#confirmModal').modal('hide');
+
+  // Clear cart visually, then submit
+  cart = [];
+  renderCart();
+  document.getElementById('purchaseForm').submit();
+}
+
+/* ── Toast notification ── */
+function showCartToast(name, qty) {
+  // Simple in-page toast
+  const toast = document.createElement('div');
+  toast.setAttribute('role', 'status');
+  toast.setAttribute('aria-live', 'polite');
+  toast.style.cssText = `
+    position:fixed;bottom:5.5rem;right:1.25rem;z-index:9000;
+    background:var(--bg-surface);border:1px solid var(--emerald-500);
+    border-radius:14px;padding:0.75rem 1.1rem;min-width:220px;
+    box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:0.6rem;
+    animation:slideInUp 0.3s ease;
+  `;
+  toast.innerHTML = `
+    <i class="fas fa-check-circle" style="color:var(--emerald-500);font-size:1rem;" aria-hidden="true"></i>
+    <div>
+      <div style="font-weight:700;font-size:0.85rem;color:var(--text-primary);text-transform:capitalize;">${name}</div>
+      <div style="font-size:0.75rem;color:var(--text-muted);">${qty} kg added to cart</div>
+    </div>`;
+  document.body.appendChild(toast);
+  setTimeout(() => { toast.style.opacity = '0'; toast.style.transition = 'opacity 0.4s'; }, 2200);
+  setTimeout(() => toast.remove(), 2700);
+}
+
+/* ── Init ── */
+renderCart();
+</script>
+
+<style>
+@keyframes slideInUp {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+</style>
 {% endblock %}
