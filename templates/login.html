@@ -11,9 +11,6 @@
         <a href="{{ url_for('login', role='farmer') }}" class="btn flex-fill text-sm font-weight-bold py-2 px-1 text-center {% if role=='farmer' %}btn-agro-primary{% else %}text-muted{% endif %}" style="min-width: 0;">
           <i class="fas fa-tractor mr-1"></i> Farmer
         </a>
-        <a href="{{ url_for('login', role='customer') }}" class="btn flex-fill text-sm font-weight-bold py-2 px-1 text-center {% if role=='customer' %}btn-agro-primary{% else %}text-muted{% endif %}" style="min-width: 0;">
-          <i class="fas fa-cart-shopping mr-1"></i> Buyer
-        </a>
         <a href="{{ url_for('login', role='admin') }}" class="btn flex-fill text-sm font-weight-bold py-2 px-1 text-center {% if role=='admin' %}btn-agro-admin{% else %}text-muted{% endif %}" style="min-width: 0;">
           <i class="fas fa-user-shield mr-1"></i> Admin
         </a>
