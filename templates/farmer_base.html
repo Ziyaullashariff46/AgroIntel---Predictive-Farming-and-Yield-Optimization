@@ -100,29 +100,17 @@
         </div>
       </a>
 
-      <p class="sidebar-section-label mt-4">Marketplace</p>
+      <p class="sidebar-section-label mt-4">Market Intelligence</p>
 
-      <a href="{{ url_for('farmer_trade_crops') }}"
-         class="sidebar-nav-item {% if request.endpoint == 'farmer_trade_crops' %}active{% endif %}"
-         aria-label="Trade Produce">
-        <div class="sidebar-nav-icon" style="background: rgba(16,185,129,0.12); color: var(--emerald-500);">
-          <i class="fas fa-store" aria-hidden="true"></i>
+      <a href="{{ url_for('farmer_market_prices') }}"
+         class="sidebar-nav-item {% if request.endpoint == 'farmer_market_prices' %}active{% endif %}"
+         aria-label="Live Mandi Prices">
+        <div class="sidebar-nav-icon" style="background: rgba(34,197,94,0.12); color: #22c55e;">
+          <i class="fas fa-indian-rupee-sign" aria-hidden="true"></i>
         </div>
         <div class="sidebar-nav-text">
-          <span class="sidebar-nav-title">Trade Produce</span>
-          <span class="sidebar-nav-sub">List crops for sale</span>
-        </div>
-      </a>
-
-      <a href="{{ url_for('farmer_selling_history') }}"
-         class="sidebar-nav-item {% if request.endpoint == 'farmer_selling_history' %}active{% endif %}"
-         aria-label="Selling History">
-        <div class="sidebar-nav-icon" style="background: rgba(100,116,139,0.12); color: var(--text-muted);">
-          <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
-        </div>
-        <div class="sidebar-nav-text">
-          <span class="sidebar-nav-title">Selling History</span>
-          <span class="sidebar-nav-sub">Past transaction log</span>
+          <span class="sidebar-nav-title">Live Mandi Prices</span>
+          <span class="sidebar-nav-sub">Real-time commodity rates</span>
         </div>
       </a>
     </nav>

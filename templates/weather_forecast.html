@@ -4,90 +4,489 @@
 
 {% block farmer_content %}
 <div class="py-3">
+
+  <!-- Header -->
   <div class="mb-4">
     <span class="badge-agro badge-agro-amber"><i class="fas fa-sun" aria-hidden="true"></i> Live Environmental Radar</span>
-    <h2 class="mt-2 mb-1" style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary);">Live Regional Weather Forecast</h2>
-    <p class="text-muted mb-0" style="font-size: 0.9rem;">Real-time temperature, humidity, wind speed & conditions for any Indian city.</p>
+    <h2 class="mt-2 mb-1" style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary);">Weather Intelligence Hub</h2>
+    <p class="text-muted mb-0" style="font-size: 0.9rem;">Auto-detects your location. 7-day forecast, nearby cities, and search any location.</p>
   </div>
 
-  <div class="glass-card">
-    <div class="mb-4">
-      <label class="d-block mb-2" style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
-        <i class="fas fa-wand-magic-sparkles" style="color: var(--amber-500);" aria-hidden="true"></i> Quick City Presets
-      </label>
-      <div class="soil-preset-container">
-        <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Udupi')">📍 Udupi</button>
-        <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Bangalore')">📍 Bangalore</button>
-        <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Mumbai')">📍 Mumbai</button>
-        <button type="button" class="soil-preset-btn" onclick="applyCityPreset('Delhi')">📍 Delhi</button>
+  <!-- ═══════════════════════════════════════════
+       LOCATION AUTO-DETECT BANNER
+       ═══════════════════════════════════════════ -->
+  <div class="glass-card mb-4" id="locationBanner">
+    <div class="d-flex align-items-center gap-3 flex-wrap">
+      <div class="weather-detect-icon">
+        <i class="fas fa-crosshairs fa-spin" id="detectIcon" aria-hidden="true"></i>
       </div>
+      <div style="flex: 1; min-width: 200px;">
+        <p class="mb-0 fw-bold" style="font-weight: 700; color: var(--text-primary); font-size: 0.95rem;" id="detectStatus">
+          Detecting your location...
+        </p>
+        <p class="mb-0 text-muted" style="font-size: 0.8rem;" id="detectSubtext">
+          Allow location access for automatic weather data
+        </p>
+      </div>
+      <button class="btn-agro-secondary" onclick="requestLocation()" id="retryLocationBtn" style="display: none; min-height: 40px; font-size: 0.85rem;">
+        <i class="fas fa-redo" aria-hidden="true"></i> Retry
+      </button>
     </div>
+  </div>
 
-    <form action="{{ url_for('farmer_weather_forecast') }}" method="POST" class="mb-4">
-      <label><i class="fas fa-magnifying-glass-location" style="color: var(--emerald-500);" aria-hidden="true"></i> City / Location Search</label>
-      <div class="input-group">
-        <input type="text" name="city" id="cityInput" class="form-control form-control-agro"
-               placeholder="e.g. Udupi, Bangalore, Mumbai..." value="{{ city or 'Udupi' }}" required>
-        <div class="input-group-append">
-          <button type="submit" class="btn-agro-primary" style="border-radius: 0 var(--r-md) var(--r-md) 0; min-height: 48px; padding: 0 1.25rem;">
-            <i class="fas fa-search" aria-hidden="true"></i> Fetch Weather
+  <!-- ═══════════════════════════════════════════
+       CITY SEARCH + NEARBY CITY CHIPS
+       ═══════════════════════════════════════════ -->
+  <div class="glass-card mb-4">
+    <div class="row align-items-end g-3">
+      <div class="col-lg-6">
+        <label class="d-block mb-2" style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
+          <i class="fas fa-magnifying-glass-location" style="color: var(--emerald-500);" aria-hidden="true"></i> Search Any City
+        </label>
+        <div class="d-flex gap-2">
+          <input type="text" id="citySearchInput" class="form-control form-control-agro"
+                 placeholder="e.g. Mumbai, Delhi, Jaipur..."
+                 onkeydown="if(event.key==='Enter'){searchCity()}"
+                 style="flex: 1;"
+                 aria-label="Search city for weather">
+          <button class="btn-agro-primary" onclick="searchCity()" style="min-height: 48px; padding: 0 1.25rem; border-radius: var(--r-md);">
+            <i class="fas fa-search" aria-hidden="true"></i>
           </button>
         </div>
       </div>
-    </form>
-
-    {% if weather %}
-    <div class="p-4 rounded animate-fade-in-up" style="background: var(--bg-input); border: 1.5px solid var(--border-normal);">
-      <div class="d-flex align-items-center justify-content-between mb-4 pb-3" style="border-bottom: 1px solid var(--border-subtle);">
-        <div>
-          <h4 class="mb-0" style="font-weight: 800; color: var(--text-primary);">
-            <i class="fas fa-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> {{ weather.city }}
-          </h4>
-          <span class="text-muted" style="font-size: 0.82rem;">Live OpenWeather Metrics</span>
-        </div>
-        <span class="badge-agro badge-agro-amber">{{ weather.desc }}</span>
-      </div>
-      <div class="row text-center">
-        <div class="col-6 col-md-3 mb-3">
-          <div class="p-3 rounded" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
-            <i class="fas fa-temperature-three-quarters" style="color: var(--amber-500); font-size: 1.75rem;" aria-hidden="true"></i>
-            <p class="text-muted mb-1 mt-2" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Temperature</p>
-            <h4 class="mb-0" style="font-weight: 800; color: var(--text-primary);">{{ weather.temp }}°C</h4>
-          </div>
-        </div>
-        <div class="col-6 col-md-3 mb-3">
-          <div class="p-3 rounded" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
-            <i class="fas fa-droplet" style="color: var(--cyan-500); font-size: 1.75rem;" aria-hidden="true"></i>
-            <p class="text-muted mb-1 mt-2" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Humidity</p>
-            <h4 class="mb-0" style="font-weight: 800; color: var(--text-primary);">{{ weather.humidity }}%</h4>
-          </div>
-        </div>
-        <div class="col-6 col-md-3 mb-3">
-          <div class="p-3 rounded" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
-            <i class="fas fa-wind" style="color: #8b5cf6; font-size: 1.75rem;" aria-hidden="true"></i>
-            <p class="text-muted mb-1 mt-2" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Wind Speed</p>
-            <h4 class="mb-0" style="font-weight: 800; color: var(--text-primary);">{{ weather.wind }} m/s</h4>
-          </div>
-        </div>
-        <div class="col-6 col-md-3 mb-3">
-          <div class="p-3 rounded" style="background: var(--bg-surface); border: 1px solid var(--border-subtle);">
-            <i class="fas fa-eye" style="color: var(--amber-500); font-size: 1.75rem;" aria-hidden="true"></i>
-            <p class="text-muted mb-1 mt-2" style="font-size: 0.75rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em;">Sky Condition</p>
-            <h5 class="mb-0" style="font-weight: 800; color: var(--text-primary); font-size: 0.95rem;">{{ weather.desc }}</h5>
-          </div>
+      <div class="col-lg-6">
+        <label class="d-block mb-2" style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
+          <i class="fas fa-location-dot" style="color: var(--amber-500);" aria-hidden="true"></i> Nearby Cities
+        </label>
+        <div class="soil-preset-container" id="nearbyCitiesChips">
+          <span class="text-muted" style="font-size: 0.82rem;">Detecting location...</span>
         </div>
       </div>
     </div>
-    {% endif %}
   </div>
+
+  <!-- ═══════════════════════════════════════════
+       CURRENT WEATHER CARD
+       ═══════════════════════════════════════════ -->
+  <div id="currentWeatherSection" style="display: none;">
+    <div class="glass-card mb-4 animate-fade-in-up" id="currentWeatherCard">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
+       7-DAY FORECAST STRIP
+       ═══════════════════════════════════════════ -->
+  <div id="forecastSection" style="display: none;">
+    <div class="mb-3 d-flex align-items-center gap-2">
+      <span class="badge-agro badge-agro-cyan"><i class="fas fa-calendar-week" aria-hidden="true"></i> Extended Forecast</span>
+    </div>
+    <div class="forecast-scroll-container" id="forecastStrip">
+      <!-- Filled by JS -->
+    </div>
+  </div>
+
+  <!-- Loading state -->
+  <div id="weatherLoading" class="text-center py-5" style="display: none;">
+    <div class="weather-loading-spinner"></div>
+    <p class="text-muted mt-3" style="font-size: 0.9rem;">Fetching weather data...</p>
+  </div>
+
+  <!-- Error state -->
+  <div id="weatherError" class="glass-card text-center py-5" style="display: none;">
+    <i class="fas fa-cloud-bolt" style="font-size: 2.5rem; opacity: 0.3; display: block; margin-bottom: 1rem; color: var(--amber-500);" aria-hidden="true"></i>
+    <h5 style="font-weight: 700; color: var(--text-primary);">Unable to Fetch Weather</h5>
+    <p class="text-muted mb-3" style="font-size: 0.88rem;" id="weatherErrorMsg">Please try searching a city manually.</p>
+    <button class="btn-agro-secondary" onclick="searchCity()"><i class="fas fa-redo" aria-hidden="true"></i> Try Again</button>
+  </div>
+
 </div>
+
+<style>
+/* Weather detect icon */
+.weather-detect-icon {
+  width: 48px; height: 48px; border-radius: 14px;
+  background: rgba(245,158,11,0.12); color: var(--amber-500);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 1.2rem; flex-shrink: 0;
+}
+
+/* Current weather layout */
+.current-weather-main {
+  display: flex; align-items: center; gap: 2rem; flex-wrap: wrap;
+}
+
+.current-temp-block {
+  text-align: center; min-width: 140px;
+}
+
+.current-temp-value {
+  font-size: 4rem; font-weight: 900; line-height: 1;
+  background: linear-gradient(135deg, var(--amber-500), var(--emerald-500));
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent;
+  background-clip: text;
+}
+
+.current-temp-desc {
+  font-size: 0.95rem; font-weight: 600; color: var(--text-muted);
+  text-transform: capitalize; margin-top: 0.25rem;
+}
+
+.current-weather-icon {
+  font-size: 3.5rem; opacity: 0.7;
+}
+
+.weather-detail-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+  gap: 0.75rem;
+  margin-top: 1.25rem;
+}
+
+.weather-detail-card {
+  padding: 0.85rem; border-radius: 12px;
+  background: rgba(4,15,11,0.5); border: 1px solid var(--border-subtle);
+  text-align: center;
+}
+
+.weather-detail-card i {
+  font-size: 1.3rem; display: block; margin-bottom: 0.4rem;
+}
+
+.weather-detail-card .detail-label {
+  font-size: 0.7rem; font-weight: 600; text-transform: uppercase;
+  letter-spacing: 0.04em; color: var(--text-muted); margin-bottom: 0.2rem;
+}
+
+.weather-detail-card .detail-value {
+  font-size: 1.05rem; font-weight: 800; color: var(--text-primary);
+}
+
+/* Forecast strip */
+.forecast-scroll-container {
+  display: flex; gap: 0.75rem; overflow-x: auto;
+  padding-bottom: 0.75rem; scroll-snap-type: x mandatory;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+  scrollbar-color: var(--border-normal) transparent;
+}
+
+.forecast-day-card {
+  flex: 0 0 140px; scroll-snap-align: start;
+  padding: 1rem 0.85rem; border-radius: 16px;
+  background: var(--bg-surface); border: 1px solid var(--border-subtle);
+  text-align: center;
+  transition: border-color 0.2s, transform 0.2s;
+  cursor: default;
+}
+
+.forecast-day-card:hover {
+  border-color: var(--emerald-500);
+  transform: translateY(-3px);
+}
+
+.forecast-day-name {
+  font-size: 0.78rem; font-weight: 700; color: var(--text-muted);
+  text-transform: uppercase; letter-spacing: 0.04em; margin-bottom: 0.5rem;
+}
+
+.forecast-day-icon {
+  font-size: 1.8rem; margin-bottom: 0.5rem; display: block;
+}
+
+.forecast-day-temps {
+  font-size: 0.9rem; font-weight: 800; color: var(--text-primary);
+}
+
+.forecast-day-temps .temp-low {
+  color: var(--text-muted); font-weight: 600;
+}
+
+.forecast-day-desc {
+  font-size: 0.72rem; color: var(--text-muted); margin-top: 0.3rem;
+  text-transform: capitalize;
+}
+
+.forecast-day-rain {
+  font-size: 0.7rem; color: var(--cyan-500); margin-top: 0.25rem; font-weight: 600;
+}
+
+/* Loading spinner */
+.weather-loading-spinner {
+  width: 40px; height: 40px; border: 3px solid var(--border-subtle);
+  border-top-color: var(--emerald-500); border-radius: 50%;
+  animation: spin 0.8s linear infinite; margin: 0 auto;
+}
+
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Nearby city chip animation */
+.nearby-chip {
+  display: inline-flex; align-items: center; gap: 0.4rem;
+  padding: 0.45rem 0.85rem; border-radius: 99px;
+  background: var(--bg-input); border: 1px solid var(--border-normal);
+  color: var(--text-primary); font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s; white-space: nowrap;
+}
+
+.nearby-chip:hover {
+  border-color: var(--emerald-500); background: rgba(16,185,129,0.08);
+  transform: translateY(-1px);
+}
+
+.nearby-chip .chip-distance {
+  font-size: 0.68rem; color: var(--text-muted); font-weight: 500;
+}
+
+/* Responsive */
+@media (max-width: 767px) {
+  .current-weather-main { gap: 1rem; justify-content: center; }
+  .current-temp-value { font-size: 3rem; }
+  .current-weather-icon { font-size: 2.5rem; }
+  .forecast-day-card { flex: 0 0 120px; }
+}
+</style>
 {% endblock %}
 
 {% block extra_scripts %}
 {{ super() }}
 <script>
-function applyCityPreset(city){
-  document.getElementById('cityInput').value=city;
+/* ════════════════════════════════════════════════════════
+   WEATHER INTELLIGENCE HUB — Client-Side Engine
+   ════════════════════════════════════════════════════════ */
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+const MONTH_NAMES = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+
+let userLat = null, userLon = null;
+
+/* ── ICON COLOR MAP ── */
+function iconColor(faClass) {
+  if (faClass.includes('sun'))   return 'var(--amber-500)';
+  if (faClass.includes('moon'))  return '#a78bfa';
+  if (faClass.includes('rain') || faClass.includes('showers'))  return 'var(--cyan-500)';
+  if (faClass.includes('bolt'))  return '#eab308';
+  if (faClass.includes('snow'))  return '#e2e8f0';
+  if (faClass.includes('smog'))  return '#94a3b8';
+  return 'var(--text-muted)';
 }
+
+/* ── AUTO-DETECT LOCATION ── */
+function requestLocation() {
+  const statusEl = document.getElementById('detectStatus');
+  const subEl = document.getElementById('detectSubtext');
+  const iconEl = document.getElementById('detectIcon');
+  const retryBtn = document.getElementById('retryLocationBtn');
+
+  statusEl.textContent = 'Detecting your location...';
+  subEl.textContent = 'Allow location access for automatic weather data';
+  iconEl.className = 'fas fa-crosshairs fa-spin';
+  retryBtn.style.display = 'none';
+
+  if (!navigator.geolocation) {
+    statusEl.textContent = 'Geolocation not supported';
+    subEl.textContent = 'Please search for a city manually above.';
+    iconEl.className = 'fas fa-exclamation-triangle';
+    iconEl.parentElement.style.background = 'rgba(239,68,68,0.12)';
+    iconEl.parentElement.style.color = '#ef4444';
+    retryBtn.style.display = 'inline-flex';
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(
+    (pos) => {
+      userLat = pos.coords.latitude.toFixed(4);
+      userLon = pos.coords.longitude.toFixed(4);
+      statusEl.textContent = 'Location detected!';
+      subEl.textContent = `Coordinates: ${userLat}°, ${userLon}°`;
+      iconEl.className = 'fas fa-check-circle';
+      iconEl.parentElement.style.background = 'rgba(16,185,129,0.12)';
+      iconEl.parentElement.style.color = 'var(--emerald-500)';
+      fetchWeatherByCoords(userLat, userLon);
+      fetchNearbyCities(userLat, userLon);
+    },
+    (err) => {
+      statusEl.textContent = 'Location access denied';
+      subEl.textContent = 'Search for your city manually, or click Retry.';
+      iconEl.className = 'fas fa-location-crosshairs';
+      iconEl.parentElement.style.background = 'rgba(245,158,11,0.12)';
+      iconEl.parentElement.style.color = 'var(--amber-500)';
+      retryBtn.style.display = 'inline-flex';
+      // Load default nearby cities (Udupi area)
+      fetchNearbyCities(13.341, 74.742);
+    },
+    { enableHighAccuracy: true, timeout: 8000 }
+  );
+}
+
+/* ── FETCH WEATHER ── */
+function showLoading() {
+  document.getElementById('weatherLoading').style.display = 'block';
+  document.getElementById('currentWeatherSection').style.display = 'none';
+  document.getElementById('forecastSection').style.display = 'none';
+  document.getElementById('weatherError').style.display = 'none';
+}
+
+function hideLoading() {
+  document.getElementById('weatherLoading').style.display = 'none';
+}
+
+function fetchWeatherByCoords(lat, lon) {
+  showLoading();
+  fetch(`/api/weather/coords/${lat}/${lon}`)
+    .then(r => r.json())
+    .then(data => {
+      hideLoading();
+      if (data.error) { showError(data.error); return; }
+      renderCurrentWeather(data.current);
+      renderForecast(data.forecast);
+    })
+    .catch(err => { hideLoading(); showError(err.message); });
+}
+
+function fetchWeatherByCity(city) {
+  showLoading();
+  fetch(`/api/weather/city/${encodeURIComponent(city)}`)
+    .then(r => r.json())
+    .then(data => {
+      hideLoading();
+      if (data.error) { showError(data.error); return; }
+      renderCurrentWeather(data.current);
+      renderForecast(data.forecast);
+      // Also get nearby cities for the new location
+      if (data.current && data.current.lat) {
+        fetchNearbyCities(data.current.lat, data.current.lon);
+      }
+    })
+    .catch(err => { hideLoading(); showError(err.message); });
+}
+
+function searchCity() {
+  const input = document.getElementById('citySearchInput');
+  const city = input.value.trim();
+  if (city) fetchWeatherByCity(city);
+}
+
+function showError(msg) {
+  document.getElementById('weatherErrorMsg').textContent = msg || 'Please try searching a city manually.';
+  document.getElementById('weatherError').style.display = 'block';
+}
+
+/* ── RENDER CURRENT WEATHER ── */
+function renderCurrentWeather(w) {
+  const section = document.getElementById('currentWeatherSection');
+  const card = document.getElementById('currentWeatherCard');
+  section.style.display = 'block';
+
+  const now = new Date();
+  const sunrise = w.sunrise ? new Date(w.sunrise * 1000) : null;
+  const sunset = w.sunset ? new Date(w.sunset * 1000) : null;
+  const fmtTime = (d) => d ? d.toLocaleTimeString('en-IN', {hour:'2-digit',minute:'2-digit'}) : '--';
+
+  card.innerHTML = `
+    <div class="d-flex align-items-center justify-content-between mb-3 pb-3" style="border-bottom: 1px solid var(--border-subtle);">
+      <div>
+        <h4 class="mb-0" style="font-weight: 800; color: var(--text-primary);">
+          <i class="fas fa-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> ${w.city}
+        </h4>
+        <span class="text-muted" style="font-size: 0.82rem;">${now.toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</span>
+      </div>
+      <span class="badge-agro badge-agro-amber">${w.desc}</span>
+    </div>
+
+    <div class="current-weather-main">
+      <div class="current-temp-block">
+        <i class="fas ${w.icon} current-weather-icon" style="color: ${iconColor(w.icon)};" aria-hidden="true"></i>
+        <div class="current-temp-value">${Math.round(w.temp)}°</div>
+        <div class="current-temp-desc">Feels like ${Math.round(w.feels_like)}°C</div>
+      </div>
+
+      <div style="flex: 1; min-width: 200px;">
+        <div class="weather-detail-grid">
+          <div class="weather-detail-card">
+            <i class="fas fa-droplet" style="color: var(--cyan-500);" aria-hidden="true"></i>
+            <div class="detail-label">Humidity</div>
+            <div class="detail-value">${w.humidity}%</div>
+          </div>
+          <div class="weather-detail-card">
+            <i class="fas fa-wind" style="color: #8b5cf6;" aria-hidden="true"></i>
+            <div class="detail-label">Wind</div>
+            <div class="detail-value">${w.wind} m/s</div>
+          </div>
+          <div class="weather-detail-card">
+            <i class="fas fa-gauge-high" style="color: var(--amber-500);" aria-hidden="true"></i>
+            <div class="detail-label">Pressure</div>
+            <div class="detail-value">${w.pressure} hPa</div>
+          </div>
+          <div class="weather-detail-card">
+            <i class="fas fa-eye" style="color: var(--emerald-500);" aria-hidden="true"></i>
+            <div class="detail-label">Visibility</div>
+            <div class="detail-value">${w.visibility} km</div>
+          </div>
+          <div class="weather-detail-card">
+            <i class="fas fa-sunrise" style="color: #f59e0b;" aria-hidden="true"></i>
+            <div class="detail-label">Sunrise</div>
+            <div class="detail-value">${fmtTime(sunrise)}</div>
+          </div>
+          <div class="weather-detail-card">
+            <i class="fas fa-sunset" style="color: #f97316;" aria-hidden="true"></i>
+            <div class="detail-label">Sunset</div>
+            <div class="detail-value">${fmtTime(sunset)}</div>
+          </div>
+        </div>
+      </div>
+    </div>`;
+}
+
+/* ── RENDER FORECAST ── */
+function renderForecast(forecast) {
+  if (!forecast || forecast.length === 0) return;
+  const section = document.getElementById('forecastSection');
+  const strip = document.getElementById('forecastStrip');
+  section.style.display = 'block';
+
+  strip.innerHTML = forecast.map((day, i) => {
+    const d = new Date(day.date + 'T00:00:00');
+    const dayName = i === 0 ? 'Today' : DAY_NAMES[d.getDay()];
+    const dateLabel = `${d.getDate()} ${MONTH_NAMES[d.getMonth()]}`;
+
+    return `
+      <div class="forecast-day-card">
+        <div class="forecast-day-name">${dayName}</div>
+        <div style="font-size: 0.7rem; color: var(--text-muted); margin-bottom: 0.4rem;">${dateLabel}</div>
+        <i class="fas ${day.icon} forecast-day-icon" style="color: ${iconColor(day.icon)};" aria-hidden="true"></i>
+        <div class="forecast-day-temps">
+          ${Math.round(day.high)}° <span class="temp-low">/ ${Math.round(day.low)}°</span>
+        </div>
+        <div class="forecast-day-desc">${day.desc}</div>
+        ${day.rain_mm > 0 ? `<div class="forecast-day-rain"><i class="fas fa-droplet" aria-hidden="true"></i> ${day.rain_mm}mm</div>` : ''}
+      </div>`;
+  }).join('');
+}
+
+/* ── FETCH & RENDER NEARBY CITIES ── */
+function fetchNearbyCities(lat, lon) {
+  fetch(`/api/nearby_cities/${lat}/${lon}`)
+    .then(r => r.json())
+    .then(data => {
+      const container = document.getElementById('nearbyCitiesChips');
+      if (!data.cities || data.cities.length === 0) {
+        container.innerHTML = '<span class="text-muted" style="font-size:0.82rem;">No nearby cities found</span>';
+        return;
+      }
+      container.innerHTML = data.cities.map(c => `
+        <button type="button" class="nearby-chip" onclick="fetchWeatherByCity('${c.name}')">
+          📍 ${c.name}
+          <span class="chip-distance">${c.distance_km} km</span>
+        </button>`).join('');
+    })
+    .catch(() => {
+      document.getElementById('nearbyCitiesChips').innerHTML =
+        '<span class="text-muted" style="font-size:0.82rem;">Could not load nearby cities</span>';
+    });
+}
+
+/* ── INIT ── */
+document.addEventListener('DOMContentLoaded', requestLocation);
 </script>
 {% endblock %}

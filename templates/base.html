@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="icon" type="image/png" href="{{ url_for('static_assets', path='img/logo.png') }}" />
   <title>{% block title %}AgroIntel | Intelligent Agriculture Platform{% endblock %}</title>
-  <meta name="description" content="AgroIntel — AI-powered smart agriculture platform for crop recommendations, yield forecasting, and marketplace trade.">
+  <meta name="description" content="AgroIntel — AI-powered smart agriculture platform for crop recommendations, yield forecasting, and live market intelligence.">
 
   <!-- Prevent theme flash -->
   <script>
@@ -33,9 +33,8 @@
   {% set is_landing     = (request.endpoint == 'index') %}
   {% set is_auth        = (request.endpoint in ['login', 'register']) %}
   {% set is_farmer_page = (request.endpoint and request.endpoint.startswith('farmer_')) %}
-  {% set is_customer_page = (request.endpoint and (request.endpoint.startswith('customer_') or request.endpoint == 'customer_buy_crops')) %}
   {% set is_admin_page  = (request.endpoint and request.endpoint.startswith('admin_')) %}
-  {% set is_portal_page = (is_farmer_page or is_customer_page or is_admin_page) %}
+  {% set is_portal_page = (is_farmer_page or is_admin_page) %}
   {% set is_logged_in   = (session.get('user_type') and is_portal_page) %}
 
   {# ════════════════════════════════════════════════════════
@@ -78,9 +77,6 @@
             <a href="{{ url_for('login', role='farmer') }}" class="btn-agro-primary btn-sm">
               <i class="fas fa-tractor" aria-hidden="true"></i> Farmer Portal
             </a>
-            <a href="{{ url_for('login', role='customer') }}" class="btn-agro-secondary btn-sm">
-              <i class="fas fa-cart-shopping" aria-hidden="true"></i> Buyer Market
-            </a>
             <a href="{{ url_for('login', role='admin') }}" class="btn-agro-admin btn-sm">
               <i class="fas fa-user-shield" aria-hidden="true"></i> Admin
             </a>
@@ -92,8 +88,6 @@
             <i class="fas fa-user-circle" aria-hidden="true"></i>
             {% if session.get('user_type') == 'farmer' %}
               {{ session.get('farmer_name', 'Farmer') | truncate(18, True) }}
-            {% elif session.get('user_type') == 'customer' %}
-              {{ session.get('cust_name', 'Buyer') | truncate(18, True) }}
             {% else %}
               Admin
             {% endif %}
@@ -177,36 +171,11 @@
               </span>
             </li>
 
-          {% elif is_customer_page and session.get('user_type') == 'customer' %}
-            <li class="nav-item">
-              <a href="{{ url_for('index') }}" class="nav-link-custom">
-                <i class="fas fa-house" aria-hidden="true"></i> Home
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{{ url_for('customer_buy_crops') }}"
-                 class="nav-link-custom {% if request.endpoint == 'customer_buy_crops' %}active{% endif %}">
-                <i class="fas fa-basket-shopping" aria-hidden="true"></i> Marketplace
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{{ url_for('contact') }}"
-                 class="nav-link-custom {% if request.endpoint == 'contact' %}active{% endif %}">
-                <i class="fas fa-headset" aria-hidden="true"></i> Support
-              </a>
-            </li>
-
           {% elif is_admin_page and session.get('user_type') == 'admin' %}
             <li class="nav-item">
               <a href="{{ url_for('admin_farmers') }}"
                  class="nav-link-custom {% if request.endpoint == 'admin_farmers' %}active{% endif %}">
                 <i class="fas fa-users-gear" aria-hidden="true"></i> Farmers
-              </a>
-            </li>
-            <li class="nav-item">
-              <a href="{{ url_for('admin_customers') }}"
-                 class="nav-link-custom {% if request.endpoint == 'admin_customers' %}active{% endif %}">
-                <i class="fas fa-user-group" aria-hidden="true"></i> Customers
               </a>
             </li>
             <li class="nav-item">
@@ -224,9 +193,6 @@
             <div class="nav-portal-btns">
               <a href="{{ url_for('login', role='farmer') }}" class="btn-agro-primary btn-sm">
                 <i class="fas fa-tractor" aria-hidden="true"></i> Farmer Portal
-              </a>
-              <a href="{{ url_for('login', role='customer') }}" class="btn-agro-secondary btn-sm">
-                <i class="fas fa-cart-shopping" aria-hidden="true"></i> Buyer Marketplace
               </a>
               <a href="{{ url_for('login', role='admin') }}" class="btn-agro-admin btn-sm">
                 <i class="fas fa-user-shield" aria-hidden="true"></i> Admin Portal
@@ -275,7 +241,7 @@
             <span class="brand-text">Agro<span class="brand-accent">Intel</span></span>
           </div>
           <p class="small" style="color: var(--text-muted);">
-            Intelligent agricultural portal empowering farmers with AI-driven crop recommendations, yield estimations, and direct marketplace trade.
+            Intelligent agricultural portal empowering farmers with AI-driven crop recommendations, yield estimations, and live market intelligence.
           </p>
         </div>
 
@@ -293,7 +259,6 @@
           <h6 class="font-weight-bold mb-3" style="color: var(--text-primary);">Portals</h6>
           <ul class="list-unstyled small">
             <li class="mb-2"><a href="{{ url_for('login', role='farmer') }}">Farmer Portal</a></li>
-            <li class="mb-2"><a href="{{ url_for('login', role='customer') }}">Buyer Marketplace</a></li>
             <li class="mb-2"><a href="{{ url_for('login', role='admin') }}">Admin Control</a></li>
             <li class="mb-2"><a href="{{ url_for('contact') }}">Contact Support</a></li>
           </ul>

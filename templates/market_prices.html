@@ -1,0 +1,246 @@
+{% extends 'farmer_base.html' %}
+{% block page_title %}Live Mandi Prices{% endblock %}
+{% block farmer_content %}
+
+<div class="mb-4">
+  <div class="badge-agro badge-agro-emerald mb-3">
+    <i class="fas fa-indian-rupee-sign" aria-hidden="true"></i>
+    Market Intelligence
+  </div>
+  <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 1.65rem; margin-bottom: 0.35rem; color: var(--text-primary);">
+    Live Mandi Prices
+  </h2>
+  <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
+    Real-time APMC commodity rates from Agmarknet — search any district or detect your location.
+  </p>
+</div>
+
+{# ── Search & Location Card ── #}
+<div class="glass-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+  <div class="row align-items-end" style="row-gap: 1rem;">
+    <div class="col-md-5">
+      <label for="citySearch"><i class="fas fa-search" style="color: var(--emerald-500); margin-right: 6px;"></i> Search City or District</label>
+      <input type="text" id="citySearch" class="form-control-agro" placeholder="e.g. Bangalore, Udupi, Delhi..." value="Udupi">
+    </div>
+    <div class="col-md-4">
+      <div class="d-flex" style="gap: 0.5rem;">
+        <button class="btn-agro-primary" style="flex: 1; min-height: 48px;" onclick="searchCity()">
+          <i class="fas fa-search"></i> Search
+        </button>
+        <button class="btn-agro-secondary" style="min-height: 48px;" onclick="detectMyLocation()" id="locBtn">
+          <i class="fas fa-location-crosshairs"></i> My Location
+        </button>
+      </div>
+    </div>
+    <div class="col-md-3" id="nearbyCol" style="display: none;">
+      <label style="font-size: 0.8rem;"><i class="fas fa-map-pin" style="color: var(--amber-500);"></i> Nearby</label>
+      <div id="nearbyChips" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
+    </div>
+  </div>
+</div>
+
+{# ── Quick Access Chips ── #}
+<div class="soil-preset-container mb-4">
+  <button class="soil-preset-btn" onclick="loadCity('Udupi')"><i class="fas fa-map-marker-alt"></i> Udupi</button>
+  <button class="soil-preset-btn" onclick="loadCity('Bangalore')"><i class="fas fa-map-marker-alt"></i> Bangalore</button>
+  <button class="soil-preset-btn" onclick="loadCity('Mumbai')"><i class="fas fa-map-marker-alt"></i> Mumbai</button>
+  <button class="soil-preset-btn" onclick="loadCity('Delhi')"><i class="fas fa-map-marker-alt"></i> Delhi</button>
+  <button class="soil-preset-btn" onclick="loadCity('Nashik')"><i class="fas fa-map-marker-alt"></i> Nashik</button>
+  <button class="soil-preset-btn" onclick="loadCity('Pune')"><i class="fas fa-map-marker-alt"></i> Pune</button>
+  <button class="soil-preset-btn" onclick="loadCity('Hyderabad')"><i class="fas fa-map-marker-alt"></i> Hyderabad</button>
+</div>
+
+{# ── Status Bar ── #}
+<div id="statusBar" style="display: none; margin-bottom: 1.25rem;">
+  <div class="d-flex align-items-center flex-wrap" style="gap: 0.75rem;">
+    <span class="badge-agro badge-agro-emerald" id="statusCity"><i class="fas fa-city"></i> --</span>
+    <span class="badge-agro badge-agro-amber" id="statusCount"><i class="fas fa-boxes-stacked"></i> --</span>
+    <span class="badge-agro badge-agro-cyan" id="statusSource"><i class="fas fa-database"></i> --</span>
+  </div>
+</div>
+
+{# ── Loading State ── #}
+<div id="loadingState" style="display: none; text-align: center; padding: 3rem;">
+  <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--emerald-500); margin-bottom: 1rem; display: block;"></i>
+  <p style="color: var(--text-muted); font-weight: 600;">Fetching live market prices...</p>
+</div>
+
+{# ── Highlight Cards ── #}
+<div id="highlightSection" style="display: none; margin-bottom: 1.5rem;">
+  <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 1rem; color: var(--text-primary);">
+    <i class="fas fa-star" style="color: var(--amber-500); margin-right: 6px;"></i> Top Commodities
+  </h5>
+  <div class="row" style="row-gap: 1rem;" id="highlightCards"></div>
+</div>
+
+{# ── Price Table ── #}
+<div id="tableSection" style="display: none;">
+  <div class="glass-card" style="padding: 0; overflow: hidden;">
+    <div class="table-responsive" style="border-radius: var(--r-xl);">
+      <table class="table-agro" style="margin: 0;">
+        <thead>
+          <tr>
+            <th>Commodity</th>
+            <th>Variety</th>
+            <th>Market</th>
+            <th>District</th>
+            <th style="text-align: right;">Min ₹/q</th>
+            <th style="text-align: right;">Max ₹/q</th>
+            <th style="text-align: right; color: var(--emerald-500);">Modal ₹/q</th>
+            <th>Date</th>
+          </tr>
+        </thead>
+        <tbody id="priceTableBody"></tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+{# ── Empty State ── #}
+<div id="emptyState" style="display: none; text-align: center; padding: 3rem;">
+  <i class="fas fa-shop-slash" style="font-size: 3rem; color: var(--text-muted); opacity: 0.4; margin-bottom: 1rem; display: block;"></i>
+  <p style="color: var(--text-muted); font-weight: 600; font-size: 1.05rem;">No market data found for this location</p>
+  <p style="color: var(--text-muted); font-size: 0.88rem;">Try searching for a different city or district</p>
+</div>
+
+{# ── Attribution ── #}
+<div style="text-align: center; margin-top: 2rem; padding: 1rem;">
+  <p style="color: var(--text-muted); font-size: 0.76rem; margin: 0;">
+    <i class="fas fa-database"></i> Data Source: <strong>Agmarknet / data.gov.in</strong> (Ministry of Agriculture, Govt. of India)
+  </p>
+</div>
+
+<script>
+function showLoading() {
+  document.getElementById('loadingState').style.display = 'block';
+  document.getElementById('highlightSection').style.display = 'none';
+  document.getElementById('tableSection').style.display = 'none';
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('statusBar').style.display = 'none';
+}
+
+function loadCity(city) {
+  document.getElementById('citySearch').value = city;
+  searchCity();
+}
+
+function searchCity() {
+  const city = document.getElementById('citySearch').value.trim();
+  if (!city) return;
+  showLoading();
+
+  fetch(`/api/market_prices?city=${encodeURIComponent(city)}`)
+    .then(r => r.json())
+    .then(data => {
+      document.getElementById('loadingState').style.display = 'none';
+
+      if (!data.prices || data.prices.length === 0) {
+        document.getElementById('emptyState').style.display = 'block';
+        return;
+      }
+
+      // Status bar
+      document.getElementById('statusCity').innerHTML = `<i class="fas fa-city"></i> ${data.city}`;
+      document.getElementById('statusCount').innerHTML = `<i class="fas fa-boxes-stacked"></i> ${data.count} commodities`;
+      document.getElementById('statusSource').innerHTML = `<i class="fas fa-database"></i> ${data.source}`;
+      document.getElementById('statusBar').style.display = 'block';
+
+      // Highlight cards (top 6)
+      const highlights = data.prices.slice(0, 6);
+      const hContainer = document.getElementById('highlightCards');
+      hContainer.innerHTML = '';
+      highlights.forEach(p => {
+        hContainer.innerHTML += `
+          <div class="col-sm-6 col-lg-4">
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-lg); padding: 1.25rem; height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease;" 
+                 onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'" 
+                 onmouseout="this.style.transform='';this.style.boxShadow=''">
+              <p style="font-weight: 700; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 0.35rem;">${p.commodity}</p>
+              <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">${p.variety} • ${p.market}</p>
+              <div style="display: flex; align-items: baseline; gap: 0.5rem;">
+                <span style="font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; color: var(--emerald-500);">\u20b9${Number(p.modal_price).toLocaleString('en-IN')}</span>
+                <span style="font-size: 0.76rem; color: var(--text-muted);">per quintal</span>
+              </div>
+              <div style="margin-top: 0.5rem; display: flex; gap: 0.75rem; font-size: 0.76rem; color: var(--text-muted);">
+                <span>Min: \u20b9${Number(p.min_price).toLocaleString('en-IN')}</span>
+                <span>Max: \u20b9${Number(p.max_price).toLocaleString('en-IN')}</span>
+              </div>
+            </div>
+          </div>`;
+      });
+      document.getElementById('highlightSection').style.display = 'block';
+
+      // Full table
+      const tbody = document.getElementById('priceTableBody');
+      tbody.innerHTML = '';
+      data.prices.forEach(p => {
+        tbody.innerHTML += `
+          <tr>
+            <td><strong>${p.commodity}</strong></td>
+            <td>${p.variety}</td>
+            <td>${p.market}</td>
+            <td>${p.district}</td>
+            <td style="text-align: right;">\u20b9${Number(p.min_price).toLocaleString('en-IN')}</td>
+            <td style="text-align: right;">\u20b9${Number(p.max_price).toLocaleString('en-IN')}</td>
+            <td style="text-align: right; font-weight: 700; color: var(--emerald-500);">\u20b9${Number(p.modal_price).toLocaleString('en-IN')}</td>
+            <td style="white-space: nowrap;">${p.arrival_date}</td>
+          </tr>`;
+      });
+      document.getElementById('tableSection').style.display = 'block';
+    })
+    .catch(() => {
+      document.getElementById('loadingState').style.display = 'none';
+      document.getElementById('emptyState').style.display = 'block';
+    });
+}
+
+function detectMyLocation() {
+  const btn = document.getElementById('locBtn');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+
+    // Reverse geocode to get city
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`)
+      .then(r => r.json())
+      .then(geo => {
+        const city = geo.address.city || geo.address.town || geo.address.county || geo.address.state_district || 'Bangalore';
+        document.getElementById('citySearch').value = city;
+        searchCity();
+      }).catch(() => { searchCity(); });
+
+    // Fetch nearby cities
+    fetch(`/api/nearby_cities/${lat}/${lon}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.cities && data.cities.length) {
+          const container = document.getElementById('nearbyChips');
+          container.innerHTML = '';
+          data.cities.slice(0, 4).forEach(c => {
+            container.innerHTML += `<button class="soil-preset-btn" style="font-size: 0.76rem; padding: 0.2rem 0.6rem; min-height: 28px;" onclick="loadCity('${c.name}')">${c.name}</button>`;
+          });
+          document.getElementById('nearbyCol').style.display = 'block';
+        }
+      }).catch(() => {});
+
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> My Location';
+  }, function() {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> My Location';
+    alert('Location access denied. Please search manually.');
+  }, { enableHighAccuracy: true, timeout: 8000 });
+}
+
+// Auto-load default city
+document.addEventListener('DOMContentLoaded', function() { searchCity(); });
+
+// Enter key support
+document.getElementById('citySearch').addEventListener('keydown', function(e) {
+  if (e.key === 'Enter') { e.preventDefault(); searchCity(); }
+});
+</script>
+
+{% endblock %}

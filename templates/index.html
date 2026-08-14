@@ -283,20 +283,15 @@
 
     <p class="hero-sub">
       AgroIntel brings together machine-learning models and real agricultural data so Indian
-      farmers can choose the right crop, predict yields, and sell directly to buyers — no middlemen.
+      farmers can choose the right crop, predict yields, optimize yields, and make data-driven farming decisions.
     </p>
 
-    {# ── Exactly 3 login CTAs — the ONLY login buttons on this page ── #}
+    {# ── 2 login CTAs: Farmer Portal & Admin Portal ── #}
     <div class="hero-cta-group" role="group" aria-label="Portal login options">
       <a href="{{ url_for('login', role='farmer') }}"
          class="btn-agro-primary"
          aria-label="Login to the Farmer Portal">
         <i class="fas fa-tractor" aria-hidden="true"></i> Farmer Portal
-      </a>
-      <a href="{{ url_for('login', role='customer') }}"
-         class="btn-agro-secondary"
-         aria-label="Login to the Buyer Marketplace">
-        <i class="fas fa-basket-shopping" aria-hidden="true"></i> Buyer Marketplace
       </a>
       <a href="{{ url_for('login', role='admin') }}"
          class="btn-agro-admin"
@@ -308,7 +303,7 @@
     {# ── 4-stat strip ── #}
     <div class="hero-stats" aria-label="Platform statistics">
       <div class="stat-item">
-        <h3 class="gradient-text">6</h3>
+        <h3 class="gradient-text">5</h3>
         <p>AI Models</p>
       </div>
       <div class="stat-item">
@@ -316,8 +311,8 @@
         <p>Crop Types</p>
       </div>
       <div class="stat-item">
-        <h3 style="color: var(--cyan-500);">100%</h3>
-        <p>Direct Trade</p>
+        <h3 style="color: var(--cyan-500);">Live</h3>
+        <p>Mandi Prices</p>
       </div>
       <div class="stat-item">
         <h3 class="gradient-text">115 yr</h3>
@@ -330,7 +325,7 @@
 
 
 {# ══════════════════════════════════════════════════════════
-   FEATURE INFO — 8 informational tiles, no action links
+   FEATURE INFO — 7 informational tiles, no action links
    ══════════════════════════════════════════════════════════ #}
 <section class="py-5" aria-labelledby="features-heading">
   <div class="container py-4">
@@ -341,7 +336,7 @@
       </div>
       <h2 id="features-heading" class="section-headline">What AgroIntel Can Do</h2>
       <p style="color: var(--text-muted); max-width: 520px; margin: 0 auto; font-size: 0.95rem; line-height: 1.7;">
-        One platform covering everything a modern farmer needs — from soil analysis to marketplace sales.
+        One intelligent platform covering everything a modern farmer needs — from soil analysis to real-time market prices.
       </p>
     </div>
 
@@ -371,15 +366,15 @@
         </p>
       </article>
 
-      {# 3 — Price Predictor #}
+      {# 3 — Price & Demand Predictor #}
       <article class="feat-item c-amber">
         <div class="feat-icon" style="background: rgba(245,158,11,0.13); color: var(--amber-500);">
           <i class="fas fa-chart-line" aria-hidden="true"></i>
         </div>
-        <h5>Price Predictor</h5>
+        <h5>Price & Demand Predictor</h5>
         <p>
-          Predict upcoming market prices and crop suitability across Indian districts using
-          Decision Tree models trained on historical commodity data — plan before you harvest.
+          Predict upcoming market prices, demand trajectory, and crop suitability across Indian districts using
+          Random Forest models trained on 3-4 months of trading & historical commodity data.
         </p>
       </article>
 
@@ -402,8 +397,7 @@
         </div>
         <h5>Rainfall Estimation</h5>
         <p>
-          Monthly rainfall predictions for every subdivision in India, derived from 115 years of
-          IMD meteorological records — plan irrigation schedules with real confidence.
+          Auto-detect live location and view short-term rain forecasts alongside monthly rainfall predictions for every subdivision in India, derived from 115 years of IMD meteorological records.
         </p>
       </article>
 
@@ -414,32 +408,18 @@
         </div>
         <h5>Weather Forecast</h5>
         <p>
-          Get temperature, humidity, wind speed, and weather condition predictions for any Indian
-          city — plan your field operations around accurate short-term climate data.
+          Get 7-day weather forecasts, temperature, humidity, and wind conditions for your live location or any Indian city.
         </p>
       </article>
 
-      {# 7 — Marketplace #}
+      {# 7 — Live Mandi Prices #}
       <article class="feat-item c-emerald">
         <div class="feat-icon" style="background: rgba(16,185,129,0.13); color: var(--emerald-500);">
-          <i class="fas fa-store" aria-hidden="true"></i>
+          <i class="fas fa-indian-rupee-sign" aria-hidden="true"></i>
         </div>
-        <h5>Marketplace</h5>
+        <h5>Live Mandi Prices</h5>
         <p>
-          Farmers list harvested produce; buyers purchase directly at fair market rates.
-          Zero commission, zero middlemen — pure farm-to-table economics that benefit both sides.
-        </p>
-      </article>
-
-      {# 8 — Selling History #}
-      <article class="feat-item c-cyan">
-        <div class="feat-icon" style="background: rgba(6,182,212,0.13); color: var(--cyan-500);">
-          <i class="fas fa-clock-rotate-left" aria-hidden="true"></i>
-        </div>
-        <h5>Selling History</h5>
-        <p>
-          Farmers get a complete log of every transaction — crop sold, buyer name, quantity,
-          and price — all organised in one clear dashboard view for easy record-keeping.
+          Check live government Agmarknet APMC mandi prices for major agricultural commodities, updated with fallback caching for instant market awareness.
         </p>
       </article>
 
@@ -482,7 +462,7 @@
                 Create Your Account
               </h5>
               <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; margin: 0;">
-                Register as a Farmer, Buyer, or Admin. Each role unlocks a tailored portal with the
+                Register as a Farmer or Admin. Each role unlocks a tailored portal with the
                 specific tools and data views relevant to your work.
               </p>
             </div>

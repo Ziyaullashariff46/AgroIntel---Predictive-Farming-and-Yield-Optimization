@@ -1,81 +1,297 @@
 {% extends 'farmer_base.html' %}
-{% block title %}Rainfall Forecast | AgroIntel AI{% endblock %}
 {% block page_title %}Rainfall Estimation{% endblock %}
-
 {% block farmer_content %}
-<div class="py-3">
-  <div class="mb-4">
-    <span class="badge-agro badge-agro-cyan"><i class="fas fa-cloud-showers-heavy" aria-hidden="true"></i> Meteorological Data (115 Years)</span>
-    <h2 class="mt-2 mb-1" style="font-size: 1.6rem; font-weight: 800; color: var(--text-primary);">Subdivision Rainfall Forecast</h2>
-    <p class="text-muted mb-0" style="font-size: 0.9rem;">Monthly rainfall estimations derived from IMD records across Indian meteorological zones.</p>
+
+<div class="mb-4">
+  <div class="badge-agro badge-agro-cyan mb-3">
+    <i class="fas fa-cloud-showers-heavy" aria-hidden="true"></i>
+    Meteorological AI Engine
   </div>
+  <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 1.65rem; margin-bottom: 0.35rem; color: var(--text-primary);">
+    Rainfall Estimation
+  </h2>
+  <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
+    Predict monthly rainfall for any Indian meteorological subdivision using 115 years of IMD historical data.
+  </p>
+</div>
 
-  <div class="glass-card">
-    <div class="mb-4">
-      <label class="d-block mb-2" style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
-        <i class="fas fa-wand-magic-sparkles" style="color: var(--cyan-500);" aria-hidden="true"></i> Quick Region Presets
-      </label>
-      <div class="soil-preset-container">
-        <button type="button" class="soil-preset-btn" onclick="applyRainPreset('COASTAL KARNATAKA','JUL')">🌧️ Coastal Karnataka (Jul)</button>
-        <button type="button" class="soil-preset-btn" onclick="applyRainPreset('NORTH INTERIOR KARNATAKA','AUG')">🌦️ N. Interior Karnataka (Aug)</button>
-        <button type="button" class="soil-preset-btn" onclick="applyRainPreset('TAMIL NADU','OCT')">🌧️ Tamil Nadu (Oct)</button>
-        <button type="button" class="soil-preset-btn" onclick="applyRainPreset('KERALA','JUN')">⛈️ Kerala Monsoon (Jun)</button>
+{# ── Live Location Rain Radar ── #}
+<div class="glass-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+  <div class="d-flex align-items-center justify-content-between flex-wrap" style="gap: 1rem;">
+    <div class="d-flex align-items-center" style="gap: 0.75rem;">
+      <div style="width: 38px; height: 38px; border-radius: 10px; background: rgba(6,182,212,0.12); display: flex; align-items: center; justify-content: center;">
+        <i class="fas fa-location-crosshairs" style="color: var(--cyan-500); font-size: 1rem;"></i>
+      </div>
+      <div>
+        <p style="margin: 0; font-weight: 700; font-size: 0.88rem; color: var(--text-primary);" id="locationStatus">Detecting your location...</p>
+        <p style="margin: 0; font-size: 0.76rem; color: var(--text-muted);" id="locationSub">Tap to auto-detect your meteorological zone</p>
       </div>
     </div>
-
-    <form action="{{ url_for('farmer_rainfall_prediction') }}" method="POST">
-      <div class="row">
-        <div class="col-md-6 mb-3">
-          <label><i class="fas fa-map-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> Meteorological Zone</label>
-          <select name="region" id="regionSelect" class="form-control form-control-agro" required>
-            <option value="COASTAL KARNATAKA" selected>COASTAL KARNATAKA</option>
-            <option value="NORTH INTERIOR KARNATAKA">NORTH INTERIOR KARNATAKA</option>
-            <option value="SOUTH INTERIOR KARNATAKA">SOUTH INTERIOR KARNATAKA</option>
-            <option value="ANDAMAN &amp; NICOBAR ISLANDS">ANDAMAN &amp; NICOBAR ISLANDS</option>
-            <option value="TAMIL NADU">TAMIL NADU</option>
-            <option value="KERALA">KERALA</option>
-            <option value="MAHARASHTRA">MAHARASHTRA</option>
-            <option value="GUJARAT">GUJARAT</option>
-            <option value="PUNJAB">PUNJAB</option>
-            <option value="WEST BENGAL">WEST BENGAL</option>
-          </select>
-        </div>
-        <div class="col-md-6 mb-3">
-          <label><i class="fas fa-calendar-alt" style="color: var(--cyan-500);" aria-hidden="true"></i> Target Month</label>
-          <select name="month" id="monthSelect" class="form-control form-control-agro" required>
-            <option value="JAN">January</option><option value="FEB">February</option>
-            <option value="MAR">March</option><option value="APR">April</option>
-            <option value="MAY">May</option><option value="JUN">June</option>
-            <option value="JUL" selected>July</option><option value="AUG">August</option>
-            <option value="SEP">September</option><option value="OCT">October</option>
-            <option value="NOV">November</option><option value="DEC">December</option>
-          </select>
-        </div>
-      </div>
-
-      <button type="submit" class="btn-agro-primary w-100" style="min-height: 52px; font-size: 1rem;">
-        <i class="fas fa-droplet" aria-hidden="true"></i> Compute Expected Rainfall
+    <div class="d-flex align-items-center" style="gap: 0.75rem;">
+      <span id="liveRainBadge" class="badge-agro badge-agro-cyan" style="display: none;">
+        <i class="fas fa-droplet"></i> <span id="liveRainValue">--</span> mm (5-day)
+      </span>
+      <button type="button" class="btn-agro-secondary btn-sm" onclick="detectLocation()" id="detectBtn">
+        <i class="fas fa-crosshairs"></i> Detect
       </button>
-    </form>
-
-    {% if result %}
-    <div class="mt-4 result-card-glow text-center animate-fade-in-up" style="background: linear-gradient(135deg, rgba(6,182,212,0.16) 0%, rgba(16,185,129,0.28) 100%); border-color: var(--cyan-500);">
-      <span class="badge-agro badge-agro-cyan mb-3"><i class="fas fa-cloud-rain" aria-hidden="true"></i> Forecasted Precipitation</span>
-      <p class="text-muted mb-1" style="font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.06em; font-weight: 700;">Expected Monthly Rainfall</p>
-      <h1 class="gradient-text" style="font-size: 3rem; font-weight: 800;">{{ result }} <span style="font-size: 1.2rem; color: var(--text-muted); font-weight: 600;">mm</span></h1>
-      <p class="text-muted mb-0" style="font-size: 0.85rem;">Averaged from 1901–2015 IMD meteorological records.</p>
     </div>
+  </div>
+</div>
+
+{# ── Quick Region Presets ── #}
+<div class="soil-preset-container mb-4">
+  <button type="button" class="soil-preset-btn" onclick="setRegion('COASTAL KARNATAKA')"><i class="fas fa-water"></i> Coastal Karnataka</button>
+  <button type="button" class="soil-preset-btn" onclick="setRegion('NORTH INTERIOR KARNATAKA')"><i class="fas fa-mountain"></i> N. Interior Karnataka</button>
+  <button type="button" class="soil-preset-btn" onclick="setRegion('TAMIL NADU')"><i class="fas fa-gopuram"></i> Tamil Nadu</button>
+  <button type="button" class="soil-preset-btn" onclick="setRegion('KERALA')"><i class="fas fa-leaf"></i> Kerala</button>
+  <button type="button" class="soil-preset-btn" onclick="setRegion('KONKAN & GOA')"><i class="fas fa-umbrella-beach"></i> Konkan & Goa</button>
+  <button type="button" class="soil-preset-btn" onclick="setRegion('TELANGANA')"><i class="fas fa-monument"></i> Telangana</button>
+</div>
+
+{# ── Estimation Form ── #}
+<div class="glass-card">
+  <form method="POST" id="rainfallForm">
+    <div class="row" style="row-gap: 1.25rem;">
+      <div class="col-md-5">
+        <label for="region"><i class="fas fa-map-marked-alt" style="color: var(--cyan-500); margin-right: 6px;"></i> Meteorological Subdivision</label>
+        <select name="region" id="region" class="form-control-agro" required>
+          <option value="" disabled selected>Select zone...</option>
+          <option value="ANDAMAN & NICOBAR ISLANDS">Andaman & Nicobar Islands</option>
+          <option value="ARUNACHAL PRADESH">Arunachal Pradesh</option>
+          <option value="ASSAM & MEGHALAYA">Assam & Meghalaya</option>
+          <option value="NAGA MANI MIZO TRIPURA">Nagaland, Manipur, Mizoram & Tripura</option>
+          <option value="SUB HIMALAYAN WEST BENGAL & SIKKIM">Sub-Himalayan WB & Sikkim</option>
+          <option value="GANGETIC WEST BENGAL">Gangetic West Bengal</option>
+          <option value="ORISSA">Odisha</option>
+          <option value="JHARKHAND">Jharkhand</option>
+          <option value="BIHAR">Bihar</option>
+          <option value="EAST UTTAR PRADESH">East Uttar Pradesh</option>
+          <option value="WEST UTTAR PRADESH">West Uttar Pradesh</option>
+          <option value="UTTARAKHAND">Uttarakhand</option>
+          <option value="HARYANA DELHI & CHANDIGARH">Haryana, Delhi & Chandigarh</option>
+          <option value="PUNJAB">Punjab</option>
+          <option value="HIMACHAL PRADESH">Himachal Pradesh</option>
+          <option value="JAMMU & KASHMIR">Jammu & Kashmir</option>
+          <option value="WEST RAJASTHAN">West Rajasthan</option>
+          <option value="EAST RAJASTHAN">East Rajasthan</option>
+          <option value="WEST MADHYA PRADESH">West Madhya Pradesh</option>
+          <option value="EAST MADHYA PRADESH">East Madhya Pradesh</option>
+          <option value="GUJARAT REGION">Gujarat Region</option>
+          <option value="SAURASHTRA & KUTCH">Saurashtra & Kutch</option>
+          <option value="KONKAN & GOA">Konkan & Goa</option>
+          <option value="MADHYA MAHARASHTRA">Madhya Maharashtra</option>
+          <option value="MARATHWADA">Marathwada</option>
+          <option value="VIDARBHA">Vidarbha</option>
+          <option value="CHHATTISGARH">Chhattisgarh</option>
+          <option value="COASTAL ANDHRA PRADESH">Coastal Andhra Pradesh</option>
+          <option value="TELANGANA">Telangana</option>
+          <option value="RAYALASEEMA">Rayalaseema</option>
+          <option value="TAMIL NADU">Tamil Nadu</option>
+          <option value="COASTAL KARNATAKA">Coastal Karnataka</option>
+          <option value="NORTH INTERIOR KARNATAKA">North Interior Karnataka</option>
+          <option value="SOUTH INTERIOR KARNATAKA">South Interior Karnataka</option>
+          <option value="KERALA">Kerala</option>
+          <option value="LAKSHADWEEP">Lakshadweep</option>
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="month"><i class="fas fa-calendar-day" style="color: var(--amber-500); margin-right: 6px;"></i> Target Month</label>
+        <select name="month" id="month" class="form-control-agro" required>
+          <option value="" disabled selected>Select month...</option>
+          <option value="JAN">January</option>
+          <option value="FEB">February</option>
+          <option value="MAR">March</option>
+          <option value="APR">April</option>
+          <option value="MAY">May</option>
+          <option value="JUN">June</option>
+          <option value="JUL">July</option>
+          <option value="AUG">August</option>
+          <option value="SEP">September</option>
+          <option value="OCT">October</option>
+          <option value="NOV">November</option>
+          <option value="DEC">December</option>
+        </select>
+      </div>
+      <div class="col-md-3 d-flex align-items-end">
+        <button type="submit" class="btn-agro-primary w-100" style="min-height: 48px;">
+          <i class="fas fa-cloud-rain"></i> Estimate Rainfall
+        </button>
+      </div>
+    </div>
+  </form>
+</div>
+
+{# ── Live 5-Day Rain Forecast Strip ── #}
+<div id="liveForecastSection" style="display: none; margin-top: 1.5rem;">
+  <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--text-primary); margin-bottom: 1rem;">
+    <i class="fas fa-cloud-showers-water" style="color: var(--cyan-500); margin-right: 8px;"></i>
+    Live 5-Day Precipitation Forecast
+  </h5>
+  <div style="display: flex; gap: 0.75rem; overflow-x: auto; padding-bottom: 0.5rem; scroll-snap-type: x mandatory; -webkit-overflow-scrolling: touch;" id="liveForecastCards">
+    <!-- JS populated -->
+  </div>
+</div>
+
+{# ── Historical Result Card ── #}
+{% if result %}
+<div class="result-card-glow" style="margin-top: 2rem; text-align: center;">
+  <p style="font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cyan-500); margin-bottom: 0.5rem;">
+    <i class="fas fa-chart-area"></i> Historical Monthly Average (IMD 1901–2015)
+  </p>
+  <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 2.8rem; margin: 0.25rem 0;
+             background: linear-gradient(135deg, var(--cyan-400), var(--emerald-500)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
+    {{ result }} <span style="font-size: 1.2rem;">mm</span>
+  </h2>
+  <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.5rem;">
+    Expected rainfall for <strong style="color: var(--text-primary);">{{ request.form.get('region', 'Selected Zone') }}</strong>
+    in <strong style="color: var(--text-primary);">{{ request.form.get('month', 'Selected Month') }}</strong>
+  </p>
+  {% set r_val = result|float %}
+  <div style="margin-top: 1rem;">
+    {% if r_val > 300 %}
+      <span class="badge-agro badge-agro-cyan"><i class="fas fa-water"></i> Very Heavy Rainfall Zone</span>
+    {% elif r_val > 150 %}
+      <span class="badge-agro badge-agro-emerald"><i class="fas fa-cloud-showers-heavy"></i> Moderate–Heavy Rainfall</span>
+    {% elif r_val > 50 %}
+      <span class="badge-agro badge-agro-amber"><i class="fas fa-cloud-rain"></i> Light–Moderate Rainfall</span>
+    {% else %}
+      <span class="badge-agro badge-agro-amber"><i class="fas fa-sun"></i> Low Rainfall / Dry Period</span>
     {% endif %}
   </div>
 </div>
-{% endblock %}
+{% endif %}
 
-{% block extra_scripts %}
-{{ super() }}
+{# ── Model Intelligence ── #}
+<div class="glass-card" style="margin-top: 2rem; padding: 1.5rem;">
+  <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 1.25rem; color: var(--text-primary);">
+    <i class="fas fa-brain" style="color: var(--cyan-500); margin-right: 8px;"></i>
+    Model Intelligence
+  </h5>
+  <div class="row" style="row-gap: 1.5rem;">
+    <div class="col-md-6">
+      <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md);">
+        <h6 style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cyan-500); margin-bottom: 0.75rem;">
+          <i class="fas fa-microchip"></i> ML Model Used
+        </h6>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; margin: 0;">
+          <strong>Subdivisional Rainfall Regressor</strong> trained on the <strong>IMD 115-Year Dataset (1901–2015)</strong>.
+          Uses historical time-series analysis of 36 meteorological subdivisions across India with monthly resolution.
+        </p>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md);">
+        <h6 style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--emerald-500); margin-bottom: 0.75rem;">
+          <i class="fas fa-flask"></i> Estimation Basis
+        </h6>
+        <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; margin: 0;">
+          Evaluates <strong>monsoonal seasonality patterns</strong>, <strong>subdivisional topography</strong> (coastal vs. interior vs. Himalayan),
+          and long-term precipitation trends. Live data combines OpenWeather radar precipitation forecasts.
+        </p>
+      </div>
+    </div>
+  </div>
+</div>
+
 <script>
-function applyRainPreset(region,month){
-  document.getElementById('regionSelect').value=region;
-  document.getElementById('monthSelect').value=month;
+const ZONE_MAP = {
+  'karnataka': 'COASTAL KARNATAKA', 'goa': 'KONKAN & GOA', 'maharashtra': 'MADHYA MAHARASHTRA',
+  'tamil nadu': 'TAMIL NADU', 'kerala': 'KERALA', 'andhra pradesh': 'COASTAL ANDHRA PRADESH',
+  'telangana': 'TELANGANA', 'rajasthan': 'WEST RAJASTHAN', 'gujarat': 'GUJARAT REGION',
+  'madhya pradesh': 'WEST MADHYA PRADESH', 'uttar pradesh': 'EAST UTTAR PRADESH',
+  'bihar': 'BIHAR', 'odisha': 'ORISSA', 'west bengal': 'GANGETIC WEST BENGAL',
+  'jharkhand': 'JHARKHAND', 'chhattisgarh': 'CHHATTISGARH', 'punjab': 'PUNJAB',
+  'haryana': 'HARYANA DELHI & CHANDIGARH', 'himachal pradesh': 'HIMACHAL PRADESH',
+  'uttarakhand': 'UTTARAKHAND', 'assam': 'ASSAM & MEGHALAYA',
+  'arunachal pradesh': 'ARUNACHAL PRADESH'
+};
+
+const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
+
+function setRegion(val) {
+  document.getElementById('region').value = val;
 }
+
+function detectLocation() {
+  const btn = document.getElementById('detectBtn');
+  const status = document.getElementById('locationStatus');
+  const sub = document.getElementById('locationSub');
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Detecting...';
+  status.textContent = 'Acquiring GPS coordinates...';
+
+  if (!navigator.geolocation) {
+    status.textContent = 'Geolocation not supported';
+    sub.textContent = 'Please select a zone manually';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect';
+    return;
+  }
+
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    const lat = pos.coords.latitude, lon = pos.coords.longitude;
+    status.textContent = `Located: ${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E`;
+    sub.textContent = 'Fetching weather data...';
+
+    // Auto-select month
+    const curMonth = MONTHS[new Date().getMonth()];
+    document.getElementById('month').value = curMonth;
+
+    // Reverse geocode to guess state
+    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`)
+      .then(r => r.json())
+      .then(geo => {
+        const state = (geo.address && geo.address.state) ? geo.address.state.toLowerCase() : '';
+        const zone = ZONE_MAP[state];
+        if (zone) {
+          document.getElementById('region').value = zone;
+          sub.textContent = `Zone: ${zone} | Month: ${curMonth}`;
+        } else {
+          sub.textContent = `State: ${geo.address ? geo.address.state : 'Unknown'} — select zone manually`;
+        }
+      }).catch(() => { sub.textContent = 'Could not determine state — select zone manually'; });
+
+    // Fetch 5-day rain forecast
+    fetch(`/api/weather/coords/${lat}/${lon}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.forecast && data.forecast.length) {
+          let totalRain = 0;
+          const container = document.getElementById('liveForecastCards');
+          container.innerHTML = '';
+          data.forecast.slice(0, 5).forEach(day => {
+            totalRain += day.rain_mm || 0;
+            const dt = new Date(day.date);
+            const dayName = dt.toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+            container.innerHTML += `
+              <div style="min-width: 140px; flex-shrink: 0; scroll-snap-align: start; background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-md); padding: 1rem; text-align: center;">
+                <p style="font-size: 0.76rem; font-weight: 600; color: var(--text-muted); margin-bottom: 0.5rem;">${dayName}</p>
+                <i class="fas ${day.icon || 'fa-cloud'}" style="font-size: 1.5rem; color: var(--cyan-500); margin-bottom: 0.5rem; display: block;"></i>
+                <p style="font-weight: 800; font-size: 1rem; color: var(--text-primary); margin: 0;">${day.rain_mm || 0} mm</p>
+                <p style="font-size: 0.76rem; color: var(--text-muted); margin: 0.25rem 0 0;">${day.high || '--'}° / ${day.low || '--'}°</p>
+              </div>`;
+          });
+          document.getElementById('liveForecastSection').style.display = 'block';
+          document.getElementById('liveRainBadge').style.display = 'inline-flex';
+          document.getElementById('liveRainValue').textContent = totalRain.toFixed(1);
+        }
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect';
+      }).catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect';
+      });
+
+  }, function(err) {
+    status.textContent = 'Location access denied';
+    sub.textContent = 'Please select a zone manually';
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect';
+  }, { enableHighAccuracy: true, timeout: 8000 });
+}
+
+// Auto-detect on page load
+document.addEventListener('DOMContentLoaded', function() { detectLocation(); });
 </script>
+
 {% endblock %}

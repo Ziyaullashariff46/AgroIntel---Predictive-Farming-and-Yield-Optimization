@@ -91,7 +91,46 @@
     </div>
     {% endif %}
   </div>
+
+  <!-- ═══════════════════════════════════════════
+       EXPLANATION CARD — ML MODEL & BASIS
+       ═══════════════════════════════════════════ -->
+  <div class="glass-card" style="margin-top: 1.5rem; padding: 1.5rem;">
+    <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 1.25rem; color: var(--text-primary);">
+      <i class="fas fa-brain" style="color: var(--emerald-500); margin-right: 8px;"></i>
+      Model Intelligence
+    </h5>
+
+    <div class="row" style="row-gap: 1.5rem;">
+      <div class="col-md-6">
+        <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md); height: 100%;">
+          <h6 style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--emerald-500); margin-bottom: 0.75rem;">
+            <i class="fas fa-microchip"></i> ML Model Used
+          </h6>
+          <p class="text-muted mb-0" style="font-size: 0.85rem; line-height: 1.6;">
+            <strong>Decision Tree Classifier & Categorical Encoder</strong><br>
+            Trained on soil nutrient deficiency datasets (`Fertilizer Prediction.csv`). Maps non-linear decision nodes to classify exact commercial chemical/organic formulas (Urea, DAP, 14-35-14, 28-28, 17-17-17, 20-20, 10-26-26).
+          </p>
+        </div>
+      </div>
+
+      <div class="col-md-6">
+        <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md); height: 100%;">
+          <h6 style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cyan-500); margin-bottom: 0.75rem;">
+            <i class="fas fa-flask"></i> Estimation Basis
+          </h6>
+          <ul class="text-muted mb-0 pl-3" style="font-size: 0.84rem; line-height: 1.6;">
+            <li><strong>NPK Stoichiometric Deficit:</strong> Compares present soil N-P-K levels with target crop requirements.</li>
+            <li><strong>Pedological Soil Class:</strong> Accounts for ion exchange capacity in Sandy, Loamy, Black, Red & Clayey soils.</li>
+            <li><strong>Moisture & Thermal Factor:</strong> Evaluates soil moisture % and ambient temperature to avoid root burn.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
 </div>
+
 {% endblock %}
 
 {% block extra_scripts %}
