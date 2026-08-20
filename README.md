@@ -30,6 +30,7 @@
 13. [Utility Scripts](#-utility-scripts)
 14. [Screenshots & Use Cases](#-screenshots--use-cases)
 15. [Recent Architecture Changes](#-recent-architecture-changes)
+16. [Proposed Features & Architectural Roadmap (Multilingual & Voice AI)](#-proposed-features--architectural-roadmap-multilingual--voice-ai)
 
 ---
 
@@ -769,6 +770,72 @@ Access at: **`http://127.0.0.1:5000`**
 | **Rainfall UI Overhaul** | Rewrote `rainfall_prediction.html` with live GPS detection, preset region chips, 5-day rain forecast strip, and hero result cards. |
 | **Mandi Prices Redesign** | Redesigned `market_prices.html` with search bar, location detection, commodity highlight cards, and responsive data tables. |
 | **Legacy Cleanup** | Deleted `__pycache__/`, legacy DB dumps, redundant JSON city lists, and unused PHP scripts. |
+
+---
+
+## 🔮 Proposed Features & Architectural Roadmap (Multilingual & Voice AI)
+
+As recommended by project guides and domain advisors, the platform roadmap incorporates two major accessibility & localized user interaction modules:
+
+### 1. 🌐 Multilingual i18n System (Kannada, Hindi & English)
+
+To make AgroIntel accessible to rural farmers across India, a full **Internationalization (i18n)** layer is architected.
+
+#### Architectural Specification:
+- **Backend Translation Engine**: Integration of `Flask-Babel` / `gettext` for server-side Jinja2 template translations, alongside client-side JSON dictionary mapping (`assets/js/i18n/kn.json`, `assets/js/i18n/hi.json`, `assets/js/i18n/en.json`).
+- **Language Selector UI**: Navbar dropdown switcher (🇬🇧 English | 🇮🇳 ಕನ್ನಡ | 🇮🇳 हिंदी) with automatic `localStorage` persistence and session state storage (`session['lang']`).
+- **Dynamic Content Localization**:
+  - **Dynamic Dropdowns**: Crop names, soil types, and district names translated to native scripts (e.g., Rice → ಭತ್ತ / चावल, Maize → ಮೆಕ್ಕೆಜೋಳ / मक्का).
+  - **Live Weather & Mandi Labels**: Weather descriptions (e.g., "Partly Cloudy" → "ಭಾಗಶಃ ಮೋಡ ಮುಸುಕಿದ ವಾತಾವರಣ" / "आंशिक रूप से बादल") mapped via localized dictionary utilities.
+
+#### Project Data Structure Expansion:
+```
+AgroIntel/
+├── translations/
+│   ├── kn/LC_MESSAGES/messages.po  # Kannada translations
+│   ├── hi/LC_MESSAGES/messages.po  # Hindi translations
+│   └── en/LC_MESSAGES/messages.po  # English base
+└── assets/js/i18n/
+    ├── kn.json                      # Client-side UI strings (Kannada)
+    ├── hi.json                      # Client-side UI strings (Hindi)
+    └── lang-switch.js               # Dynamic DOM translation swapper
+```
+
+---
+
+### 2. 🎙️ Voice-Activated AI Command System
+
+For illiterate or digitally non-fluent farmers, a **Speech-to-Intent Voice Assistant** is designed to allow complete voice-guided navigation and hands-free data input.
+
+#### Architectural Specification:
+- **Speech-to-Text (STT) Processing**:
+  - **Client-Side Browser STT**: Web Speech API (`webkitSpeechRecognition` / `SpeechRecognition`) supporting language tags `kn-IN` (Kannada), `hi-IN` (Hindi), and `en-IN` (Indian English).
+  - **Backend Server-Side Fallback**: Integration option for `Vosk` (offline lightweight ASR) or OpenAI Whisper API via `/api/voice_command` POST endpoint for raw audio uploads.
+- **Natural Language Intent & Entity Parser**:
+  - Regex & Keyword Intent Matcher in Python parsing spoken sentences into structured JSON commands.
+  - **Example Voice Commands**:
+    - *"ನನ್ನ ಜಮೀನಿಗೆ ಯಾವ ಬೆಳೆ ಸೂಕ್ತ?"* (Which crop is suitable for my land?) → Navigates to `/farmer/crop_recommendation`.
+    - *"ಬೆಂಗಳೂರು ಮಂಡಿ ಬೆಲೆ ತೋರಿಸು"* (Show Bangalore mandi prices) → Triggers `/farmer/market_prices?city=Bangalore`.
+    - *"ಉಡುಪಿಯಲ್ಲಿ ಇವತ್ತು ಮಳೆ ಬರುತ್ತಾ?"* (Will it rain today in Udupi?) → Navigates to `/farmer/weather_forecast`.
+- **Text-to-Speech (TTS) Response**:
+  - Web Speech Synthesis API (`window.speechSynthesis`) for auditory feedback in the selected regional language.
+
+#### Technical Architecture Flow:
+```
+[ Farmer Microphone Input ]
+          │
+          ▼ (Regional Speech Audio)
+[ Web Speech API (kn-IN / hi-IN) ]
+          │
+          ▼ (Recognized Transcript Text)
+[ Intent Parser / Rule Engine ]
+     ├── Command: NAVIGATE ──► Redirect to Target Tool Page
+     ├── Command: PREDICT  ──► Auto-fill Form Inputs & Submit
+     └── Command: QUERY    ──► Fetch API Data (Weather / Mandi)
+          │
+          ▼ (Audio Feedback)
+[ Speech Synthesis (TTS Response in Kannada / Hindi) ]
+```
 
 ---
 
