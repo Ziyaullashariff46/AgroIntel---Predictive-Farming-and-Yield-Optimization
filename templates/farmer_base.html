@@ -417,6 +417,168 @@
   .sidebar-overlay { display: none !important; }
   .sidebar-close-btn { display: none !important; }
 }
+
+/* ════════════════════════════════════════════════════════
+   GLOBAL AI SUITE PAGE — RESPONSIVE FIXES
+   ════════════════════════════════════════════════════════ */
+
+/* Glass card inner padding scales down on small screens */
+.farmer-main-content .glass-card {
+  padding: 1.5rem;
+}
+@media (max-width: 575.98px) {
+  .farmer-main-content .glass-card {
+    padding: 1rem;
+    border-radius: 14px;
+  }
+  .farmer-main-content .glass-card + .glass-card {
+    margin-top: 1rem !important;
+  }
+}
+
+/* AI Suite page header spacing */
+.farmer-main-content .mb-4 h2 {
+  font-size: clamp(1.2rem, 4vw, 1.6rem) !important;
+}
+.farmer-main-content .mb-4 p.text-muted {
+  font-size: clamp(0.8rem, 2.5vw, 0.9rem) !important;
+}
+
+/* Row gap between form inputs — prevent sticking together */
+.farmer-main-content .row.g-3 > [class*="col-"] {
+  padding-top: 0.5rem;
+  padding-bottom: 0.5rem;
+}
+.farmer-main-content .row > [class*="col-"].mb-3,
+.farmer-main-content .row > [class*="col-"].mb-4 {
+  padding-bottom: 0;
+}
+
+/* Form controls — good touch target size on mobile */
+.farmer-main-content .form-control,
+.farmer-main-content .form-control-agro,
+.farmer-main-content select.form-control {
+  min-height: 46px;
+  font-size: 0.9rem;
+}
+@media (max-width: 575.98px) {
+  .farmer-main-content .form-control,
+  .farmer-main-content .form-control-agro,
+  .farmer-main-content select.form-control {
+    min-height: 48px;
+    font-size: 1rem; /* Prevents iOS zoom-on-focus */
+  }
+}
+
+/* Submit buttons — full width on small screens, proper height */
+.farmer-main-content button[type="submit"],
+.farmer-main-content .btn-agro-primary[type="submit"] {
+  min-height: 52px;
+  font-size: clamp(0.88rem, 2.5vw, 1rem);
+}
+
+/* Soil preset buttons — wrap cleanly on mobile */
+.soil-preset-container {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+.soil-preset-btn {
+  white-space: nowrap;
+  flex-shrink: 0;
+}
+@media (max-width: 575.98px) {
+  .soil-preset-btn {
+    font-size: 0.78rem;
+    padding: 0.4rem 0.75rem;
+  }
+}
+
+/* Model Intelligence cards — full width and readable on mobile */
+.farmer-main-content .row [class*="col-md-6"] > div,
+.farmer-main-content .row [class*="col-md-4"] > div {
+  margin-bottom: 0;
+}
+@media (max-width: 767.98px) {
+  .farmer-main-content .row [class*="col-md-6"],
+  .farmer-main-content .row [class*="col-md-4"] {
+    margin-bottom: 0.75rem;
+  }
+  .farmer-main-content .row [class*="col-md-6"]:last-child,
+  .farmer-main-content .row [class*="col-md-4"]:last-child {
+    margin-bottom: 0;
+  }
+}
+
+/* Result cards — responsive text */
+.result-card-glow h1 {
+  font-size: clamp(2rem, 8vw, 3rem) !important;
+}
+
+/* Table responsive — prevent overflow */
+.farmer-main-content .table-responsive {
+  border-radius: 10px;
+  overflow: hidden;
+}
+.farmer-main-content table {
+  font-size: clamp(0.75rem, 2vw, 0.85rem);
+}
+
+/* Slider input — touch-friendly */
+.farmer-main-content input[type="range"] {
+  height: 6px;
+  cursor: pointer;
+}
+@media (max-width: 575.98px) {
+  .farmer-main-content input[type="range"] {
+    height: 8px;
+  }
+}
+
+/* Badge spacing */
+.badge-agro {
+  margin-bottom: 0.35rem;
+  display: inline-flex;
+}
+
+/* py-3 wrapper on all tool pages — reduce on mobile */
+.farmer-main-content > .py-3 {
+  padding-top: 1.25rem !important;
+  padding-bottom: 1.25rem !important;
+}
+@media (min-width: 992px) {
+  .farmer-main-content > .py-3 {
+    padding-top: 1.75rem !important;
+    padding-bottom: 1.75rem !important;
+  }
+}
+
+/* Inner padded input groups */
+.farmer-main-content .p-3.rounded {
+  padding: 1rem !important;
+}
+@media (min-width: 768px) {
+  .farmer-main-content .p-3.rounded {
+    padding: 1.1rem 1.25rem !important;
+  }
+}
+
+/* Gap utility compatibility */
+.gap-2 { gap: 0.5rem !important; }
+.gap-3 { gap: 0.75rem !important; }
+
+/* Ensure full-width on mobile for any flex row children */
+@media (max-width: 575.98px) {
+  .farmer-main-content .d-flex.flex-wrap > * {
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+  .farmer-main-content .col-sm-6,
+  .farmer-main-content .col-md-3,
+  .farmer-main-content .col-md-4 {
+    margin-bottom: 0.75rem;
+  }
+}
 </style>
 
 {% block extra_scripts %}

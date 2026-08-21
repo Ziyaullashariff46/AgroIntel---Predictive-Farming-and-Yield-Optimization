@@ -278,8 +278,8 @@ function requestLocation() {
   const iconEl = document.getElementById('detectIcon');
   const retryBtn = document.getElementById('retryLocationBtn');
 
-  statusEl.textContent = 'Detecting your location...';
-  subEl.textContent = 'Allow location access for automatic weather data';
+  statusEl.textContent = 'Detecting your exact location...';
+  subEl.textContent = 'Allow location access for accurate weather data';
   iconEl.className = 'fas fa-crosshairs fa-spin';
   retryBtn.style.display = 'none';
 
@@ -293,30 +293,59 @@ function requestLocation() {
     return;
   }
 
-  navigator.geolocation.getCurrentPosition(
-    (pos) => {
-      userLat = pos.coords.latitude.toFixed(4);
-      userLon = pos.coords.longitude.toFixed(4);
-      statusEl.textContent = 'Location detected!';
-      subEl.textContent = `Coordinates: ${userLat}°, ${userLon}°`;
-      iconEl.className = 'fas fa-check-circle';
-      iconEl.parentElement.style.background = 'rgba(16,185,129,0.12)';
-      iconEl.parentElement.style.color = 'var(--emerald-500)';
-      fetchWeatherByCoords(userLat, userLon);
-      fetchNearbyCities(userLat, userLon);
-    },
-    (err) => {
-      statusEl.textContent = 'Location access denied';
-      subEl.textContent = 'Search for your city manually, or click Retry.';
-      iconEl.className = 'fas fa-location-crosshairs';
-      iconEl.parentElement.style.background = 'rgba(245,158,11,0.12)';
-      iconEl.parentElement.style.color = 'var(--amber-500)';
-      retryBtn.style.display = 'inline-flex';
-      // Load default nearby cities (Udupi area)
-      fetchNearbyCities(13.341, 74.742);
-    },
-    { enableHighAccuracy: true, timeout: 8000 }
-  );
+  function onSuccess(pos) {
+    userLat = pos.coords.latitude.toFixed(6);
+    userLon = pos.coords.longitude.toFixed(6);
+    const accuracy = pos.coords.accuracy ? `±${Math.round(pos.coords.accuracy)}m` : '';
+    statusEl.textContent = 'Location detected!';
+    subEl.textContent = `Fetching place name... (${accuracy})`;
+    iconEl.className = 'fas fa-spinner fa-spin';
+
+    // Call our Nominatim reverse geocode to get precise place name
+    fetch(`/api/reverse_geocode/${userLat}/${userLon}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.success && data.label) {
+          statusEl.textContent = `📍 ${data.label}`;
+          subEl.textContent = `GPS coordinates: ${parseFloat(userLat).toFixed(4)}°N, ${parseFloat(userLon).toFixed(4)}°E  (${accuracy})`;
+        } else {
+          statusEl.textContent = 'Location detected!';
+          subEl.textContent = `Coordinates: ${parseFloat(userLat).toFixed(4)}°N, ${parseFloat(userLon).toFixed(4)}°E`;
+        }
+        iconEl.className = 'fas fa-check-circle';
+        iconEl.parentElement.style.background = 'rgba(16,185,129,0.12)';
+        iconEl.parentElement.style.color = 'var(--emerald-500)';
+      })
+      .catch(() => {
+        statusEl.textContent = 'Location detected!';
+        subEl.textContent = `Lat: ${parseFloat(userLat).toFixed(4)}, Lon: ${parseFloat(userLon).toFixed(4)}`;
+        iconEl.className = 'fas fa-check-circle';
+        iconEl.parentElement.style.background = 'rgba(16,185,129,0.12)';
+        iconEl.parentElement.style.color = 'var(--emerald-500)';
+      });
+
+    fetchWeatherByCoords(userLat, userLon);
+    fetchNearbyCities(userLat, userLon);
+  }
+
+  function onError(err) {
+    statusEl.textContent = 'Location access denied';
+    subEl.textContent = 'Search for your city manually, or click Retry.';
+    iconEl.className = 'fas fa-location-crosshairs';
+    iconEl.parentElement.style.background = 'rgba(245,158,11,0.12)';
+    iconEl.parentElement.style.color = 'var(--amber-500)';
+    retryBtn.style.display = 'inline-flex';
+    // Load default nearby cities (Hassan/Udupi area)
+    fetchNearbyCities(13.007, 76.096);
+  }
+
+  // maximumAge: 0 forces a FRESH GPS fix — prevents stale cached position from returning wrong location
+  // timeout: 15000 gives enough time for GPS to lock accurately
+  navigator.geolocation.getCurrentPosition(onSuccess, onError, {
+    enableHighAccuracy: true,
+    timeout: 15000,
+    maximumAge: 0
+  });
 }
 
 /* ── FETCH WEATHER ── */

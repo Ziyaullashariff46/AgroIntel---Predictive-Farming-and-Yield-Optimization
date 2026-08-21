@@ -513,24 +513,83 @@ def farmer_weather_forecast():
 # JSON API ENDPOINTS — Weather, Nearby Cities, Market Prices
 # ═══════════════════════════════════════════════════════════════
 
+def nominatim_reverse_geocode(lat_f, lon_f):
+    """
+    Use OpenStreetMap Nominatim to reverse-geocode coordinates to a precise
+    district/town/village name. Returns a human-readable location string.
+    No API key required. Falls back gracefully.
+    """
+    try:
+        headers = {'User-Agent': 'AgroIntel-FarmerPortal/1.0 (agrointel@gmail.com)'}
+        url = (
+            f"https://nominatim.openstreetmap.org/reverse"
+            f"?lat={lat_f}&lon={lon_f}&format=json&zoom=10&addressdetails=1"
+        )
+        res = requests.get(url, headers=headers, timeout=5)
+        if res.status_code == 200:
+            data = res.json()
+            addr = data.get('address', {})
+            # Priority order: village > town > suburb > city_district > city > county > state_district
+            place = (
+                addr.get('village') or
+                addr.get('town') or
+                addr.get('suburb') or
+                addr.get('city_district') or
+                addr.get('city') or
+                addr.get('county') or
+                addr.get('state_district') or
+                addr.get('state') or
+                data.get('display_name', '').split(',')[0].strip()
+            )
+            state = addr.get('state', '')
+            return place, state
+    except Exception:
+        pass
+    return None, None
+
+
+@app.route('/api/reverse_geocode/<lat>/<lon>')
+def api_reverse_geocode(lat, lon):
+    """Return precise place name from GPS coordinates using Nominatim (free, no key needed)."""
+    try:
+        lat_f, lon_f = float(lat), float(lon)
+        place, state = nominatim_reverse_geocode(lat_f, lon_f)
+        if place:
+            label = f"{place}, {state}" if state else place
+            return jsonify({'place': place, 'state': state, 'label': label, 'success': True})
+        return jsonify({'place': None, 'success': False, 'error': 'Could not resolve location'})
+    except Exception as e:
+        return jsonify({'success': False, 'error': str(e)}), 500
+
+
 @app.route('/api/weather/coords/<lat>/<lon>')
 def api_weather_coords(lat, lon):
     """Current weather + 5-day forecast by latitude/longitude with fallback."""
     try:
         lat_f, lon_f = float(lat), float(lon)
 
-        # Try nearest city name for fallback label
-        nearest = get_nearby_cities(lat_f, lon_f, count=1)
-        city_label = nearest[0]['name'] if nearest else 'Local Region'
+        # Use Nominatim for a precise, district-level location label (free, no key needed).
+        # This fixes the Hassan→Mysore mismatch: OpenWeather resolves to nearest large city,
+        # but Nominatim gives the actual village/town/district the GPS coordinates are in.
+        nom_place, nom_state = nominatim_reverse_geocode(lat_f, lon_f)
+        if nom_place and nom_state:
+            city_label = f"{nom_place}, {nom_state}"
+        elif nom_place:
+            city_label = nom_place
+        else:
+            # Last resort: nearest city from our internal curated list
+            nearest = get_nearby_cities(lat_f, lon_f, count=1)
+            city_label = nearest[0]['name'] if nearest else 'Your Location'
 
-        # Current weather
+        # Current weather (use coords, not city name, for accuracy)
         curr_url = f"http://api.openweathermap.org/data/2.5/weather?lat={lat_f}&lon={lon_f}&units=metric&appid={OPENWEATHER_API_KEY}"
         curr_res = requests.get(curr_url, timeout=4)
         curr = curr_res.json() if curr_res.status_code == 200 else {}
 
         if curr.get('cod') == 200:
             current = {
-                'city': curr.get('name', city_label),
+                # Use Nominatim-derived city_label (accurate local name), NOT OpenWeather's curr['name']
+                'city': city_label,
                 'temp': curr['main']['temp'],
                 'feels_like': curr['main'].get('feels_like', curr['main']['temp']),
                 'humidity': curr['main']['humidity'],
