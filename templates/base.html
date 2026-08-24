@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <link rel="icon" type="image/png" href="{{ url_for('static_assets', path='img/logo.png') }}" />
   <title>{% block title %}AgroIntel | Intelligent Agriculture Platform{% endblock %}</title>
-  <meta name="description" content="AgroIntel — AI-powered smart agriculture platform for crop recommendations, yield forecasting, and live market intelligence.">
+  <meta name="description" content="AgroIntel — ML-powered smart agriculture platform for crop recommendations, yield forecasting, and live market intelligence.">
 
   <!-- Prevent theme flash -->
   <script>
@@ -167,7 +167,7 @@
             </li>
             <li class="nav-item">
               <span class="nav-link-custom" style="cursor: default; opacity: 0.55;">
-                <i class="fas fa-sidebar" aria-hidden="true"></i> Use sidebar for AI tools
+                <i class="fas fa-sidebar" aria-hidden="true"></i> Use sidebar for prediction tools
               </span>
             </li>
 
@@ -241,12 +241,12 @@
             <span class="brand-text">Agro<span class="brand-accent">Intel</span></span>
           </div>
           <p class="small" style="color: var(--text-muted);">
-            Intelligent agricultural portal empowering farmers with AI-driven crop recommendations, yield estimations, and live market intelligence.
+            A practical agricultural platform empowering farmers with ML-powered crop recommendations, yield estimations, and live market intelligence.
           </p>
         </div>
 
         <div class="col-6 col-lg-2 offset-lg-1">
-          <h6 class="font-weight-bold mb-3" style="color: var(--text-primary);">AI Suite</h6>
+          <h6 class="font-weight-bold mb-3" style="color: var(--text-primary);">Prediction Tools</h6>
           <ul class="list-unstyled small">
             <li class="mb-2"><a href="{{ url_for('farmer_crop_recommendation') }}">Crop Recommendation</a></li>
             <li class="mb-2"><a href="{{ url_for('farmer_fertilizer_recommendation') }}">Fertilizer Advisory</a></li>

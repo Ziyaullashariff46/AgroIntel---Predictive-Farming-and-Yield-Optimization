@@ -41,36 +41,36 @@ FALLBACK_MANDI_PRICES = {
     ],
     'Bangalore': [
         {'commodity': 'Rice', 'variety': 'Sona Masuri', 'market': 'Yeshwanthpur APMC', 'district': 'Bangalore', 'state': 'Karnataka', 'min_price': '3800', 'max_price': '4400', 'modal_price': '4100', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Tomato', 'variety': 'Hybrid', 'market': 'Kolar/Bangalore APMC', 'district': 'Bangalore', 'state': 'Karnataka', 'min_price': '1400', 'max_price': '2200', 'modal_price': '1800', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Onion', 'variety': 'Medium', 'market': 'Yeshwanthpur APMC', 'district': 'Bangalore', 'state': 'Karnataka', 'min_price': '2200', 'max_price': '2900', 'modal_price': '2550', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Tomato', 'variety': 'PKM-1 (Hybrid)', 'market': 'Kolar/Bangalore APMC', 'district': 'Bangalore', 'state': 'Karnataka', 'min_price': '1400', 'max_price': '2200', 'modal_price': '1800', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Onion', 'variety': 'Bellary Red', 'market': 'Yeshwanthpur APMC', 'district': 'Bangalore', 'state': 'Karnataka', 'min_price': '2200', 'max_price': '2900', 'modal_price': '2550', 'arrival_date': '11/08/2026'},
         {'commodity': 'Potato', 'variety': 'Jyoti', 'market': 'Yeshwanthpur APMC', 'district': 'Bangalore', 'state': 'Karnataka', 'min_price': '1600', 'max_price': '2100', 'modal_price': '1850', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Maize', 'variety': 'Yellow', 'market': 'Bangalore APMC', 'district': 'Bangalore', 'state': 'Karnataka', 'min_price': '2050', 'max_price': '2350', 'modal_price': '2200', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Ragi (Finger Millet)', 'variety': 'Local', 'market': 'Bangalore APMC', 'district': 'Bangalore', 'state': 'Karnataka', 'min_price': '3200', 'max_price': '3700', 'modal_price': '3450', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Maize', 'variety': 'Ganga Safed-2', 'market': 'Bangalore APMC', 'district': 'Bangalore', 'state': 'Karnataka', 'min_price': '2050', 'max_price': '2350', 'modal_price': '2200', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Ragi (Finger Millet)', 'variety': 'GPU-28', 'market': 'Bangalore APMC', 'district': 'Bangalore', 'state': 'Karnataka', 'min_price': '3200', 'max_price': '3700', 'modal_price': '3450', 'arrival_date': '11/08/2026'},
     ],
     'Mumbai': [
-        {'commodity': 'Onion', 'variety': 'Nashik Red', 'market': 'Vashi APMC (Mumbai)', 'district': 'Mumbai', 'state': 'Maharashtra', 'min_price': '2400', 'max_price': '3100', 'modal_price': '2750', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Potato', 'variety': 'Indore', 'market': 'Vashi APMC (Mumbai)', 'district': 'Mumbai', 'state': 'Maharashtra', 'min_price': '1700', 'max_price': '2200', 'modal_price': '1950', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Cotton', 'variety': 'Medium Staple', 'market': 'Mumbai APMC', 'district': 'Mumbai', 'state': 'Maharashtra', 'min_price': '6800', 'max_price': '7400', 'modal_price': '7100', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Soyabean', 'variety': 'Yellow', 'market': 'Vashi APMC', 'district': 'Mumbai', 'state': 'Maharashtra', 'min_price': '4400', 'max_price': '4900', 'modal_price': '4650', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Tur (Pigeon Pea)', 'variety': 'Desi', 'market': 'Vashi APMC', 'district': 'Mumbai', 'state': 'Maharashtra', 'min_price': '9200', 'max_price': '10500', 'modal_price': '9800', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Onion', 'variety': 'Nasik Red (Agrifound)', 'market': 'Vashi APMC (Mumbai)', 'district': 'Mumbai', 'state': 'Maharashtra', 'min_price': '2400', 'max_price': '3100', 'modal_price': '2750', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Potato', 'variety': 'Kufri Jyoti', 'market': 'Vashi APMC (Mumbai)', 'district': 'Mumbai', 'state': 'Maharashtra', 'min_price': '1700', 'max_price': '2200', 'modal_price': '1950', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Cotton', 'variety': 'Shankar-6 (H4)', 'market': 'Mumbai APMC', 'district': 'Mumbai', 'state': 'Maharashtra', 'min_price': '6800', 'max_price': '7400', 'modal_price': '7100', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Soyabean', 'variety': 'JS 335', 'market': 'Vashi APMC', 'district': 'Mumbai', 'state': 'Maharashtra', 'min_price': '4400', 'max_price': '4900', 'modal_price': '4650', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Tur (Pigeon Pea)', 'variety': 'ICPL 87119 (Asha)', 'market': 'Vashi APMC', 'district': 'Mumbai', 'state': 'Maharashtra', 'min_price': '9200', 'max_price': '10500', 'modal_price': '9800', 'arrival_date': '11/08/2026'},
     ],
     'Delhi': [
-        {'commodity': 'Wheat', 'variety': 'Dara', 'market': 'Azadpur APMC', 'district': 'Delhi', 'state': 'Delhi', 'min_price': '2350', 'max_price': '2600', 'modal_price': '2480', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Rice (Basmati)', 'variety': '1121 Raw', 'market': 'Naya Bazar APMC', 'district': 'Delhi', 'state': 'Delhi', 'min_price': '8200', 'max_price': '9500', 'modal_price': '8800', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Tomato', 'variety': 'Hybrid', 'market': 'Azadpur APMC', 'district': 'Delhi', 'state': 'Delhi', 'min_price': '1600', 'max_price': '2400', 'modal_price': '2000', 'arrival_date': '11/08/2026'},
-        {'commodity': 'Mustard', 'variety': 'Black', 'market': 'Delhi APMC', 'district': 'Delhi', 'state': 'Delhi', 'min_price': '5200', 'max_price': '5800', 'modal_price': '5500', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Wheat', 'variety': 'HD 2967 (Dara)', 'market': 'Azadpur APMC', 'district': 'Delhi', 'state': 'Delhi', 'min_price': '2350', 'max_price': '2600', 'modal_price': '2480', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Rice (Basmati)', 'variety': 'Pusa Basmati 1121 (Raw)', 'market': 'Naya Bazar APMC', 'district': 'Delhi', 'state': 'Delhi', 'min_price': '8200', 'max_price': '9500', 'modal_price': '8800', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Tomato', 'variety': 'Pusa Ruby (Hybrid)', 'market': 'Azadpur APMC', 'district': 'Delhi', 'state': 'Delhi', 'min_price': '1600', 'max_price': '2400', 'modal_price': '2000', 'arrival_date': '11/08/2026'},
+        {'commodity': 'Mustard', 'variety': 'Pusa Bold (RH-30)', 'market': 'Delhi APMC', 'district': 'Delhi', 'state': 'Delhi', 'min_price': '5200', 'max_price': '5800', 'modal_price': '5500', 'arrival_date': '11/08/2026'},
     ]
 }
 
 DEFAULT_FALLBACK_PRICES = [
-    {'commodity': 'Rice / Paddy', 'variety': 'Common', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '2200', 'max_price': '2550', 'modal_price': '2380', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Wheat', 'variety': 'Sharbati', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '2300', 'max_price': '2650', 'modal_price': '2450', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Maize (Corn)', 'variety': 'Yellow', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '1950', 'max_price': '2250', 'modal_price': '2100', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Cotton', 'variety': 'Long Staple', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '6700', 'max_price': '7350', 'modal_price': '7050', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Sugarcane', 'variety': 'Medium', 'market': 'Regional Mill Gate', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '315', 'max_price': '350', 'modal_price': '330', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Soyabean', 'variety': 'Yellow', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '4300', 'max_price': '4850', 'modal_price': '4600', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Tomato', 'variety': 'Local', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '1500', 'max_price': '2300', 'modal_price': '1900', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Onion', 'variety': 'Red', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '2100', 'max_price': '2800', 'modal_price': '2450', 'arrival_date': '10/08/2026'},
+    {'commodity': 'Rice / Paddy', 'variety': 'MTU 1010 (Swarna)', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '2200', 'max_price': '2550', 'modal_price': '2380', 'arrival_date': '10/08/2026'},
+    {'commodity': 'Wheat', 'variety': 'GW-322 (Sharbati)', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '2300', 'max_price': '2650', 'modal_price': '2450', 'arrival_date': '10/08/2026'},
+    {'commodity': 'Maize (Corn)', 'variety': 'Ganga Safed-2', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '1950', 'max_price': '2250', 'modal_price': '2100', 'arrival_date': '10/08/2026'},
+    {'commodity': 'Cotton', 'variety': 'Shankar-6 (Long Staple)', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '6700', 'max_price': '7350', 'modal_price': '7050', 'arrival_date': '10/08/2026'},
+    {'commodity': 'Sugarcane', 'variety': 'Co 86032', 'market': 'Regional Mill Gate', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '315', 'max_price': '350', 'modal_price': '330', 'arrival_date': '10/08/2026'},
+    {'commodity': 'Soyabean', 'variety': 'JS 335', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '4300', 'max_price': '4850', 'modal_price': '4600', 'arrival_date': '10/08/2026'},
+    {'commodity': 'Tomato', 'variety': 'PKM-1 (Local Hybrid)', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '1500', 'max_price': '2300', 'modal_price': '1900', 'arrival_date': '10/08/2026'},
+    {'commodity': 'Onion', 'variety': 'Nasik Red (Agrifound)', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '2100', 'max_price': '2800', 'modal_price': '2450', 'arrival_date': '10/08/2026'},
 ]
 
 
