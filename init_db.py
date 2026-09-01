@@ -1,52 +1,41 @@
-import sqlite3
+"""
+Create the AgroIntel SQLite database from schema.sql.
+
+Safe to run repeatedly: schema.sql uses CREATE TABLE IF NOT EXISTS, so this
+adds any missing table without touching existing rows. app.py calls the same
+ensure_db() on startup, so a fresh deploy (or a fresh mounted volume) builds
+its own database with no manual step.
+"""
 import os
-import re
+import sqlite3
 
-DB_FILE = os.path.join(os.path.dirname(__file__), 'agrointel.db')
-SQL_FILE = os.path.join(os.path.dirname(__file__), 'db', 'agriculture_portal.sql')
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+SCHEMA_FILE = os.path.join(BASE_DIR, 'schema.sql')
 
-def init_db():
-    print(f"Initializing SQLite database at: {DB_FILE}")
-    if os.path.exists(DB_FILE):
-        os.remove(DB_FILE)
+# Overridable so a deploy can point at a mounted persistent volume,
+# e.g. DB_PATH=/var/data/agrointel.db on Render.
+DB_FILE = os.getenv('DB_PATH') or os.path.join(BASE_DIR, 'agrointel.db')
 
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
 
-    with open(SQL_FILE, 'r', encoding='utf-8', errors='ignore') as f:
-        sql_script = f.read()
+def ensure_db(db_file=None):
+    """Create the database and any missing tables. Returns the path used."""
+    db_file = db_file or DB_FILE
+    parent = os.path.dirname(os.path.abspath(db_file))
+    os.makedirs(parent, exist_ok=True)
 
-    # Slice off ALTER TABLE section at the bottom of MySQL dump
-    alter_idx = sql_script.find('ALTER TABLE')
-    if alter_idx != -1:
-        sql_script = sql_script[:alter_idx]
+    with open(SCHEMA_FILE, 'r', encoding='utf-8') as f:
+        schema = f.read()
 
-    # Clean MySQL specific keywords
-    sql_script = re.sub(r'ENGINE\s*=\s*\w+', '', sql_script, flags=re.IGNORECASE)
-    sql_script = re.sub(r'DEFAULT\s*CHARSET\s*=\s*\w+', '', sql_script, flags=re.IGNORECASE)
-    sql_script = re.sub(r'COLLATE\s*=\s*[\w_]+', '', sql_script, flags=re.IGNORECASE)
-    sql_script = re.sub(r'int\(\d+\)', 'INTEGER', sql_script, flags=re.IGNORECASE)
-    sql_script = re.sub(r'\bdouble\b', 'REAL', sql_script, flags=re.IGNORECASE)
-    sql_script = re.sub(r'varchar\(\d+\)', 'TEXT', sql_script, flags=re.IGNORECASE)
-    
-    # Filter out set statements and comments
-    cleaned_lines = []
-    for line in sql_script.splitlines():
-        line_u = line.strip().upper()
-        if line_u.startswith('SET ') or line_u.startswith('START TRANSACTION') or line_u.startswith('COMMIT') or line_u.startswith('/*!40101'):
-            continue
-        cleaned_lines.append(line)
-
-    clean_sql = '\n'.join(cleaned_lines)
-
+    conn = sqlite3.connect(db_file)
     try:
-        cursor.executescript(clean_sql)
+        conn.executescript(schema)
         conn.commit()
-        print("Database schema and seed data created successfully!")
-    except Exception as e:
-        print(f"executescript error: {e}")
+    finally:
+        conn.close()
+    return db_file
 
-    conn.close()
 
 if __name__ == '__main__':
-    init_db()
+    path = ensure_db()
+    print(f"Database ready at: {path}")
+    print("Run 'python seed_sample_users.py' to add the demo accounts.")

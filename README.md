@@ -230,7 +230,7 @@ AgroIntel supports two active user roles with session-based authentication:
 
 ### Farmer Portal
 - **Login**: `/login/farmer` — Authenticates against `farmerlogin` table using email + password.
-- **Registration**: `/register/farmer` — Creates a new farmer account with name, email, phone, password, state, district, gender, and birthday.
+- **Registration**: `/register/farmer` — Creates a new farmer account with name, email, phone, password (confirmed, min 8 chars), state, and district.
 - **Session Data**: `user_type`, `farmer_id`, `farmer_name`, `farmer_email`.
 - **Default Redirect**: `/farmer/crop_recommendation` (first AI tool).
 - **Access**: All 7 AI Science Suite tools + Market Intelligence.
@@ -548,8 +548,8 @@ AgroIntel uses **SQLite** with 4 tables:
 | password | TEXT | Plain-text password |
 | email | TEXT | Login email |
 | phone_no | TEXT | Phone number |
-| F_gender | TEXT | Gender |
-| F_birthday | TEXT | Date of birth |
+| F_gender | TEXT | Gender (not collected at registration — stored as "Not specified") |
+| F_birthday | TEXT | Date of birth (not collected at registration — stored as a neutral default) |
 | F_State | TEXT | State |
 | F_District | TEXT | District |
 | F_Location | TEXT | Locality |
@@ -712,10 +712,11 @@ Access at: **`http://127.0.0.1:5000`**
 
 | Role | URL | Email / Username | Password |
 |---|---|---|---|
-| **Farmer** | `/login/farmer` | `farmer@agrointel.com` | `password` |
-| **Admin** | `/login/admin` | `admin` | `password` |
+| **Farmer** | `/login/farmer` | `farmer@agrointel.com` | `Demo@2026!` |
+| **Admin** | `/login/admin` | `admin` | `Demo@2026!` |
 
-> You can register new farmer accounts at `/register/farmer`.
+> You can register new farmer accounts at `/register/farmer` (minimum 8 characters, confirm-password required).
+> Login is rate-limited to 5 attempts per 15 minutes per IP address.
 
 ---
 

@@ -10,27 +10,25 @@ def seed_users():
     # Ensure Admin Account exists
     cursor.execute("SELECT * FROM admin WHERE admin_name = 'admin'")
     if not cursor.fetchone():
-        cursor.execute("INSERT INTO admin (admin_id, admin_name, admin_password) VALUES (1, 'admin', 'password')")
+        cursor.execute("INSERT INTO admin (admin_id, admin_name, admin_password) VALUES (1, 'admin', 'Demo@2026!')")
 
     # Seed Farmer Account
     cursor.execute("SELECT * FROM farmerlogin WHERE email = 'farmer@agrointel.com'")
     if not cursor.fetchone():
         cursor.execute("""
             INSERT INTO farmerlogin (farmer_id, farmer_name, password, email, phone_no, F_gender, F_birthday, F_State, F_District, F_Location, otp)
-            VALUES (100, 'Sample Farmer', 'password', 'farmer@agrointel.com', '9876543210', 'Male', '1995-05-15', 'Karnataka', 'Udupi', 'Bantakal', 0)
+            VALUES (100, 'Sample Farmer', 'Demo@2026!', 'farmer@agrointel.com', '9876543210', 'Male', '1995-05-15', 'Karnataka', 'Udupi', 'Bantakal', 0)
         """)
 
-    # Seed Buyer/Customer Account
-    cursor.execute("SELECT * FROM custlogin WHERE email = 'buyer@agrointel.com'")
-    if not cursor.fetchone():
-        cursor.execute("""
-            INSERT INTO custlogin (cust_id, cust_name, password, email, address, city, pincode, state, phone_no, otp)
-            VALUES (100, 'Sample Buyer', 'password', 'buyer@agrointel.com', 'Main Street', 'Udupi', '576101', 'Karnataka', '9876543211', 0)
-        """)
+    # Rotate any legacy account still holding the dictionary-word password
+    cursor.execute("UPDATE farmerlogin SET password = 'Demo@2026!' WHERE password = 'password'")
+    cursor.execute("UPDATE admin SET admin_password = 'Demo@2026!' WHERE admin_password = 'password'")
 
     conn.commit()
     conn.close()
-    print("Sample test accounts successfully seeded into database.")
+    print("Sample test accounts seeded successfully.")
+    print("  Farmer  -> email: farmer@agrointel.com  | password: Demo@2026!")
+    print("  Admin   -> username: admin              | password: Demo@2026!")
 
 if __name__ == '__main__':
     seed_users()

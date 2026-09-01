@@ -24,15 +24,46 @@
         <p class="text-muted small">Enter your credentials to access your dashboard</p>
       </div>
 
+      <!-- Demo Credentials (for reviewer/evaluator access) -->
+      <div class="mb-3 p-3 rounded" style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); font-size: 0.82rem;">
+        <div class="d-flex align-items-center justify-content-between" style="cursor: pointer;" onclick="document.getElementById('demoCreds').classList.toggle('d-none');">
+          <span style="color: var(--amber-500); font-weight: 700;">
+            <i class="fas fa-circle-info mr-1"></i> Demo Credentials (click to show)
+          </span>
+          <i class="fas fa-chevron-down" style="color: var(--amber-500); font-size: 0.75rem;"></i>
+        </div>
+        <div id="demoCreds" class="d-none mt-2" style="color: var(--text-muted); line-height: 1.8;">
+          {% if role == 'farmer' %}
+            <strong>Email:</strong> farmer@agrointel.com<br>
+            <strong>Password:</strong> Demo@2026!
+          {% else %}
+            <strong>Username:</strong> admin<br>
+            <strong>Password:</strong> Demo@2026!
+          {% endif %}
+        </div>
+      </div>
+
       <form action="{{ url_for('login', role=role) }}" method="POST">
         <div class="form-group mb-3">
           <label class="font-weight-bold small text-muted"><i class="fas fa-envelope mr-1 text-emerald"></i> Email / Username</label>
-          <input type="text" name="email" class="form-control form-control-agro" placeholder="Enter email or username" required>
+          <input type="text" name="email" class="form-control form-control-agro" placeholder="Enter email or username" required autocomplete="username">
         </div>
 
-        <div class="form-group mb-4">
+        <div class="form-group mb-1">
           <label class="font-weight-bold small text-muted"><i class="fas fa-lock mr-1 text-emerald"></i> Password</label>
-          <input type="password" name="password" class="form-control form-control-agro" placeholder="••••••••" required>
+          <div class="position-relative">
+            <input type="password" name="password" id="passwordInput" class="form-control form-control-agro pr-5" placeholder="••••••••" required autocomplete="current-password">
+            <button type="button" onclick="togglePw()" class="btn p-0 position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted);" aria-label="Show/hide password">
+              <i class="fas fa-eye" id="pwEyeIcon"></i>
+            </button>
+          </div>
+        </div>
+
+        <!-- Forgot Password -->
+        <div class="text-right mb-4">
+          <a href="{{ url_for('contact') }}" class="small text-muted" style="text-decoration: underline;">
+            Forgot your password? Contact support →
+          </a>
         </div>
 
         <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold fs-6">
@@ -51,3 +82,21 @@
   </div>
 </div>
 {% endblock %}
+
+{% block extra_scripts %}
+{{ super() }}
+<script>
+function togglePw() {
+  var inp = document.getElementById('passwordInput');
+  var icon = document.getElementById('pwEyeIcon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    icon.className = 'fas fa-eye-slash';
+  } else {
+    inp.type = 'password';
+    icon.className = 'fas fa-eye';
+  }
+}
+</script>
+{% endblock %}
+

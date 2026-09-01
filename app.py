@@ -7,16 +7,53 @@ import requests
 import pandas as pd
 import numpy as np
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 
 from dotenv import load_dotenv
 
 load_dotenv()
 
 app = Flask(__name__, template_folder='templates')
-app.secret_key = os.getenv('FLASK_SECRET_KEY', 'agrointel_secret_key_2026')
+
+# ═══════════════════════════════════════════════════════════════
+# SESSION SECRET — never fall back to a literal committed to the repo.
+# The whole access-control guard below rests on session cookies being
+# unforgeable; a published default key would let anyone mint an admin
+# cookie. Fail loudly when deployed, use a throwaway key locally.
+# ═══════════════════════════════════════════════════════════════
+app.secret_key = os.getenv('FLASK_SECRET_KEY')
+if not app.secret_key:
+    if os.getenv('VERCEL') or os.getenv('FLASK_ENV') == 'production':
+        raise RuntimeError(
+            'FLASK_SECRET_KEY is not set. Set it as an environment variable '
+            'before deploying — without it, session cookies can be forged.'
+        )
+    # Local dev: random per-process key. Sessions reset on restart, which is fine.
+    app.secret_key = os.urandom(32)
+
+# ═══════════════════════════════════════════════════════════════
+# RATE LIMITER — Prevents brute-force login attacks
+# 5 login attempts per 15 minutes per IP address (in-memory, demo-safe)
+# ═══════════════════════════════════════════════════════════════
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[],          # No global limit — only applied where decorated
+    storage_uri="memory://",    # In-memory store, suitable for single-process demo
+)
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(BASE_DIR, 'agrointel.db')
+
+# ═══════════════════════════════════════════════════════════════
+# DATABASE — path is overridable so a deploy can point at a mounted
+# persistent volume (e.g. DB_PATH=/var/data/agrointel.db on Render).
+# The .db is no longer committed to the repo, so the schema is created
+# on first boot; without this a fresh deploy or volume has no tables.
+# ═══════════════════════════════════════════════════════════════
+from init_db import ensure_db
+
+DB_FILE = ensure_db()
 
 # ═══════════════════════════════════════════════════════════════
 # API KEYS — Loaded exclusively from .env file (no hardcoded keys)
@@ -174,6 +211,35 @@ def get_db():
     conn.row_factory = sqlite3.Row
     return conn
 
+
+# ═══════════════════════════════════════════════════════════════
+# ACCESS CONTROL — Single before_request guard for all portal routes
+# Protects every /farmer/* and /admin/* URL without per-route checks
+# ═══════════════════════════════════════════════════════════════
+@app.before_request
+def require_login():
+    """
+    Centralised auth guard. Any request to /farmer/* must have an active
+    farmer session; /admin/* an admin session; /api/* either one (these
+    endpoints spend metered OpenWeather / data.gov.in quota).
+    This runs BEFORE every route handler, so no individual check is needed.
+    """
+    path = request.path
+    if path.startswith('/api/'):
+        # JSON endpoints back the farmer pages only — return 401, not a redirect,
+        # so fetch() callers get a parseable error instead of a login page.
+        if session.get('user_type') not in ('farmer', 'admin'):
+            return jsonify({'error': 'Authentication required'}), 401
+    elif path.startswith('/farmer/'):
+        if session.get('user_type') != 'farmer':
+            flash('Please log in to access the Farmer Portal.', 'warning')
+            return redirect(url_for('login', role='farmer'))
+    elif path.startswith('/admin/'):
+        if session.get('user_type') != 'admin':
+            flash('Admin login required.', 'warning')
+            return redirect(url_for('login', role='admin'))
+
+
 # Static file serving for assets
 @app.route('/assets/<path:path>')
 def static_assets(path):
@@ -206,20 +272,26 @@ def contact():
         return redirect(url_for('contact'))
     return render_template('contact.html')
 
+
+# ═══════════════════════════════════════════════════════════════
 # Auth Routes: Login
+# Rate-limited: 5 POST attempts per 15 minutes per IP address
+# ═══════════════════════════════════════════════════════════════
 @app.route('/login/<role>', methods=['GET', 'POST'])
+@limiter.limit("5 per 15 minutes", methods=["POST"])
 def login(role):
     if role == 'customer':
         flash('The buyer marketplace has been retired. Redirecting to Farmer Portal.', 'info')
         return redirect(url_for('login', role='farmer'))
 
     if request.method == 'POST':
-        email = request.form.get('email')
-        password = request.form.get('password')
+        email = request.form.get('email', '').strip()
+        password = request.form.get('password', '')
 
         conn = get_db()
         if role == 'farmer':
             user = conn.execute('SELECT * FROM farmerlogin WHERE email = ? AND password = ?', (email, password)).fetchone()
+            conn.close()
             if user:
                 session['user_type'] = 'farmer'
                 session['farmer_id'] = user['farmer_id']
@@ -229,43 +301,66 @@ def login(role):
                 return redirect(url_for('farmer_crop_recommendation'))
         elif role == 'admin':
             user = conn.execute('SELECT * FROM admin WHERE admin_name = ? AND admin_password = ?', (email, password)).fetchone()
+            conn.close()
             if user:
                 session['user_type'] = 'admin'
                 session['admin_id'] = user['admin_id']
                 session['admin_name'] = user['admin_name']
                 flash('Welcome Admin!', 'success')
                 return redirect(url_for('admin_farmers'))
+        else:
+            conn.close()
 
-        conn.close()
         flash('Invalid credentials. Please try again.', 'error')
     return render_template('login.html', role=role)
 
+
+# ═══════════════════════════════════════════════════════════════
 # Auth Routes: Register
+# Validates confirm-password server-side; DOB/Gender stored as
+# defaults only — not required from the user (data minimisation)
+# ═══════════════════════════════════════════════════════════════
 @app.route('/register/<role>', methods=['GET', 'POST'])
 def register(role):
     if role == 'customer':
         return redirect(url_for('register', role='farmer'))
 
     if request.method == 'POST':
-        name = request.form.get('name')
-        email = request.form.get('email')
-        phone = request.form.get('phone')
-        password = request.form.get('password')
-        state = request.form.get('state')
-        district = request.form.get('district')
+        name     = request.form.get('name', '').strip()
+        email    = request.form.get('email', '').strip()
+        phone    = request.form.get('phone', '').strip()
+        password = request.form.get('password', '')
+        confirm  = request.form.get('confirm_password', '')
+        state    = request.form.get('state', '').strip()
+        district = request.form.get('district', '').strip()
+
+        # ── Server-side confirm-password check ──
+        if password != confirm:
+            flash('Passwords do not match. Please re-enter them.', 'error')
+            return render_template('register.html', role=role)
+
+        # ── Minimum password length ──
+        if len(password) < 8:
+            flash('Password must be at least 8 characters long.', 'error')
+            return render_template('register.html', role=role)
 
         conn = get_db()
         if role == 'farmer':
-            gender = request.form.get('gender', 'Male')
-            birthday = request.form.get('birthday', '2000-01-01')
+            # Check duplicate email
+            existing = conn.execute('SELECT 1 FROM farmerlogin WHERE email = ?', (email,)).fetchone()
+            if existing:
+                conn.close()
+                flash('An account with this email already exists. Please log in.', 'error')
+                return render_template('register.html', role=role)
+            # DOB and Gender are stored as neutral defaults — not required from the user
             conn.execute(
                 'INSERT INTO farmerlogin (farmer_name, password, email, phone_no, F_gender, F_birthday, F_State, F_District, F_Location, otp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)',
-                (name, password, email, phone, gender, birthday, state, district, district)
+                (name, password, email, phone, 'Not specified', '2000-01-01', state, district, district)
             )
         conn.commit()
         conn.close()
 
-        flash('Registration successful! Please login.', 'success')
+        flash('Account created successfully! You can now log in.', 'success')
         return redirect(url_for('login', role=role))
 
     return render_template('register.html', role=role)
@@ -779,18 +874,14 @@ def api_market_prices():
 # Live Market Prices Page (Farmer Portal)
 @app.route('/farmer/market_prices')
 def farmer_market_prices():
-    if session.get('user_type') != 'farmer':
-        flash('Please login as a Farmer first.', 'warning')
-        return redirect(url_for('login', role='farmer'))
+    # Auth handled by before_request hook
     return render_template('market_prices.html')
 
 
 # Admin Dashboards
 @app.route('/admin/farmers')
 def admin_farmers():
-    if session.get('user_type') != 'admin':
-        return redirect(url_for('login', role='admin'))
-
+    # Auth handled by before_request hook
     conn = get_db()
     cursor = conn.execute('SELECT farmer_id, farmer_name, email, phone_no, F_State, F_District FROM farmerlogin')
     rows = cursor.fetchall()
@@ -801,9 +892,7 @@ def admin_farmers():
 
 @app.route('/admin/messages')
 def admin_messages():
-    if session.get('user_type') != 'admin':
-        return redirect(url_for('login', role='admin'))
-
+    # Auth handled by before_request hook
     conn = get_db()
     cursor = conn.execute('SELECT c_id, c_name, c_mobile, c_email, c_address, c_message FROM contactus')
     rows = cursor.fetchall()

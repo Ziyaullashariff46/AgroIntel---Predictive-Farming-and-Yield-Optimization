@@ -8,55 +8,66 @@
       <div class="text-center mb-4">
         <span class="badge-agro badge-agro-emerald mb-2"><i class="fas fa-user-plus"></i> Join AgroIntel Network</span>
         <h3 class="text-bright font-weight-bold mb-1">{{ role|capitalize }} Account Registration</h3>
-        <p class="text-muted small">Create your profile to start using ML-based prediction tools & farming insights</p>
+        <p class="text-muted small">Create your profile to start using ML-based prediction tools &amp; farming insights</p>
       </div>
 
-      <form action="{{ url_for('register', role=role) }}" method="POST">
+      <form action="{{ url_for('register', role=role) }}" method="POST" id="registerForm" novalidate>
+
         <div class="form-group mb-3">
           <label class="font-weight-bold small text-muted"><i class="fas fa-user mr-1 text-emerald"></i> Full Name</label>
-          <input type="text" name="name" class="form-control form-control-agro" placeholder="e.g. Ramesh Kumar" required>
+          <input type="text" name="name" class="form-control form-control-agro" placeholder="e.g. Ramesh Kumar" required autocomplete="name">
         </div>
 
         <div class="row g-3 mb-3">
           <div class="col-md-6 mb-3 mb-md-0">
             <label class="font-weight-bold small text-muted"><i class="fas fa-envelope mr-1 text-emerald"></i> Email Address</label>
-            <input type="email" name="email" class="form-control form-control-agro" placeholder="name@example.com" required>
+            <input type="email" name="email" class="form-control form-control-agro" placeholder="name@example.com" required autocomplete="email">
           </div>
           <div class="col-md-6">
             <label class="font-weight-bold small text-muted"><i class="fas fa-phone mr-1 text-emerald"></i> Phone Number</label>
-            <input type="text" name="phone" class="form-control form-control-agro" placeholder="10 Digit Phone Number" required>
+            <input type="text" name="phone" class="form-control form-control-agro" placeholder="10-digit phone number" required autocomplete="tel" maxlength="10" pattern="\d{10}">
           </div>
+        </div>
+
+        <div class="form-group mb-1">
+          <label class="font-weight-bold small text-muted"><i class="fas fa-lock mr-1 text-emerald"></i> Create Password</label>
+          <div class="position-relative">
+            <input type="password" name="password" id="pwField" class="form-control form-control-agro pr-5"
+                   placeholder="Min. 8 characters" required autocomplete="new-password" oninput="updateStrength(this.value)">
+            <button type="button" onclick="togglePw('pwField','eyePw')" class="btn p-0 position-absolute"
+                    style="right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);" aria-label="Show/hide password">
+              <i class="fas fa-eye" id="eyePw"></i>
+            </button>
+          </div>
+        </div>
+        <div class="mb-3">
+          <div style="height:4px;background:var(--border-subtle);border-radius:2px;overflow:hidden;margin-top:6px;">
+            <div id="strengthBar" style="height:100%;width:0%;transition:width 0.3s,background 0.3s;border-radius:2px;"></div>
+          </div>
+          <p id="strengthLabel" class="text-muted mb-0" style="font-size:0.76rem;margin-top:4px;">Use 8+ characters with numbers &amp; symbols for a stronger password</p>
         </div>
 
         <div class="form-group mb-3">
-          <label class="font-weight-bold small text-muted"><i class="fas fa-lock mr-1 text-emerald"></i> Create Password</label>
-          <input type="password" name="password" class="form-control form-control-agro" placeholder="••••••••" required>
-        </div>
-
-        {% if role == 'farmer' %}
-          <div class="row g-3 mb-3">
-            <div class="col-md-6 mb-3 mb-md-0">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-venus-mars mr-1 text-emerald"></i> Gender</label>
-              <select name="gender" class="form-control form-control-agro">
-                <option value="Male">Male</option>
-                <option value="Female">Female</option>
-              </select>
-            </div>
-            <div class="col-md-6">
-              <label class="font-weight-bold small text-muted"><i class="fas fa-calendar mr-1 text-emerald"></i> Date of Birth</label>
-              <input type="date" name="birthday" class="form-control form-control-agro" required>
-            </div>
+          <label class="font-weight-bold small text-muted"><i class="fas fa-lock-open mr-1 text-emerald"></i> Confirm Password</label>
+          <div class="position-relative">
+            <input type="password" name="confirm_password" id="cpwField" class="form-control form-control-agro pr-5"
+                   placeholder="Re-enter your password" required autocomplete="new-password" oninput="checkMatch()">
+            <button type="button" onclick="togglePw('cpwField','eyeCpw')" class="btn p-0 position-absolute"
+                    style="right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text-muted);" aria-label="Show/hide confirm password">
+              <i class="fas fa-eye" id="eyeCpw"></i>
+            </button>
           </div>
-        {% endif %}
+          <p id="matchMsg" class="mb-0" style="font-size:0.76rem;margin-top:4px;display:none;"></p>
+        </div>
 
         <div class="row g-3 mb-4">
           <div class="col-md-6 mb-3 mb-md-0">
             <label class="font-weight-bold small text-muted"><i class="fas fa-map-location-dot mr-1 text-emerald"></i> State</label>
-            <input type="text" name="state" class="form-control form-control-agro" placeholder="e.g. Karnataka" required>
+            <input type="text" name="state" class="form-control form-control-agro" placeholder="e.g. Karnataka" required autocomplete="address-level1">
           </div>
           <div class="col-md-6">
             <label class="font-weight-bold small text-muted"><i class="fas fa-city mr-1 text-emerald"></i> District / City</label>
-            <input type="text" name="district" class="form-control form-control-agro" placeholder="e.g. Udupi / Mandya" required>
+            <input type="text" name="district" class="form-control form-control-agro" placeholder="e.g. Udupi / Mandya" required autocomplete="address-level2">
           </div>
         </div>
 
@@ -66,11 +77,65 @@
       </form>
 
       <div class="mt-4 text-center border-top pt-3" style="border-color: var(--border-glass) !important;">
-        <p class="mb-0 text-muted small">Already have an account? 
+        <p class="mb-0 text-muted small">Already have an account?
           <a href="{{ url_for('login', role=role) }}" class="font-weight-bold text-emerald">Sign In Here</a>
         </p>
       </div>
     </div>
   </div>
 </div>
+{% endblock %}
+
+{% block extra_scripts %}
+{{ super() }}
+<script>
+function togglePw(fieldId, iconId) {
+  var inp = document.getElementById(fieldId), icon = document.getElementById(iconId);
+  if (inp.type === 'password') { inp.type = 'text'; icon.className = 'fas fa-eye-slash'; }
+  else { inp.type = 'password'; icon.className = 'fas fa-eye'; }
+}
+function updateStrength(val) {
+  var bar = document.getElementById('strengthBar'), label = document.getElementById('strengthLabel');
+  var score = 0;
+  if (val.length >= 8) score++;
+  if (/[A-Z]/.test(val)) score++;
+  if (/[0-9]/.test(val)) score++;
+  if (/[^A-Za-z0-9]/.test(val)) score++;
+  var widths = ['0%','30%','55%','80%','100%'];
+  var colors = ['#ef4444','#f97316','#eab308','#22c55e'];
+  var labels = [
+    'Use 8+ characters with numbers & symbols for a stronger password',
+    'Weak — add uppercase letters',
+    'Fair — add numbers or symbols',
+    'Good — add a special character for full strength',
+    '✓ Strong password'
+  ];
+  bar.style.width = widths[score];
+  bar.style.background = score > 0 ? colors[score - 1] : '';
+  label.textContent = labels[score];
+  label.style.color = score === 4 ? 'var(--emerald-500)' : '';
+}
+function checkMatch() {
+  var pw = document.getElementById('pwField').value;
+  var cpw = document.getElementById('cpwField').value;
+  var msg = document.getElementById('matchMsg');
+  msg.style.display = cpw.length > 0 ? 'block' : 'none';
+  if (pw === cpw) {
+    msg.textContent = '✓ Passwords match'; msg.style.color = 'var(--emerald-500)';
+  } else {
+    msg.textContent = '✗ Passwords do not match'; msg.style.color = '#ef4444';
+  }
+}
+document.getElementById('registerForm').addEventListener('submit', function(e) {
+  var pw = document.getElementById('pwField').value;
+  var cpw = document.getElementById('cpwField').value;
+  if (pw !== cpw) {
+    e.preventDefault();
+    var msg = document.getElementById('matchMsg');
+    msg.textContent = '✗ Passwords do not match — please fix before submitting';
+    msg.style.color = '#ef4444'; msg.style.display = 'block';
+    document.getElementById('cpwField').focus();
+  }
+});
+</script>
 {% endblock %}
