@@ -1,0 +1,4 @@
+Starting AgroIntel Standalone Python Flask Server...
+Access application at: http://127.0.0.1:5000
+ * Serving Flask app 'app'
+ * Debug mode: off

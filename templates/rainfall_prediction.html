@@ -51,6 +51,7 @@
 {# ── Estimation Form ── #}
 <div class="glass-card">
   <form method="POST" id="rainfallForm">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="row" style="row-gap: 1.25rem;">
       <div class="col-md-5">
         <label for="region"><i class="fas fa-map-marked-alt" style="color: var(--cyan-500); margin-right: 6px;"></i> Meteorological Subdivision</label>
@@ -133,7 +134,7 @@
 </div>
 
 {# ── Historical Result Card ── #}
-{% if result %}
+{% if result is number %}
 <div class="result-card-glow" style="margin-top: 2rem; text-align: center;">
   <p style="font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cyan-500); margin-bottom: 0.5rem;">
     <i class="fas fa-chart-area"></i> Historical Monthly Average (IMD 1901–2015)

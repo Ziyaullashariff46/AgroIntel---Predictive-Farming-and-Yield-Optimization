@@ -9,6 +9,10 @@ import numpy as np
 from flask import Flask, render_template, request, redirect, url_for, session, flash, send_from_directory, jsonify
 from flask_limiter import Limiter
 from flask_limiter.util import get_remote_address
+import bcrypt
+import secrets
+import hmac
+import time
 
 from dotenv import load_dotenv
 
@@ -195,7 +199,7 @@ WEATHER_ICON_MAP = {
     '01d': 'fa-sun', '01n': 'fa-moon',
     '02d': 'fa-cloud-sun', '02n': 'fa-cloud-moon',
     '03d': 'fa-cloud', '03n': 'fa-cloud',
-    '04d': 'fa-clouds', '04n': 'fa-clouds',
+    '04d': 'fa-cloud', '04n': 'fa-cloud',
     '09d': 'fa-cloud-showers-heavy', '09n': 'fa-cloud-showers-heavy',
     '10d': 'fa-cloud-sun-rain', '10n': 'fa-cloud-moon-rain',
     '11d': 'fa-bolt', '11n': 'fa-bolt',
@@ -203,8 +207,43 @@ WEATHER_ICON_MAP = {
     '50d': 'fa-smog', '50n': 'fa-smog',
 }
 
+# WMO weather codes (used by Open-Meteo) -> Font Awesome icons
+WMO_ICON_MAP = {
+    0: 'fa-sun', 1: 'fa-sun', 2: 'fa-cloud-sun', 3: 'fa-cloud',
+    45: 'fa-smog', 48: 'fa-smog',
+    51: 'fa-cloud-rain', 53: 'fa-cloud-rain', 55: 'fa-cloud-showers-heavy',
+    56: 'fa-cloud-rain', 57: 'fa-cloud-showers-heavy',
+    61: 'fa-cloud-rain', 63: 'fa-cloud-showers-heavy', 65: 'fa-cloud-showers-heavy',
+    66: 'fa-cloud-showers-heavy', 67: 'fa-cloud-showers-heavy',
+    71: 'fa-snowflake', 73: 'fa-snowflake', 75: 'fa-snowflake',
+    77: 'fa-snowflake',
+    80: 'fa-cloud-sun-rain', 81: 'fa-cloud-showers-heavy', 82: 'fa-cloud-showers-heavy',
+    85: 'fa-snowflake', 86: 'fa-snowflake',
+    95: 'fa-bolt', 96: 'fa-bolt', 99: 'fa-bolt',
+}
+
+WMO_DESC_MAP = {
+    0: 'Clear Sky', 1: 'Mainly Clear', 2: 'Partly Cloudy', 3: 'Overcast',
+    45: 'Fog', 48: 'Rime Fog',
+    51: 'Light Drizzle', 53: 'Moderate Drizzle', 55: 'Dense Drizzle',
+    56: 'Freezing Drizzle', 57: 'Heavy Freezing Drizzle',
+    61: 'Slight Rain', 63: 'Moderate Rain', 65: 'Heavy Rain',
+    66: 'Freezing Rain', 67: 'Heavy Freezing Rain',
+    71: 'Slight Snow', 73: 'Moderate Snow', 75: 'Heavy Snow',
+    77: 'Snow Grains',
+    80: 'Light Showers', 81: 'Moderate Showers', 82: 'Violent Showers',
+    85: 'Snow Showers', 86: 'Heavy Snow Showers',
+    95: 'Thunderstorm', 96: 'Thunderstorm with Hail', 99: 'Severe Thunderstorm',
+}
+
 def map_weather_icon(icon_code):
     return WEATHER_ICON_MAP.get(icon_code, 'fa-cloud')
+
+def wmo_to_icon(code):
+    return WMO_ICON_MAP.get(code, 'fa-cloud')
+
+def wmo_to_desc(code):
+    return WMO_DESC_MAP.get(code, 'Clear')
 
 def get_db():
     conn = sqlite3.connect(DB_FILE)
@@ -213,6 +252,121 @@ def get_db():
 
 
 # ═══════════════════════════════════════════════════════════════
+
+# BCRYPT HELPERS
+def hash_password(plain):
+    return bcrypt.hashpw(plain.encode("utf-8"), bcrypt.gensalt()).decode("utf-8")
+
+def check_password(plain, hashed):
+    try:
+        return bcrypt.checkpw(plain.encode("utf-8"), hashed.encode("utf-8"))
+    except Exception:
+        return False
+
+# CSRF PROTECTION
+
+@app.before_request
+def csrf_protect():
+    if request.method in ("POST", "PUT", "DELETE"):
+        token = session.get("csrf_token")
+        form_token = request.form.get("csrf_token", "")
+        if not token or not hmac.compare_digest(token, form_token):
+            flash("Session expired or invalid request. Please try again.", "error")
+            return redirect(request.referrer or url_for("index"))
+
+def generate_csrf_token():
+    if "csrf_token" not in session:
+        session["csrf_token"] = secrets.token_hex(32)
+    return session["csrf_token"]
+
+app.jinja_env.globals["csrf_token"] = generate_csrf_token
+
+# NOMINATIM RATE LIMITER
+_last_nominatim_call = 0.0
+def _nominatim_throttle():
+    global _last_nominatim_call
+    elapsed = time.time() - _last_nominatim_call
+    if elapsed < 1.1:
+        time.sleep(1.1 - elapsed)
+    _last_nominatim_call = time.time()
+
+# ML MODEL CACHE
+_CROP_MODEL_CACHE = None
+_FERTILIZER_MODEL_CACHE = None
+_YIELD_MODEL_CACHE = None
+
+def _init_crop_model():
+    global _CROP_MODEL_CACHE
+    if _CROP_MODEL_CACHE is not None:
+        return _CROP_MODEL_CACHE
+    try:
+        from sklearn.model_selection import train_test_split
+        from sklearn.ensemble import RandomForestClassifier
+        ds = os.path.join(BASE_DIR, "farmer", "ML", "crop_recommendation", "Crop_recommendation.csv")
+        dataset = pd.read_csv(ds)
+        fc = ["N", "P", "K", "temperature", "humidity", "ph", "rainfall"]
+        X = dataset[fc].to_numpy(dtype=float)
+        y = dataset["label"].to_numpy()
+        Xtr, _, ytr, _ = train_test_split(X, y, test_size=0.2, random_state=0)
+        clf = RandomForestClassifier(n_estimators=100, criterion="entropy", random_state=0)
+        clf.fit(Xtr, ytr)
+        _CROP_MODEL_CACHE = clf
+        return clf
+    except Exception:
+        return None
+
+def _init_fertilizer_model():
+    global _FERTILIZER_MODEL_CACHE
+    if _FERTILIZER_MODEL_CACHE is not None:
+        return _FERTILIZER_MODEL_CACHE
+    try:
+        from sklearn.preprocessing import LabelEncoder
+        from sklearn.tree import DecisionTreeClassifier
+        ds = os.path.join(BASE_DIR, "farmer", "ML", "fertilizer_recommendation", "fertilizer_recommendation.csv")
+        data = pd.read_csv(ds)
+        data["Soil Type"] = data["Soil Type"].str.strip()
+        data["Crop Type"] = data["Crop Type"].str.strip()
+        le_s = LabelEncoder()
+        data["Soil Type"] = le_s.fit_transform(data["Soil Type"])
+        le_c = LabelEncoder()
+        data["Crop Type"] = le_c.fit_transform(data["Crop Type"])
+        X = data[["Temparature","Humidity","Soil Moisture","Soil Type","Crop Type","Nitrogen","Potassium","Phosphorous"]].to_numpy(dtype=float)
+        y = data["Fertilizer Name"].to_numpy()
+        dtc = DecisionTreeClassifier(random_state=0)
+        dtc.fit(X, y)
+        _FERTILIZER_MODEL_CACHE = (dtc, le_s, le_c)
+        return _FERTILIZER_MODEL_CACHE
+    except Exception:
+        return None
+
+def _init_yield_model():
+    global _YIELD_MODEL_CACHE
+    if _YIELD_MODEL_CACHE is not None:
+        return _YIELD_MODEL_CACHE
+    try:
+        from sklearn.model_selection import train_test_split
+        from sklearn.preprocessing import OneHotEncoder
+        from sklearn.ensemble import RandomForestRegressor
+        ds = os.path.join(BASE_DIR, "farmer", "ML", "yield_prediction", "crop_production_karnataka.csv")
+        df = pd.read_csv(ds).drop(["Crop_Year"], axis=1)
+        df = df.dropna(subset=["Production"])
+        X = df.drop(["Production"], axis=1)
+        y = df["Production"].to_numpy(dtype=float)
+        cc = ["State_Name","District_Name","Season","Crop"]
+        Xtr, _, ytr, _ = train_test_split(X, y, test_size=0.2, random_state=42)
+        ohe = OneHotEncoder(handle_unknown="ignore", sparse_output=True)
+        ohe.fit(Xtr[cc])
+        Xc = ohe.transform(Xtr[cc]).toarray()
+        Xn = Xtr.drop(cc, axis=1).to_numpy(dtype=float)
+        Xf = np.hstack((Xc, Xn))
+        m = RandomForestRegressor(n_estimators=50, random_state=42)
+        m.fit(Xf, ytr)
+        _YIELD_MODEL_CACHE = (m, ohe, cc)
+        return _YIELD_MODEL_CACHE
+    except Exception:
+        return None
+
+
 # ACCESS CONTROL — Single before_request guard for all portal routes
 # Protects every /farmer/* and /admin/* URL without per-route checks
 # ═══════════════════════════════════════════════════════════════
@@ -254,19 +408,31 @@ def index():
 @app.route('/contact', methods=['GET', 'POST'])
 def contact():
     if request.method == 'POST':
-        name = request.form.get('name')
-        mobile = request.form.get('mobile')
-        email = request.form.get('email')
-        address = request.form.get('address')
-        message = request.form.get('message')
+        name = (request.form.get('name') or '').strip()
+        mobile = (request.form.get('mobile') or '').strip()
+        email = (request.form.get('email') or '').strip()
+        address = (request.form.get('address') or '').strip()
+        message = (request.form.get('message') or '').strip()
+
+        if not name or len(name) > 100:
+            flash('Please enter a valid name.', 'error')
+            return redirect(url_for('contact'))
+        if not email or '@' not in email:
+            flash('Please enter a valid email.', 'error')
+            return redirect(url_for('contact'))
+        if not message or len(message) > 2000:
+            flash('Please enter a message.', 'error')
+            return redirect(url_for('contact'))
 
         conn = get_db()
-        conn.execute(
+        try:
+            conn.execute(
             'INSERT INTO contactus (c_name, c_mobile, c_email, c_address, c_message) VALUES (?, ?, ?, ?, ?)',
             (name, mobile, email, address, message)
         )
-        conn.commit()
-        conn.close()
+            conn.commit()
+        finally:
+            conn.close()
 
         flash('Your message has been submitted successfully!', 'success')
         return redirect(url_for('contact'))
@@ -290,9 +456,9 @@ def login(role):
 
         conn = get_db()
         if role == 'farmer':
-            user = conn.execute('SELECT * FROM farmerlogin WHERE email = ? AND password = ?', (email, password)).fetchone()
+            user = conn.execute('SELECT * FROM farmerlogin WHERE email = ?', (email,)).fetchone()
             conn.close()
-            if user:
+            if user and check_password(password, user['password']):
                 session['user_type'] = 'farmer'
                 session['farmer_id'] = user['farmer_id']
                 session['farmer_name'] = user['farmer_name']
@@ -300,9 +466,9 @@ def login(role):
                 flash(f"Welcome back, {user['farmer_name']}!", 'success')
                 return redirect(url_for('farmer_crop_recommendation'))
         elif role == 'admin':
-            user = conn.execute('SELECT * FROM admin WHERE admin_name = ? AND admin_password = ?', (email, password)).fetchone()
+            user = conn.execute('SELECT * FROM admin WHERE admin_name = ?', (email,)).fetchone()
             conn.close()
-            if user:
+            if user and check_password(password, user['admin_password']):
                 session['user_type'] = 'admin'
                 session['admin_id'] = user['admin_id']
                 session['admin_name'] = user['admin_name']
@@ -321,6 +487,7 @@ def login(role):
 # defaults only — not required from the user (data minimisation)
 # ═══════════════════════════════════════════════════════════════
 @app.route('/register/<role>', methods=['GET', 'POST'])
+@limiter.limit("10 per hour", methods=["POST"])
 def register(role):
     if role == 'customer':
         return redirect(url_for('register', role='farmer'))
@@ -339,6 +506,11 @@ def register(role):
             flash('Passwords do not match. Please re-enter them.', 'error')
             return render_template('register.html', role=role)
 
+        # ── Server-side phone validation ──
+        if not re.match(r"^\d{10}$", phone):
+            flash("Please enter a valid 10-digit phone number.", "error")
+            return render_template("register.html", role=role)
+
         # ── Minimum password length ──
         if len(password) < 8:
             flash('Password must be at least 8 characters long.', 'error')
@@ -353,12 +525,15 @@ def register(role):
                 flash('An account with this email already exists. Please log in.', 'error')
                 return render_template('register.html', role=role)
             # DOB and Gender are stored as neutral defaults — not required from the user
+            hashed_pw = hash_password(password)
             conn.execute(
                 'INSERT INTO farmerlogin (farmer_name, password, email, phone_no, F_gender, F_birthday, F_State, F_District, F_Location, otp) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 0)',
-                (name, password, email, phone, 'Not specified', '2000-01-01', state, district, district)
+                (name, hashed_pw, email, phone, 'Not specified', '2000-01-01', state, district, district)
             )
-        conn.commit()
-        conn.close()
+        try:
+            conn.commit()
+        finally:
+            conn.close()
 
         flash('Account created successfully! You can now log in.', 'success')
         return redirect(url_for('login', role=role))
@@ -387,24 +562,13 @@ def farmer_crop_recommendation():
             ph = float(request.form.get('ph', 6.5))
             r = float(request.form.get('r', 100))
 
-            dataset_path = os.path.join(BASE_DIR, 'farmer', 'ML', 'crop_recommendation', 'Crop_recommendation.csv')
-            dataset = pd.read_csv(dataset_path)
-
-            # Separate features and labels safely
-            feature_cols = ['N', 'P', 'K', 'temperature', 'humidity', 'ph', 'rainfall']
-            X = dataset[feature_cols].to_numpy(dtype=float)
-            y = dataset['label'].to_numpy()
-
-            from sklearn.model_selection import train_test_split
-            from sklearn.ensemble import RandomForestClassifier
-
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=0)
-            classifier = RandomForestClassifier(n_estimators=100, criterion='entropy', random_state=0)
-            classifier.fit(X_train, y_train)
-
-            user_input = np.array([[n, p, k, t, h, ph, r]], dtype=float)
-            predictions = classifier.predict(user_input)
-            result = str(predictions[0])
+            classifier = _init_crop_model()
+            if classifier is None:
+                result = None
+            else:
+                user_input = np.array([[n, p, k, t, h, ph, r]], dtype=float)
+                predictions = classifier.predict(user_input)
+                result = str(predictions[0])
         except Exception as e:
             result = f"Could not compute recommendation. Please check your input values and try again."
 
@@ -426,46 +590,90 @@ def farmer_fertilizer_recommendation():
             crop = str(request.form.get('crop', '')).strip()
 
             dataset_path = os.path.join(BASE_DIR, 'farmer', 'ML', 'fertilizer_recommendation', 'fertilizer_recommendation.csv')
-            data = pd.read_csv(dataset_path)
-
-            from sklearn.preprocessing import LabelEncoder
-            from sklearn.tree import DecisionTreeClassifier
-
-            # Normalize categorical columns for consistent matching
-            data['Soil Type'] = data['Soil Type'].str.strip()
-            data['Crop Type'] = data['Crop Type'].str.strip()
-
-            le_soil = LabelEncoder()
-            data['Soil Type'] = le_soil.fit_transform(data['Soil Type'])
-            le_crop = LabelEncoder()
-            data['Crop Type'] = le_crop.fit_transform(data['Crop Type'])
-
-            # Feature columns: Temparature, Humidity, Soil Moisture, Soil Type, Crop Type, Nitrogen, Potassium, Phosphorous
-            X = data[['Temparature', 'Humidity', 'Soil Moisture', 'Soil Type', 'Crop Type', 'Nitrogen', 'Potassium', 'Phosphorous']].to_numpy(dtype=float)
-            y = data['Fertilizer Name'].to_numpy()
-
-            dtc = DecisionTreeClassifier(random_state=0)
-            dtc.fit(X, y)
-
-            # Safely encode user soil/crop — handle unknown labels
-            try:
-                soil_enc = int(le_soil.transform([soil])[0])
-            except ValueError:
-                soil_enc = 0  # Default to first soil type
-            try:
-                crop_enc = int(le_crop.transform([crop])[0])
-            except ValueError:
-                crop_enc = 0  # Default to first crop type
-
-            user_input = np.array([[t, h, sm, soil_enc, crop_enc, n, k, p]], dtype=float)
-            fertilizer_name = dtc.predict(user_input)
-            result = str(fertilizer_name[0])
+            fert_cache = _init_fertilizer_model()
+            if fert_cache is None:
+                result = None
+            else:
+                dtc, le_soil, le_crop = fert_cache
+                try:
+                    soil_enc = int(le_soil.transform([soil])[0])
+                except ValueError:
+                    soil_enc = 0
+                try:
+                    crop_enc = int(le_crop.transform([crop])[0])
+                except ValueError:
+                    crop_enc = 0
+                user_input = np.array([[t, h, sm, soil_enc, crop_enc, n, k, p]], dtype=float)
+                fertilizer_name = dtc.predict(user_input)
+                result = str(fertilizer_name[0])
         except Exception as e:
             result = f"Could not compute fertilizer recommendation. Please verify your inputs and try again."
 
     return render_template('fertilizer_recommendation.html', result=result)
 
-# ML Feature 3: Crop Price Prediction
+# Estimated mandi prices per quintal (₹) — base prices with seasonal variation
+_CROP_PRICES = {
+    'Rice': 2200, 'Paddy': 2100, 'Wheat': 2400, 'Maize': 2000, 'Cotton': 7000,
+    'Bajra': 1800, 'Jowar': 1900, 'Groundnut': 5500, 'Soyabean': 4200, 'Gram': 5000,
+    'Arhar/Tur': 6500, 'Moong(Green Gram)': 7500, 'Urad': 6800, 'Sesamum': 14000,
+    'Rapeseed &Mustard': 5200, 'Sunflower': 6000, 'Castor seed': 5800, 'Niger seed': 8000,
+    'Potato': 1200, 'Onion': 2000, 'Tomato': 1800, 'Dry chillies': 12000,
+    'Sugarcane': 350, 'Coconut': 2800, 'Banana': 1500, 'Turmeric': 10000,
+    'Arecanut': 35000, 'Cardamom': 25000, 'Black pepper': 65000,
+    'Ragi': 3500, 'Horse-gram': 8000, 'Cowpea(Lobia)': 6000,
+    'Barley': 2200, 'Peas': 4500, 'Peas & beans (Pulses)': 4500,
+    'Mango': 2000, 'Grapes': 3000, 'Papaya': 1200, 'Watermelon': 800,
+    'Muskmelon': 1000, 'Small millets': 4000, 'Linseed': 6500,
+    'Dry ginger': 18000, 'Garlic': 8000, 'Coriander': 12000,
+    'Soyabean': 4200, 'Tobacco': 15000, 'Safflower': 5500,
+    'Tapioca': 1800, 'Sweet potato': 1500, 'Brinjal': 1200,
+    'Beans & Mutter(Vegetable)': 3500, 'Other Kharif pulses': 5500,
+    'Other Rabi pulses': 5500, 'Other Fresh Fruits': 2500,
+}
+
+def _estimate_crop_prices(crop_names):
+    """Generate estimated price trends for predicted crops."""
+    import random, datetime
+    random.seed(42)  # Deterministic for same inputs
+    today = datetime.date.today()
+    rows = []
+    for name in crop_names[:6]:
+        base = _CROP_PRICES.get(name, 3000)
+        # Generate 3-month backward prices with slight variation
+        prices = []
+        p = base * 0.88
+        for _ in range(3):
+            p = p * random.uniform(1.02, 1.08)
+            prices.append(round(p))
+        current = round(base * random.uniform(0.97, 1.05))
+        demand_pct = round((current - prices[0]) / prices[0] * 100, 1)
+        if demand_pct > 15:
+            badge_class = 'badge-success'
+            demand_label = f'High Demand'
+        elif demand_pct > 5:
+            badge_class = 'badge-info'
+            demand_label = f'Stable High'
+        else:
+            badge_class = 'badge-warning'
+            demand_label = f'Medium'
+        months = []
+        for i in range(3):
+            d = today - datetime.timedelta(days=30 * (3 - i))
+            months.append(d.strftime('%b %Y'))
+        current_month = today.strftime('%b %Y')
+        rows.append({
+            'name': name,
+            'm3': f'₹{prices[0]:,}',
+            'm2': f'₹{prices[1]:,}',
+            'm1': f'₹{prices[2]:,}',
+            'current': f'₹{current:,}',
+            'demand_badge': badge_class,
+            'demand_label': f'{demand_label} (↑ {abs(demand_pct)}%)',
+            'months': months,
+            'current_month': current_month,
+        })
+    return rows
+
 @app.route('/farmer/crop_prediction', methods=['GET', 'POST'])
 def farmer_crop_prediction():
     result = None
@@ -482,6 +690,10 @@ def farmer_crop_prediction():
 
             lines = [l.strip() for l in output.splitlines() if l.strip() and l.strip() != ',' and len(l.strip()) > 1]
             if lines:
+                # Re-sort by frequency from training data (most traded = most profitable)
+                freq = _find_district_crops(district, state)
+                freq_order = {c: i for i, c in enumerate(freq)}
+                lines.sort(key=lambda c: freq_order.get(c, 999))
                 result = {crop: "High" for crop in lines[:5]}
             else:
                 result = _get_season_crop_fallback(season)
@@ -489,7 +701,10 @@ def farmer_crop_prediction():
             # Graceful fallback: recommend crops based on season
             result = _get_season_crop_fallback(season)
 
-    return render_template('crop_prediction.html', result=result)
+    price_data = []
+    if result and not isinstance(result, str):
+        price_data = _estimate_crop_prices(list(result.keys()))
+    return render_template('crop_prediction.html', result=result, price_data=price_data, state=state if result else '', district=district if result else '', season=season if result else '')
 
 
 def _get_season_crop_fallback(season):
@@ -513,43 +728,24 @@ def farmer_yield_prediction():
             season = str(request.form.get('season', '')).strip()
             crop = str(request.form.get('crop', '')).strip()
             area = float(request.form.get('area', 1))
+            # Convert acres to hectares (1 acre = 0.4047 hectares)
+            area = round(area * 0.4047, 4)
 
-            dataset_path = os.path.join(BASE_DIR, 'farmer', 'ML', 'yield_prediction', 'crop_production_karnataka.csv')
-            df = pd.read_csv(dataset_path).drop(['Crop_Year'], axis=1)
-
-            # Drop rows with NaN in Production (target column) to prevent training errors
-            df = df.dropna(subset=['Production'])
-
-            X = df.drop(['Production'], axis=1)
-            y = df['Production'].to_numpy(dtype=float)
-
-            from sklearn.model_selection import train_test_split
-            from sklearn.preprocessing import OneHotEncoder
-            from sklearn.ensemble import RandomForestRegressor
-
-            X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
-
-            categorical_cols = ['State_Name', 'District_Name', 'Season', 'Crop']
-            ohe = OneHotEncoder(handle_unknown='ignore', sparse_output=True)
-            ohe.fit(X_train[categorical_cols])
-
-            X_train_cat = ohe.transform(X_train[categorical_cols]).toarray()
-            X_train_num = X_train.drop(categorical_cols, axis=1).to_numpy(dtype=float)
-            X_train_final = np.hstack((X_train_cat, X_train_num))
-
-            model = RandomForestRegressor(n_estimators=50, random_state=42)
-            model.fit(X_train_final, y_train)
-
-            # Build user input as a DataFrame to match training structure
-            user_df = pd.DataFrame([[state, district, season, crop, area]], columns=['State_Name', 'District_Name', 'Season', 'Crop', 'Area'])
-            user_cat = ohe.transform(user_df[categorical_cols]).toarray()
-            user_num = user_df.drop(categorical_cols, axis=1).to_numpy(dtype=float)
-            user_final = np.hstack((user_cat, user_num))
-
-            prediction = model.predict(user_final)
-            result = round(float(prediction[0]), 2)
-        except Exception as e:
-            # Graceful fallback: estimate yield based on area
+            yield_cache = _init_yield_model()
+            if yield_cache is None:
+                try:
+                    result = round(area * 2.85, 2)
+                except Exception:
+                    result = 2.85
+            else:
+                model, ohe, categorical_cols = yield_cache
+                user_df = pd.DataFrame([[state, district, season, crop, area]], columns=['State_Name', 'District_Name', 'Season', 'Crop', 'Area'])
+                user_cat = ohe.transform(user_df[categorical_cols]).toarray()
+                user_num = user_df.drop(categorical_cols, axis=1).to_numpy(dtype=float)
+                user_final = np.hstack((user_cat, user_num))
+                prediction = model.predict(user_final)
+                result = round(float(prediction[0]), 2)
+        except Exception:
             try:
                 result = round(area * 2.85, 2)
             except Exception:
@@ -572,8 +768,8 @@ def farmer_rainfall_prediction():
             state_data = df[df['SUBDIVISION'] == region]
             avg_rainfall = state_data[month].mean()
             result = round(float(avg_rainfall), 2)
-        except Exception as e:
-            result = f"Error calculating rainfall: {e}"
+        except Exception:
+            result = None
 
     return render_template('rainfall_prediction.html', result=result)
 
@@ -659,134 +855,112 @@ def api_reverse_geocode(lat, lon):
 
 @app.route('/api/weather/coords/<lat>/<lon>')
 def api_weather_coords(lat, lon):
-    """Current weather + 5-day forecast by latitude/longitude with fallback."""
+    """Current weather + 7-day forecast via Open-Meteo (free, no API key).""" 
     try:
         lat_f, lon_f = float(lat), float(lon)
 
-        # Use Nominatim for a precise, district-level location label (free, no key needed).
-        # This fixes the Hassan→Mysore mismatch: OpenWeather resolves to nearest large city,
-        # but Nominatim gives the actual village/town/district the GPS coordinates are in.
+        # Use Nominatim for precise location label
         nom_place, nom_state = nominatim_reverse_geocode(lat_f, lon_f)
         if nom_place and nom_state:
             city_label = f"{nom_place}, {nom_state}"
         elif nom_place:
             city_label = nom_place
         else:
-            # Last resort: nearest city from our internal curated list
             nearest = get_nearby_cities(lat_f, lon_f, count=1)
             city_label = nearest[0]['name'] if nearest else 'Your Location'
 
-        # Current weather (use coords, not city name, for accuracy)
-        curr_url = f"http://api.openweathermap.org/data/2.5/weather?lat={lat_f}&lon={lon_f}&units=metric&appid={OPENWEATHER_API_KEY}"
-        curr_res = requests.get(curr_url, timeout=4)
-        curr = curr_res.json() if curr_res.status_code == 200 else {}
+        # Open-Meteo: current conditions + 7-day forecast (no key needed)
+        meteo_url = (
+            f"https://api.open-meteo.com/v1/forecast"
+            f"?latitude={lat_f}&longitude={lon_f}"
+            f"&current=temperature_2m,relative_humidity_2m,apparent_temperature,"
+            f"pressure_msl,weather_code,wind_speed_10m,is_day"
+            f"&daily=weather_code,temperature_2m_max,temperature_2m_min,precipitation_sum"
+            f"&daily=sunrise,sunset"
+            f"&timezone=auto&forecast_days=7"
+        )
+        meteo_res = requests.get(meteo_url, timeout=6)
+        m = meteo_res.json() if meteo_res.status_code == 200 else {}
 
-        if curr.get('cod') == 200:
+        if 'current' in m and 'daily' in m:
+            cur = m['current']
+            daily = m['daily']
+            wmo = cur.get('weather_code', 3)
+
+            # Sunrise/sunset from today's daily data
+            sunrise_str = daily['sunrise'][0] if daily.get('sunrise') else None
+            sunset_str = daily['sunset'][0] if daily.get('sunset') else None
+            import datetime as _dt
+            sunrise_ts = int(_dt.datetime.fromisoformat(sunrise_str).timestamp()) if sunrise_str else None
+            sunset_ts = int(_dt.datetime.fromisoformat(sunset_str).timestamp()) if sunset_str else None
+
             current = {
-                # Use Nominatim-derived city_label (accurate local name), NOT OpenWeather's curr['name']
                 'city': city_label,
-                'temp': curr['main']['temp'],
-                'feels_like': curr['main'].get('feels_like', curr['main']['temp']),
-                'humidity': curr['main']['humidity'],
-                'pressure': curr['main'].get('pressure', 1013),
-                'wind': curr['wind']['speed'],
-                'visibility': curr.get('visibility', 10000) / 1000,
-                'desc': curr['weather'][0]['description'].capitalize(),
-                'icon': map_weather_icon(curr['weather'][0].get('icon', '03d')),
-                'icon_code': curr['weather'][0].get('icon', '03d'),
-                'sunrise': curr['sys'].get('sunrise'),
-                'sunset': curr['sys'].get('sunset'),
+                'temp': round(cur['temperature_2m'], 1),
+                'feels_like': round(cur.get('apparent_temperature', cur['temperature_2m']), 1),
+                'humidity': int(cur.get('relative_humidity_2m', 75)),
+                'pressure': int(cur.get('pressure_msl', 1013)),
+                'wind': round(cur.get('wind_speed_10m', 0) / 3.6, 1),  # km/h -> m/s
+                'visibility': 10.0,  # Open-Meteo doesn't provide visibility; use default
+                'desc': wmo_to_desc(wmo),
+                'icon': wmo_to_icon(wmo),
+                'icon_code': str(wmo),
+                'sunrise': sunrise_ts,
+                'sunset': sunset_ts,
                 'lat': lat_f,
                 'lon': lon_f,
+                'updated_at': cur.get('time', ''),
+                'is_day': cur.get('is_day', 1),
             }
 
-            # 5-day forecast
-            fc_url = f"http://api.openweathermap.org/data/2.5/forecast?lat={lat_f}&lon={lon_f}&units=metric&appid={OPENWEATHER_API_KEY}"
-            fc_res = requests.get(fc_url, timeout=4)
-            fc = fc_res.json() if fc_res.status_code == 200 else {}
-
-            daily = {}
-            if fc.get('cod') == '200':
-                for item in fc.get('list', []):
-                    dt_txt = item['dt_txt']
-                    date_key = dt_txt.split(' ')[0]
-                    if date_key not in daily:
-                        daily[date_key] = {'date': date_key, 'temps': [], 'descs': [], 'icons': [], 'rain_mm': 0}
-                    daily[date_key]['temps'].append(item['main']['temp'])
-                    daily[date_key]['descs'].append(item['weather'][0]['description'])
-                    daily[date_key]['icons'].append(item['weather'][0].get('icon', '03d'))
-                    daily[date_key]['rain_mm'] += item.get('rain', {}).get('3h', 0)
-
+            # Build 7-day forecast from daily data
             forecast = []
-            for dkey in sorted(daily.keys())[:7]:
-                d = daily[dkey]
-                day_icons = [i for i in d['icons'] if 'd' in i]
-                best_icon = day_icons[len(day_icons)//2] if day_icons else d['icons'][0]
+            for i in range(min(7, len(daily.get('time', [])))):
+                d_wmo = daily['weather_code'][i]
                 forecast.append({
-                    'date': d['date'],
-                    'high': round(max(d['temps']), 1),
-                    'low': round(min(d['temps']), 1),
-                    'desc': max(set(d['descs']), key=d['descs'].count).capitalize(),
-                    'icon': map_weather_icon(best_icon),
-                    'rain_mm': round(d['rain_mm'], 1),
+                    'date': daily['time'][i],
+                    'high': round(daily['temperature_2m_max'][i], 1),
+                    'low': round(daily['temperature_2m_min'][i], 1),
+                    'desc': wmo_to_desc(d_wmo),
+                    'icon': wmo_to_icon(d_wmo),
+                    'rain_mm': round(daily.get('precipitation_sum', [0]*7)[i] or 0, 1),
                 })
+
             return jsonify({'current': current, 'forecast': forecast, 'is_fallback': False})
 
     except Exception:
         pass
 
-    # Fallback Weather Generation
-    from datetime import datetime, timedelta
-    today = datetime.now()
-    fallback_current = {
-        'city': city_label if 'city_label' in locals() else 'Local Region',
-        'temp': 28.5,
-        'feels_like': 30.2,
-        'humidity': 75,
-        'pressure': 1012,
-        'wind': 3.6,
-        'visibility': 10.0,
-        'desc': 'Partly Cloudy',
-        'icon': 'fa-cloud-sun',
-        'icon_code': '02d',
-        'lat': float(lat),
-        'lon': float(lon),
-    }
-    fallback_forecast = []
-    sample_descs = ['Partly Cloudy', 'Light Rain Showers', 'Scattered Clouds', 'Sunny / Clear', 'Moderate Rain', 'Mostly Sunny', 'Thunderstorm Chance']
-    sample_icons = ['fa-cloud-sun', 'fa-cloud-sun-rain', 'fa-cloud', 'fa-sun', 'fa-cloud-showers-heavy', 'fa-sun', 'fa-bolt']
-    sample_rains = [2.4, 12.8, 0.0, 0.0, 18.5, 0.0, 8.2]
-
-    for i in range(7):
-        d_date = (today + timedelta(days=i)).strftime('%Y-%m-%d')
-        fallback_forecast.append({
-            'date': d_date,
-            'high': round(29.0 + (i % 3) * 0.8, 1),
-            'low': round(23.5 + (i % 2) * 0.5, 1),
-            'desc': sample_descs[i % len(sample_descs)],
-            'icon': sample_icons[i % len(sample_icons)],
-            'rain_mm': sample_rains[i % len(sample_rains)],
-        })
-
-    return jsonify({'current': fallback_current, 'forecast': fallback_forecast, 'is_fallback': True})
-
-
+    # Fallback: try the curated Indian cities list for coordinates
+    nearest = get_nearby_cities(float(lat), float(lon), count=1)
+    city_label = nearest[0]['name'] if nearest else 'Local Region'
+    return jsonify({
+        'current': {
+            'city': city_label, 'temp': 0, 'feels_like': 0, 'humidity': 0,
+            'pressure': 1013, 'wind': 0, 'visibility': 10, 'desc': 'Unavailable',
+            'icon': 'fa-cloud', 'icon_code': '03d', 'lat': float(lat), 'lon': float(lon),
+            'updated_at': '', 'is_day': 1,
+        },
+        'forecast': [], 'is_fallback': True
+    })
 
 @app.route('/api/weather/city/<city_name>')
 def api_weather_city(city_name):
-    """Current weather + 5-day forecast by city name with fallback."""
+    """Current weather + 7-day forecast by city name via Open-Meteo geocoding."""
     try:
-        geo_url = f"http://api.openweathermap.org/data/2.5/weather?q={city_name}&units=metric&appid={OPENWEATHER_API_KEY}"
+        # Open-Meteo geocoding (free, no key)
+        geo_url = f"https://geocoding-api.open-meteo.com/v1/search?name={city_name}&count=1&language=en"
         geo_res = requests.get(geo_url, timeout=4)
         geo = geo_res.json() if geo_res.status_code == 200 else {}
-        if geo.get('cod') == 200:
-            lat = geo['coord']['lat']
-            lon = geo['coord']['lon']
+        results = geo.get('results', [])
+        if results:
+            lat = results[0]['latitude']
+            lon = results[0]['longitude']
             return api_weather_coords(str(lat), str(lon))
     except Exception:
         pass
 
-    # Lookup city in curated INDIAN_CITIES database or fallback to default
+    # Fallback: curated Indian cities list
     matched = next((c for c in INDIAN_CITIES if c['name'].lower() == city_name.lower()), None)
     if matched:
         return api_weather_coords(str(matched['lat']), str(matched['lon']))
@@ -807,19 +981,27 @@ def api_nearby_cities(lat, lon):
         return jsonify({'error': str(e)}), 500
 
 
+# Live Market Prices Page (Farmer Portal)
+@app.route('/farmer/market_prices')
+def farmer_market_prices():
+    return render_template('market_prices.html')
+
+
 @app.route('/api/market_prices')
 def api_market_prices():
     """Fetch live mandi commodity prices from data.gov.in for a given city/district, with automatic fallback to last known rates."""
+    from datetime import datetime
     city = request.args.get('city', 'Bangalore')
+    today = datetime.now().strftime('%d/%m/%Y')
 
     try:
-        # Try district-level filter first
+        # Try district-level filter first (government API can be slow)
         url = (
             f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
             f"?api-key={DATA_GOV_API_KEY}&format=json&limit=50"
             f"&filters[district]={city}"
         )
-        res = requests.get(url, timeout=6)
+        res = requests.get(url, timeout=30)
         data = res.json() if res.status_code == 200 else {}
         records = data.get('records', [])
 
@@ -830,7 +1012,7 @@ def api_market_prices():
                 f"?api-key={DATA_GOV_API_KEY}&format=json&limit=50"
                 f"&filters[state]={city}"
             )
-            res2 = requests.get(url2, timeout=6)
+            res2 = requests.get(url2, timeout=30)
             data2 = res2.json() if res2.status_code == 200 else {}
             records = data2.get('records', [])
 
@@ -859,44 +1041,130 @@ def api_market_prices():
     except Exception:
         pass
 
-    # Serve Last Known Mandi Rates as Fallback
-    fallback_list = FALLBACK_MANDI_PRICES.get(city) or FALLBACK_MANDI_PRICES.get(city.capitalize()) or DEFAULT_FALLBACK_PRICES
+    # Serve Dynamic Mandi Rates as Fallback — district-level from ML training data
+    import random
+    import csv as _csv
+
+    # District crop map loaded at startup from preprocessed2.csv
+
+    # Mandi price ranges (₹/quintal) for common crops
+    _MANDI_PRICES = {
+        'Rice': (2200, 3200), 'Paddy': (2000, 2400), 'Wheat': (2100, 2500),
+        'Maize': (1700, 2200), 'Cotton(lint)': (5500, 7000), 'Ragi': (3000, 4000),
+        'Jowar': (1800, 2400), 'Bajra': (1600, 2100), 'Groundnut': (5000, 6800),
+        'Soyabean': (3600, 4600), 'Arhar/Tur': (6000, 7800), 'Moong(Green Gram)': (7000, 8500),
+        'Urad': (6500, 8000), 'Gram': (4500, 5500), 'Horse-gram': (7500, 9000),
+        'Dry chillies': (14000, 22000), 'Onion': (1400, 2800), 'Tomato': (1200, 2200),
+        'Potato': (1000, 1500), 'Turmeric': (10000, 16000), 'Banana': (1500, 2500),
+        'Coconut': (24000, 33000), 'Arecanut (Betelnut)': (43000, 50000),
+        'Cashewnut': (11000, 14000), 'Black pepper': (55000, 63000),
+        'Cardamom': (25000, 35000), 'Sugarcane': (260, 380),
+        'Sunflower': (5500, 7000), 'Sesamum': (12000, 16000),
+        'Rapeseed &Mustard': (4800, 5800), 'Linseed': (6000, 7500),
+        'Castor seed': (5200, 6500), 'Niger seed': (7500, 9000),
+        'Small millets': (3500, 5000), 'Other Kharif pulses': (5000, 7000),
+        'Other  Rabi pulses': (4500, 6000), 'Other Rabi pulses': (4500, 6000),
+        'Other Fresh Fruits': (2000, 3500), 'Mango': (1500, 3000),
+        'Grapes': (2500, 4000), 'Papaya': (1000, 1800), 'Watermelon': (600, 1200),
+        'Muskmelon': (800, 1400), 'Brinjal': (1000, 1800), 'Coriander': (10000, 15000),
+        'Garlic': (7000, 10000), 'Dry ginger': (16000, 22000), 'Tobacco': (13000, 18000),
+        'Safflower': (5000, 6500), 'Tapioca': (1500, 2200), 'Sweet potato': (1200, 1800),
+        'Beans & Mutter(Vegetable)': (3000, 4500), 'Cowpea(Lobia)': (5500, 7000),
+        'Mesta': (4000, 5500), 'Sannhamp': (3000, 4500),
+    }
+
+    # City→state mapping for unknown districts
+    _CITY_STATE = {
+        'bangalore': 'Karnataka', 'mysore': 'Karnataka', 'mandya': 'Karnataka',
+        'tumkur': 'Karnataka', 'hassan': 'Karnataka', 'udupi': 'Karnataka',
+        'mangalore': 'Karnataka', 'belgaum': 'Karnataka', 'hubli': 'Karnataka',
+        'pune': 'Maharashtra', 'mumbai': 'Maharashtra', 'nagpur': 'Maharashtra',
+        'nashik': 'Maharashtra', 'aurangabad': 'Maharashtra', 'kolhapur': 'Maharashtra',
+        'chennai': 'Tamil Nadu', 'coimbatore': 'Tamil Nadu', 'madurai': 'Tamil Nadu',
+        'hyderabad': 'Telangana', 'warangal': 'Telangana', 'nizamabad': 'Telangana',
+        'delhi': 'Delhi', 'new delhi': 'Delhi',
+        'ludhiana': 'Punjab', 'amritsar': 'Punjab', 'jalandhar': 'Punjab',
+        'patna': 'Bihar', 'lucknow': 'Uttar Pradesh', 'kanpur': 'Uttar Pradesh',
+        'jaipur': 'Rajasthan', 'jodhpur': 'Rajasthan',
+        'ahmedabad': 'Gujarat', 'surat': 'Gujarat', 'rajkot': 'Gujarat',
+        'bhopal': 'Madhya Pradesh', 'indore': 'Madhya Pradesh',
+        'kolkata': 'West Bengal', 'bhubaneswar': 'Odisha',
+        'goa': 'Goa', 'panaji': 'Goa', 'shimla': 'Himachal Pradesh',
+        'srinagar': 'Jammu and Kashmir', 'raipur': 'Chhattisgarh',
+        'ranchi': 'Jharkhand', 'guwahati': 'Assam', 'imphal': 'Manipur',
+        'shillong': 'Meghalaya', 'gangtok': 'Sikkim', 'dehradun': 'Uttarakhand',
+    }
+
+    # Detect state from city name
+    def _detect_state(city_name):
+        cn = city_name.lower().strip()
+        if cn in _CITY_STATE:
+            return _CITY_STATE[cn]
+        for k, v in _CITY_STATE.items():
+            if k in cn:
+                return v
+        return 'Karnataka'
+
+    # Look up district crops from training data, fallback to state
+    state = _detect_state(city)
+    crop_list = _find_district_crops(city, state)
+
+    # Build fallback prices
+    fallback_list = []
+    if crop_list:
+        # District-level data available
+        for crop_name in crop_list[:10]:
+            pmin, pmax = _MANDI_PRICES.get(crop_name, (2000, 5000))
+            base = random.randint(pmin, pmax)
+            variation = int(base * 0.08)
+            fallback_list.append({
+                'commodity': crop_name,
+                'variety': 'Local',
+                'market': f'{city} APMC',
+                'district': city,
+                'state': _detect_state(city),
+                'min_price': str(base - variation),
+                'max_price': str(base + variation),
+                'modal_price': str(base),
+                'arrival_date': today,
+            })
+
+    # Ultimate fallback: generic crops
+    if not fallback_list:
+        state = _detect_state(city)
+        generic = [('Rice', 2200, 3200), ('Wheat', 2100, 2500), ('Maize', 1700, 2200),
+                   ('Cotton(lint)', 5500, 7000), ('Groundnut', 5000, 6800),
+                   ('Onion', 1400, 2800), ('Tomato', 1200, 2200),
+                   ('Tur Dal', 6000, 7500), ('Mustard', 4500, 5500), ('Potato', 1000, 1500)]
+        for crop_name, pmin, pmax in generic:
+            base = random.randint(pmin, pmax)
+            variation = int(base * 0.08)
+            fallback_list.append({
+                'commodity': crop_name, 'variety': 'Local',
+                'market': f'{city} APMC', 'district': city, 'state': state,
+                'min_price': str(base - variation), 'max_price': str(base + variation),
+                'modal_price': str(base), 'arrival_date': today,
+            })
+    else:
+        state = fallback_list[0]['state']
+
     return jsonify({
         'city': city,
         'count': len(fallback_list),
         'prices': fallback_list,
         'is_fallback': True,
-        'source': 'Agmarknet APMC (Last Known Market Rates)',
+        'source': f'Estimated Market Rates for {city}, {state} (govt API unavailable)',
     })
-
-
-
-# Live Market Prices Page (Farmer Portal)
-@app.route('/farmer/market_prices')
-def farmer_market_prices():
-    # Auth handled by before_request hook
-    return render_template('market_prices.html')
-
-
-# Admin Dashboards
-@app.route('/admin/farmers')
-def admin_farmers():
-    # Auth handled by before_request hook
-    conn = get_db()
-    cursor = conn.execute('SELECT farmer_id, farmer_name, email, phone_no, F_State, F_District FROM farmerlogin')
-    rows = cursor.fetchall()
-    conn.close()
-
-    headers = ['ID', 'Farmer Name', 'Email', 'Phone', 'State', 'District']
-    return render_template('admin_dashboard.html', title='Farmer Users', headers=headers, rows=rows, delete_url='/admin/delete_farmer')
 
 @app.route('/admin/messages')
 def admin_messages():
     # Auth handled by before_request hook
     conn = get_db()
-    cursor = conn.execute('SELECT c_id, c_name, c_mobile, c_email, c_address, c_message FROM contactus')
-    rows = cursor.fetchall()
-    conn.close()
+    try:
+        cursor = conn.execute('SELECT c_id, c_name, c_mobile, c_email, c_address, c_message FROM contactus')
+        rows = cursor.fetchall()
+    finally:
+        conn.close()
 
     headers = ['ID', 'Name', 'Mobile', 'Email', 'Address', 'Message']
     return render_template('admin_dashboard.html', title='Customer Feedback & Messages', headers=headers, rows=rows, delete_url='/admin/delete_message')
@@ -906,9 +1174,11 @@ def admin_messages():
 def delete_farmer():
     fid = request.form.get('id')
     conn = get_db()
-    conn.execute('DELETE FROM farmerlogin WHERE farmer_id = ?', (fid,))
-    conn.commit()
-    conn.close()
+    try:
+        conn.execute('DELETE FROM farmerlogin WHERE farmer_id = ?', (fid,))
+        conn.commit()
+    finally:
+        conn.close()
     flash('Farmer user deleted.', 'info')
     return redirect(url_for('admin_farmers'))
 
@@ -916,12 +1186,75 @@ def delete_farmer():
 def delete_message():
     mid = request.form.get('id')
     conn = get_db()
-    conn.execute('DELETE FROM contactus WHERE c_id = ?', (mid,))
-    conn.commit()
-    conn.close()
+    try:
+        conn.execute('DELETE FROM contactus WHERE c_id = ?', (mid,))
+        conn.commit()
+    finally:
+        conn.close()
     flash('Contact message deleted.', 'info')
     return redirect(url_for('admin_messages'))
 
+
+# Pre-load district crop map from ML training data on startup
+import csv as _csv_init
+from collections import Counter as _CounterInit
+app._district_crop_map = {}
+_csv_path = os.path.join(BASE_DIR, 'farmer', 'ML', 'crop_prediction', 'preprocessed2.csv')
+if os.path.exists(_csv_path):
+    _dc = {}
+    with open(_csv_path, 'r', encoding='utf-8') as _f:
+        for _row in _csv_init.DictReader(_f):
+            _d = _row.get('District_Name', '').strip()
+            _c = _row.get('Crop', '').strip()
+            if _d and _c:
+                if _d not in _dc: _dc[_d] = _CounterInit()
+                _dc[_d][_c] += 1
+    for _d, _cnt in _dc.items():
+        app._district_crop_map[_d] = [c for c, _ in _cnt.most_common(10)]
+
+# Also build state→districts mapping for fallback
+app._state_districts = {}
+with open(_csv_path, 'r', encoding='utf-8') as _f:
+    for _row in _csv_init.DictReader(_f):
+        _s = _row.get('State_Name', '').strip()
+        _d = _row.get('District_Name', '').strip()
+        if _s and _d:
+            if _s not in app._state_districts:
+                app._state_districts[_s] = set()
+            app._state_districts[_s].add(_d)
+
+def _find_district_crops(district_name, state_name=""):
+    """Find district crops with fuzzy matching, falling back to state-level top crops."""
+    dmap = app._district_crop_map
+    key = district_name.upper().strip()
+    if key in dmap:
+        return dmap[key]
+    for k, v in dmap.items():
+        if key in k or k in key:
+            return v
+    for k, v in dmap.items():
+        if any(w in k for w in key.split() if len(w) > 3):
+            return v
+    # State-level fallback: aggregate top crops across districts in that state
+    if state_name:
+        from collections import Counter
+        state_crops = Counter()
+        state_key = state_name.strip()
+        # Find districts belonging to this state
+        state_districts = app._state_districts.get(state_key, set())
+        if not state_districts:
+            # Try partial match on state name
+            for sk, sd in app._state_districts.items():
+                if state_key in sk or sk in state_key:
+                    state_districts = sd
+                    break
+        for d in state_districts:
+            if d in dmap:
+                for crop in dmap[d]:
+                    state_crops[crop] += 1
+        if state_crops:
+            return [c for c, _ in state_crops.most_common(10)]
+    return []
 
 if __name__ == '__main__':
     print("Starting AgroIntel Standalone Python Flask Server...")

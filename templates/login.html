@@ -44,6 +44,7 @@
       </div>
 
       <form action="{{ url_for('login', role=role) }}" method="POST">
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-group mb-3">
           <label class="font-weight-bold small text-muted"><i class="fas fa-envelope mr-1 text-emerald"></i> Email / Username</label>
           <input type="text" name="email" class="form-control form-control-agro" placeholder="Enter email or username" required autocomplete="username">

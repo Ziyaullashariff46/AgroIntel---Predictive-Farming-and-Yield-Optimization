@@ -17,15 +17,16 @@
         <i class="fas fa-wand-magic-sparkles" style="color: var(--emerald-500);" aria-hidden="true"></i> Quick Soil Presets
       </label>
       <div class="soil-preset-container">
-        <button type="button" class="soil-preset-btn" onclick="applyPreset(90, 42, 43, 20.8, 82.0, 6.5, 202.9)">🌾 Paddy Rice</button>
-        <button type="button" class="soil-preset-btn" onclick="applyPreset(70, 55, 40, 24.5, 65.0, 6.8, 85.0)">🌽 Maize Loam</button>
-        <button type="button" class="soil-preset-btn" onclick="applyPreset(110, 45, 38, 28.0, 75.0, 7.2, 90.0)">☁️ Cotton Alluvial</button>
-        <button type="button" class="soil-preset-btn" onclick="applyPreset(100, 25, 30, 25.0, 80.0, 6.2, 160.0)">🎍 Sugarcane</button>
-        <button type="button" class="soil-preset-btn" onclick="applyPreset(20, 135, 200, 27.0, 85.0, 5.8, 240.0)">☕ Coffee & Spice</button>
+        <button type="button" class="soil-preset-btn" onclick="applyPreset(80, 48, 40, 23.7, 82.3, 6.4, 236.0)">🌾 Paddy Rice</button>
+        <button type="button" class="soil-preset-btn" onclick="applyPreset(78, 48, 20, 22.5, 65.0, 6.2, 85.0)">🌽 Maize Loam</button>
+        <button type="button" class="soil-preset-btn" onclick="applyPreset(118, 46, 20, 24.0, 80.0, 6.9, 80.0)">☁️ Cotton Alluvial</button>
+        <button type="button" class="soil-preset-btn" onclick="applyPreset(22, 17, 31, 27.4, 94.8, 6.0, 175.0)">🥥 Coconut</button>
+        <button type="button" class="soil-preset-btn" onclick="applyPreset(101, 29, 30, 25.5, 59.0, 6.8, 158.0)">☕ Coffee & Spice</button>
       </div>
     </div>
 
     <form action="{{ url_for('farmer_crop_recommendation') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="row">
         <!-- Nitrogen -->
         <div class="col-md-4 mb-4">

@@ -581,7 +581,6 @@
 }
 </style>
 
-{% block extra_scripts %}
 <script>
 function openSidebar() {
   document.getElementById('farmerSidebar').classList.add('open');
@@ -595,4 +594,5 @@ function closeSidebar() {
 }
 </script>
 {% endblock %}
-{% endblock %}
+
+{% block extra_scripts %}{% endblock %}

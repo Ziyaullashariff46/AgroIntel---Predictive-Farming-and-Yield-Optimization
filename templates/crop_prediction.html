@@ -48,6 +48,7 @@
     </div>
 
     <form action="{{ url_for('farmer_crop_prediction') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="row">
         <div class="col-sm-6 col-md-4 mb-3">
           <label><i class="fas fa-map-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> State</label>
@@ -55,7 +56,7 @@
         </div>
         <div class="col-sm-6 col-md-4 mb-3">
           <label><i class="fas fa-city" style="color: var(--cyan-500);" aria-hidden="true"></i> District</label>
-          <input type="text" name="district" id="districtInput" class="form-control form-control-agro" value="BAGALKOT" required>
+          <input type="text" name="district" id="districtInput" class="form-control form-control-agro" value="BANGALORE" required>
         </div>
         <div class="col-sm-6 col-md-4 mb-3">
           <label><i class="fas fa-calendar-days" style="color: var(--amber-500);" aria-hidden="true"></i> Season</label>
@@ -112,12 +113,11 @@
       <span class="text-muted" style="font-size: 0.8rem;">Historical Trajectory (Indicative)</span>
     </div>
 
-    <!-- Sample data disclosure -->
+    {% if price_data %}
     <div class="d-flex align-items-start gap-2 mb-3 p-3 rounded" style="background: rgba(6,182,212,0.07); border: 1px solid rgba(6,182,212,0.2); font-size: 0.82rem;">
-      <i class="fas fa-flask mt-1" style="color: var(--cyan-500); flex-shrink: 0;"></i>
+      <i class="fas fa-chart-line mt-1" style="color: var(--cyan-500); flex-shrink: 0;"></i>
       <div>
-        <strong style="color: var(--cyan-500);">Sample Reference Data</strong> — The table below shows illustrative APMC price trajectories for common crops based on historical averages.
-        Run a prediction above using your specific region and season to get ML model recommendations for your area.
+        <strong style="color: var(--cyan-500);">{{ state }} — {{ district }}</strong> | {{ season }} Season | Estimated APMC mandi price trajectories for ML-predicted crops in your region.
       </div>
     </div>
 
@@ -126,72 +126,35 @@
         <thead>
           <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem;">
             <th>Crop Name</th>
-            <th>−3 Months</th>
-            <th>−2 Months</th>
-            <th>−1 Month</th>
-            <th>Current Est.</th>
+            <th>{{ price_data[0].months[0] }}</th>
+            <th>{{ price_data[0].months[1] }}</th>
+            <th>{{ price_data[0].months[2] }}</th>
+            <th>{{ price_data[0].current_month }}</th>
             <th>Predicted Demand</th>
-            <th>Market Outlook</th>
           </tr>
         </thead>
         <tbody>
+          {% for row in price_data %}
           <tr>
-            <td><strong style="color: var(--text-primary);">Paddy / Rice (Sona Masuri)</strong></td>
-            <td>₹2,100 / q</td>
-            <td>₹2,180 / q</td>
-            <td>₹2,250 / q</td>
-            <td style="color: var(--emerald-500); font-weight: 700;">₹2,380 / q</td>
-            <td><span class="badge badge-success">High Demand (↑ 13.3%)</span></td>
-            <td class="text-muted">Strong festive demand & stable exports</td>
+            <td><strong style="color: var(--text-primary);">{{ row.name }}</strong></td>
+            <td>{{ row.m3 }} / q</td>
+            <td>{{ row.m2 }} / q</td>
+            <td>{{ row.m1 }} / q</td>
+            <td style="color: var(--emerald-500); font-weight: 700;">{{ row.current }} / q</td>
+            <td><span class="badge {{ row.demand_badge }}">{{ row.demand_label }}</span></td>
           </tr>
-          <tr>
-            <td><strong style="color: var(--text-primary);">Wheat (Dara / Sharbati)</strong></td>
-            <td>₹2,250 / q</td>
-            <td>₹2,320 / q</td>
-            <td>₹2,400 / q</td>
-            <td style="color: var(--emerald-500); font-weight: 700;">₹2,480 / q</td>
-            <td><span class="badge badge-success">High Demand (↑ 10.2%)</span></td>
-            <td class="text-muted">High industrial flour procurement</td>
-          </tr>
-          <tr>
-            <td><strong style="color: var(--text-primary);">Cotton (Long Staple)</strong></td>
-            <td>₹6,600 / q</td>
-            <td>₹6,800 / q</td>
-            <td>₹6,950 / q</td>
-            <td style="color: var(--emerald-500); font-weight: 700;">₹7,150 / q</td>
-            <td><span class="badge badge-success">Very High (↑ 8.3%)</span></td>
-            <td class="text-muted">Textile mill restocking season</td>
-          </tr>
-          <tr>
-            <td><strong style="color: var(--text-primary);">Tomato (Hybrid)</strong></td>
-            <td>₹1,200 / q</td>
-            <td>₹1,450 / q</td>
-            <td>₹1,800 / q</td>
-            <td style="color: var(--amber-500); font-weight: 700;">₹2,100 / q</td>
-            <td><span class="badge badge-warning">Medium (↑ 75%)</span></td>
-            <td class="text-muted">Monsoon supply shock driving rates</td>
-          </tr>
-          <tr>
-            <td><strong style="color: var(--text-primary);">Onion (Red Medium)</strong></td>
-            <td>₹1,800 / q</td>
-            <td>₹2,050 / q</td>
-            <td>₹2,300 / q</td>
-            <td style="color: var(--emerald-500); font-weight: 700;">₹2,600 / q</td>
-            <td><span class="badge badge-success">High Demand (↑ 44.4%)</span></td>
-            <td class="text-muted">Low buffer stock in key mandis</td>
-          </tr>
-          <tr>
-            <td><strong style="color: var(--text-primary);">Maize / Yellow Corn</strong></td>
-            <td>₹1,900 / q</td>
-            <td>₹1,980 / q</td>
-            <td>₹2,080 / q</td>
-            <td style="color: var(--emerald-500); font-weight: 700;">₹2,200 / q</td>
-            <td><span class="badge badge-info">Stable High (↑ 15.7%)</span></td>
-            <td class="text-muted">Poultry feed & ethanol demand peak</td>
-          </tr>
+          {% endfor %}
         </tbody>
       </table>
     </div>
+    {% else %}
+    <div class="d-flex align-items-start gap-2 mb-3 p-3 rounded" style="background: rgba(6,182,212,0.07); border: 1px solid rgba(6,182,212,0.2); font-size: 0.82rem;">
+      <i class="fas fa-flask mt-1" style="color: var(--cyan-500); flex-shrink: 0;"></i>
+      <div>
+        <strong style="color: var(--cyan-500);">Sample Reference Data</strong> — Run a prediction above using your specific region and season to get ML model recommendations and market price trends for your area.
+      </div>
+    </div>
+    {% endif %}
   </div>
 
   <!-- ═══════════════════════════════════════════
@@ -255,12 +218,12 @@ function detectPriceLocation() {
       const lat = pos.coords.latitude.toFixed(4);
       const lon = pos.coords.longitude.toFixed(4);
 
-      fetch(`/api/weather/coords/${lat}/${lon}`)
+      fetch(`/api/reverse_geocode/${lat}/${lon}`)
         .then(r => r.json())
         .then(data => {
-          if (data.current && data.current.city) {
-            document.getElementById('districtInput').value = data.current.city.toUpperCase();
-            document.getElementById('stateInput').value = 'Karnataka';
+          if (data.success && data.place) {
+            document.getElementById('districtInput').value = data.place.toUpperCase();
+            document.getElementById('stateInput').value = data.state ? data.state.toUpperCase() : 'Karnataka';
             document.getElementById('locStatusTitle').textContent = `Live Location: ${data.current.city}`;
             document.getElementById('locStatusSub').textContent = `Coordinates: ${lat}°, ${lon}° • District mapped to ${data.current.city}`;
           }

@@ -12,6 +12,7 @@
 
   <div class="glass-card">
     <form action="{{ url_for('farmer_yield_prediction') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="row">
         <div class="col-sm-6 col-md-4 mb-3">
           <label><i class="fas fa-map-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> State</label>
@@ -19,7 +20,7 @@
         </div>
         <div class="col-sm-6 col-md-4 mb-3">
           <label><i class="fas fa-city" style="color: var(--cyan-500);" aria-hidden="true"></i> District</label>
-          <input type="text" name="district" class="form-control form-control-agro" value="BAGALKOT" required>
+          <input type="text" name="district" class="form-control form-control-agro" value="BANGALORE" required>
         </div>
         <div class="col-sm-6 col-md-4 mb-3">
           <label><i class="fas fa-calendar-days" style="color: var(--amber-500);" aria-hidden="true"></i> Cultivation Season</label>
@@ -31,19 +32,50 @@
         </div>
         <div class="col-sm-6 col-md-6 mb-3">
           <label><i class="fas fa-seedling" style="color: var(--emerald-500);" aria-hidden="true"></i> Target Crop</label>
-          <input type="text" name="crop" class="form-control form-control-agro" value="Rice" placeholder="e.g. Rice, Maize" required>
+          <select name="crop" class="form-control form-control-agro" required>
+            <option value="Rice" selected>Rice (Paddy)</option>
+            <option value="Maize">Maize (Corn)</option>
+            <option value="Wheat">Wheat</option>
+            <option value="Cotton(lint)">Cotton</option>
+            <option value="Sugarcane">Sugarcane</option>
+            <option value="Groundnut">Groundnut (Peanut)</option>
+            <option value="Soyabean">Soyabean</option>
+            <option value="Bajra">Bajra (Pearl Millet)</option>
+            <option value="Jowar">Jowar (Sorghum)</option>
+            <option value="Ragi">Ragi (Finger Millet)</option>
+            <option value="Arhar/Tur">Arhar/Tur (Pigeon Pea)</option>
+            <option value="Moong(Green Gram)">Moong (Green Gram)</option>
+            <option value="Urad">Urad (Black Gram)</option>
+            <option value="Gram">Gram (Chickpea)</option>
+            <option value="Onion">Onion</option>
+            <option value="Tomato">Tomato</option>
+            <option value="Potato">Potato</option>
+            <option value="Turmeric">Turmeric</option>
+            <option value="Dry chillies">Dry Chillies</option>
+            <option value="Coconut ">Coconut</option>
+            <option value="Banana">Banana</option>
+            <option value="Mango">Mango</option>
+            <option value="Arecanut">Arecanut</option>
+            <option value="Black pepper">Black Pepper</option>
+            <option value="Cardamom">Cardamom</option>
+            <option value="Cashewnut">Cashewnut</option>
+            <option value="Sesamum">Sesame</option>
+            <option value="Sunflower">Sunflower</option>
+            <option value="Rapeseed &Mustard">Mustard</option>
+            <option value="Horse-gram">Horse Gram</option>
+          </select>
         </div>
         <div class="col-sm-6 col-md-6 mb-3">
           <div class="p-3 rounded" style="background: var(--bg-input); border: 1px solid var(--border-subtle);">
             <div class="d-flex justify-content-between align-items-center mb-2">
               <label class="mb-0" style="font-weight: 700; font-size: 0.85rem; color: var(--text-primary);">
-                <i class="fas fa-ruler-combined" aria-hidden="true"></i> Land Area (Ha)
+                <i class="fas fa-ruler-combined" aria-hidden="true"></i> Land Area (Acre)
               </label>
-              <span class="badge badge-success px-2 py-1" id="areaVal">100 Ha</span>
+              <span class="badge badge-success px-2 py-1" id="areaVal">247 Acre</span>
             </div>
-            <input type="range" min="1" max="500" value="100" class="custom-range" id="areaSlider"
+            <input type="range" min="1" max="1235" value="247" class="custom-range" id="areaSlider"
                    oninput="syncArea(this.value)" aria-label="Land area slider">
-            <input type="number" step="any" name="area" id="areaInput" class="form-control form-control-agro mt-2" value="100" required>
+            <input type="number" step="any" name="area" id="areaInput" class="form-control form-control-agro mt-2" value="247" required oninput="document.getElementById('areaSlider').value=this.value; syncArea(this.value)">
           </div>
         </div>
       </div>
@@ -91,7 +123,7 @@
             <i class="fas fa-flask"></i> Estimation Basis
           </h6>
           <ul class="text-muted mb-0 pl-3" style="font-size: 0.84rem; line-height: 1.6;">
-            <li><strong>Cultivated Land Area (Ha):</strong> Primary linear multiplier for total biomass production.</li>
+            <li><strong>Cultivated Land Area (Acre):</strong> Primary linear multiplier for total biomass production. Converted to hectares for model processing.</li>
             <li><strong>District Agricultural Multiplier:</strong> Evaluates historical soil fertility & irrigation infrastructure.</li>
             <li><strong>Seasonal Factor:</strong> Models solar radiation & rainfall duration during Kharif, Rabi & Whole Year cycles.</li>
           </ul>
@@ -109,7 +141,7 @@
 <script>
 function syncArea(val){
   document.getElementById('areaInput').value=val;
-  document.getElementById('areaVal').innerText=val+' Ha';
+  document.getElementById('areaVal').innerText=val+' Acre';
 }
 </script>
 {% endblock %}

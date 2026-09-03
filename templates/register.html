@@ -12,6 +12,7 @@
       </div>
 
       <form action="{{ url_for('register', role=role) }}" method="POST" id="registerForm" novalidate>
+          <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
 
         <div class="form-group mb-3">
           <label class="font-weight-bold small text-muted"><i class="fas fa-user mr-1 text-emerald"></i> Full Name</label>

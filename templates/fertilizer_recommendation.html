@@ -24,6 +24,7 @@
     </div>
 
     <form action="{{ url_for('farmer_fertilizer_recommendation') }}" method="POST">
+      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="row">
         <div class="col-sm-6 col-md-4 mb-3">
           <label><i class="fas fa-leaf" style="color: var(--emerald-500);" aria-hidden="true"></i> Nitrogen (N)</label>

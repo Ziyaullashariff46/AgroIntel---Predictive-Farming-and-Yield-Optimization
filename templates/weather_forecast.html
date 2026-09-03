@@ -249,7 +249,6 @@
 {% endblock %}
 
 {% block extra_scripts %}
-{{ super() }}
 <script>
 /* ════════════════════════════════════════════════════════
    WEATHER INTELLIGENCE HUB — Client-Side Engine
@@ -329,23 +328,31 @@ function requestLocation() {
   }
 
   function onError(err) {
-    statusEl.textContent = 'Location access denied';
-    subEl.textContent = 'Search for your city manually, or click Retry.';
-    iconEl.className = 'fas fa-location-crosshairs';
+    statusEl.textContent = 'Location unavailable — showing Udupi weather';
+    subEl.textContent = 'Use the city search above or click Retry for your location.';
+    iconEl.className = 'fas fa-map-marker-alt';
     iconEl.parentElement.style.background = 'rgba(245,158,11,0.12)';
     iconEl.parentElement.style.color = 'var(--amber-500)';
     retryBtn.style.display = 'inline-flex';
-    // Load default nearby cities (Hassan/Udupi area)
-    fetchNearbyCities(13.007, 76.096);
+    // Load default weather for Udupi as fallback
+    fetchWeatherByCoords(13.341, 74.742);
+    fetchNearbyCities(13.341, 74.742);
   }
 
   // maximumAge: 0 forces a FRESH GPS fix — prevents stale cached position from returning wrong location
   // timeout: 15000 gives enough time for GPS to lock accurately
   navigator.geolocation.getCurrentPosition(onSuccess, onError, {
-    enableHighAccuracy: true,
-    timeout: 15000,
-    maximumAge: 0
+    enableHighAccuracy: false,
+    timeout: 8000,
+    maximumAge: 300000
   });
+  
+  // Safety net: if geolocation takes too long, load default weather
+  setTimeout(function() {
+    if (!userLat && !userLon) {
+      onError({message: 'timeout'});
+    }
+  }, 10000);
 }
 
 /* ── FETCH WEATHER ── */
@@ -419,6 +426,7 @@ function renderCurrentWeather(w) {
           <i class="fas fa-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> ${w.city}
         </h4>
         <span class="text-muted" style="font-size: 0.82rem;">${now.toLocaleDateString('en-IN', {weekday:'long', day:'numeric', month:'long', year:'numeric'})}</span>
+        ${w.updated_at ? '<br><span style="font-size: 0.72rem; color: var(--emerald-500); font-weight: 600;"><i class="fas fa-clock" aria-hidden="true"></i> Live at ' + new Date(w.updated_at).toLocaleTimeString('en-IN', {hour: '2-digit', minute: '2-digit'}) + '</span>' : ''}
       </div>
       <span class="badge-agro badge-agro-amber">${w.desc}</span>
     </div>
@@ -504,7 +512,7 @@ function fetchNearbyCities(lat, lon) {
         return;
       }
       container.innerHTML = data.cities.map(c => `
-        <button type="button" class="nearby-chip" onclick="fetchWeatherByCity('${c.name}')">
+        <button type="button" class="nearby-chip" data-city="${c.name}" onclick="fetchWeatherByCity(this.dataset.city)">
           📍 ${c.name}
           <span class="chip-distance">${c.distance_km} km</span>
         </button>`).join('');
