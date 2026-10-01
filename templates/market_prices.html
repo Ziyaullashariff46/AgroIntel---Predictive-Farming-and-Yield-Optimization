@@ -2,6 +2,8 @@
 {% block page_title %}Live Mandi Prices{% endblock %}
 {% block farmer_content %}
 
+{% set DISTRICTS_BY_STATE = districts_by_state | tojson %}
+
 <div class="mb-4">
   <div class="badge-agro badge-agro-emerald mb-3">
     <i class="fas fa-indian-rupee-sign" aria-hidden="true"></i>
@@ -11,18 +13,29 @@
     Live Mandi Prices
   </h2>
   <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
-    Real-time APMC commodity rates from Agmarknet — search any district or detect your location.
+    Real-time APMC commodity rates from Agmarknet — pick a state and district, or detect your location.
   </p>
 </div>
 
 {# ── Search & Location Card ── #}
 <div class="glass-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
   <div class="row align-items-end" style="row-gap: 1rem;">
-    <div class="col-md-5">
-      <label for="citySearch"><i class="fas fa-search" style="color: var(--emerald-500); margin-right: 6px;"></i> Search City or District</label>
-      <input type="text" id="citySearch" class="form-control-agro" placeholder="e.g. Bangalore, Udupi, Delhi..." value="Udupi">
+    <div class="col-md-4">
+      <label for="stateSelect"><i class="fas fa-map" style="color: var(--emerald-500); margin-right: 6px;"></i> State</label>
+      <select id="stateSelect" class="form-control-agro" onchange="onStateChange()">
+        <option value="">Select a state…</option>
+        {% for st in states %}
+        <option value="{{ st }}">{{ st }}</option>
+        {% endfor %}
+      </select>
     </div>
     <div class="col-md-4">
+      <label for="districtSelect"><i class="fas fa-search" style="color: var(--emerald-500); margin-right: 6px;"></i> District</label>
+      <select id="districtSelect" class="form-control-agro" disabled>
+        <option value="">Select a state first…</option>
+      </select>
+    </div>
+    <div class="col-md-3">
       <div class="d-flex" style="gap: 0.5rem;">
         <button class="btn-agro-primary" style="flex: 1; min-height: 48px;" onclick="searchCity()">
           <i class="fas fa-search"></i> Search
@@ -32,22 +45,22 @@
         </button>
       </div>
     </div>
-    <div class="col-md-3" id="nearbyCol" style="display: none;">
+    <div class="col-md-1" id="nearbyCol" style="display: none;">
       <label style="font-size: 0.8rem;"><i class="fas fa-map-pin" style="color: var(--amber-500);"></i> Nearby</label>
       <div id="nearbyChips" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
     </div>
   </div>
 </div>
 
-{# ── Quick Access Chips ── #}
+{# ── Quick Access Chips (real districts from our data) ── #}
 <div class="soil-preset-container mb-4">
-  <button class="soil-preset-btn" onclick="loadCity('Udupi')"><i class="fas fa-map-marker-alt"></i> Udupi</button>
-  <button class="soil-preset-btn" onclick="loadCity('Bangalore')"><i class="fas fa-map-marker-alt"></i> Bangalore</button>
-  <button class="soil-preset-btn" onclick="loadCity('Mumbai')"><i class="fas fa-map-marker-alt"></i> Mumbai</button>
-  <button class="soil-preset-btn" onclick="loadCity('Delhi')"><i class="fas fa-map-marker-alt"></i> Delhi</button>
-  <button class="soil-preset-btn" onclick="loadCity('Nashik')"><i class="fas fa-map-marker-alt"></i> Nashik</button>
-  <button class="soil-preset-btn" onclick="loadCity('Pune')"><i class="fas fa-map-marker-alt"></i> Pune</button>
-  <button class="soil-preset-btn" onclick="loadCity('Hyderabad')"><i class="fas fa-map-marker-alt"></i> Hyderabad</button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Karnataka', 'UDUPI')"><i class="fas fa-map-marker-alt"></i> Udupi</button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Karnataka', 'BENGALURU URBAN')"><i class="fas fa-map-marker-alt"></i> Bengaluru Urban</button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Maharashtra', 'MUMBAI')"><i class="fas fa-map-marker-alt"></i> Mumbai</button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Maharashtra', 'PUNE')"><i class="fas fa-map-marker-alt"></i> Pune</button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Maharashtra', 'NASHIK')"><i class="fas fa-map-marker-alt"></i> Nashik</button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Telangana', 'HYDERABAD')"><i class="fas fa-map-marker-alt"></i> Hyderabad</button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Punjab', 'LUDHIANA')"><i class="fas fa-map-marker-alt"></i> Ludhiana</button>
 </div>
 
 {# ── Status Bar ── #}
@@ -110,7 +123,7 @@
 <div id="emptyState" style="display: none; text-align: center; padding: 3rem;">
   <i class="fas fa-shop-slash" style="font-size: 3rem; color: var(--text-muted); opacity: 0.4; margin-bottom: 1rem; display: block;"></i>
   <p style="color: var(--text-muted); font-weight: 600; font-size: 1.05rem;">No market data found for this location</p>
-  <p style="color: var(--text-muted); font-size: 0.88rem;">Try searching for a different city or district</p>
+  <p style="color: var(--text-muted); font-size: 0.88rem;">Try a different state or district</p>
 </div>
 
 {# ── Attribution ── #}
@@ -120,7 +133,11 @@
   </p>
 </div>
 
+<script type="application/json" id="districts-data">{{ DISTRICTS_BY_STATE }}</script>
+
 <script>
+const DISTRICTS_BY_STATE = JSON.parse(document.getElementById('districts-data').textContent);
+
 function showLoading() {
   document.getElementById('loadingState').style.display = 'block';
   document.getElementById('highlightSection').style.display = 'none';
@@ -129,17 +146,53 @@ function showLoading() {
   document.getElementById('statusBar').style.display = 'none';
 }
 
-function loadCity(city) {
-  document.getElementById('citySearch').value = city;
+// Repopulate the district dropdown from the selected state
+function populateDistricts(state, selected) {
+  const sel = document.getElementById('districtSelect');
+  sel.innerHTML = '';
+  if (!state || !DISTRICTS_BY_STATE[state]) {
+    sel.innerHTML = '<option value="">Select a state first…</option>';
+    sel.disabled = true;
+    return false;
+  }
+  sel.disabled = false;
+  let found = false;
+  if (!selected) {
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = 'Select your district…';
+    ph.selected = true;
+    sel.appendChild(ph);
+  }
+  DISTRICTS_BY_STATE[state].forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d;
+    if (selected && d === selected) { opt.selected = true; found = true; }
+    sel.appendChild(opt);
+  });
+  return found;
+}
+
+function onStateChange() {
+  populateDistricts(document.getElementById('stateSelect').value);
+}
+
+// Chip handler: set state + district, then search
+function loadDistrict(state, district) {
+  document.getElementById('stateSelect').value = state;
+  populateDistricts(state, district);
   searchCity();
 }
 
 function searchCity() {
-  const city = document.getElementById('citySearch').value.trim();
-  if (!city) return;
+  const state = document.getElementById('stateSelect').value;
+  const district = document.getElementById('districtSelect').value;
+  if (!state || !district) return;
   showLoading();
 
-  fetch(`/api/market_prices?city=${encodeURIComponent(city)}`)
+  const query = `city=${encodeURIComponent(district)}&state=${encodeURIComponent(state)}`;
+  fetch(`/api/market_prices?${query}`)
     .then(r => r.json())
     .then(data => {
       document.getElementById('loadingState').style.display = 'none';
@@ -150,7 +203,7 @@ function searchCity() {
       }
 
       // Status bar
-      document.getElementById('statusCity').innerHTML = `<i class="fas fa-city"></i> ${data.city}`;
+      document.getElementById('statusCity').innerHTML = `<i class="fas fa-city"></i> ${data.city}${data.state ? ', ' + data.state : ''}`;
       document.getElementById('statusCount').innerHTML = `<i class="fas fa-boxes-stacked"></i> ${data.count} commodities`;
       document.getElementById('statusSource').innerHTML = `<i class="fas fa-database"></i> ${data.source}`;
       document.getElementById('statusBar').style.display = 'block';
@@ -162,8 +215,8 @@ function searchCity() {
       highlights.forEach(p => {
         hContainer.innerHTML += `
           <div class="col-sm-6 col-lg-4">
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-lg); padding: 1.25rem; height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease;" 
-                 onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'" 
+            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-lg); padding: 1.25rem; height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease;"
+                 onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
                  onmouseout="this.style.transform='';this.style.boxShadow=''">
               <p style="font-weight: 700; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 0.35rem;">${p.commodity}</p>
               <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">${p.variety} • ${p.market}</p>
@@ -212,26 +265,42 @@ function detectMyLocation() {
   navigator.geolocation.getCurrentPosition(function(pos) {
     const lat = pos.coords.latitude, lon = pos.coords.longitude;
 
-    // Reverse geocode to get city
+    // Reverse geocode to a state + district we actually have data for
     fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`)
       .then(r => r.json())
       .then(geo => {
-        const city = geo.address.city || geo.address.town || geo.address.county || geo.address.state_district || 'Bangalore';
-        document.getElementById('citySearch').value = city;
+        const detectedState = geo.address.state || '';
+        const candidates = [geo.address.state_district, geo.address.county, geo.address.city, geo.address.town]
+          .map(v => (v || '').toUpperCase());
+        const local = (DISTRICTS_BY_STATE[detectedState] || []).find(d => candidates.includes(d));
+        const match = local ? { state: detectedState, district: local } : candidates.map(findDistrictMatch).find(m => m);
+        if (match) {
+          document.getElementById('stateSelect').value = match.state;
+          populateDistricts(match.state, match.district);
+        } else if (DISTRICTS_BY_STATE[detectedState]) {
+          // Town not in our data: list districts, prompt user — never silently search one
+          document.getElementById('stateSelect').value = detectedState;
+          populateDistricts(detectedState, '');
+        }
         searchCity();
       }).catch(() => { searchCity(); });
 
-    // Fetch nearby cities
+    // Fetch nearby cities (only those mapping to a district we have data for)
     fetch(`/api/nearby_cities/${lat}/${lon}`)
       .then(r => r.json())
       .then(data => {
         if (data.cities && data.cities.length) {
           const container = document.getElementById('nearbyChips');
           container.innerHTML = '';
-          data.cities.slice(0, 4).forEach(c => {
-            container.innerHTML += `<button class="soil-preset-btn" style="font-size: 0.76rem; padding: 0.2rem 0.6rem; min-height: 28px;" onclick="loadCity('${c.name}')">${c.name}</button>`;
+          const actionable = data.cities
+            .map(c => ({ name: c.name, match: findDistrictMatch(c.name) }))
+            .filter(x => x.match)
+            .slice(0, 4);
+          actionable.forEach(x => {
+            const cname = String(x.name).replace(/'/g, '');
+            container.innerHTML += `<button class="soil-preset-btn" style="font-size: 0.76rem; padding: 0.2rem 0.6rem; min-height: 28px;" onclick="nearbyCity('${cname}')">${x.name}</button>`;
           });
-          document.getElementById('nearbyCol').style.display = 'block';
+          if (actionable.length) document.getElementById('nearbyCol').style.display = 'block';
         }
       }).catch(() => {});
 
@@ -244,12 +313,39 @@ function detectMyLocation() {
   }, { enableHighAccuracy: true, timeout: 8000 });
 }
 
-// Auto-load default city
-document.addEventListener('DOMContentLoaded', function() { searchCity(); });
+// Map a city name to a district we have data for (exact → first-word → substring)
+function findDistrictMatch(name) {
+  const wanted = (name || '').toUpperCase().trim();
+  if (!wanted) return null;
+  for (const [st, districts] of Object.entries(DISTRICTS_BY_STATE)) {
+    const hit = districts.find(d => d === wanted);
+    if (hit) return { state: st, district: hit };
+  }
+  const w1 = wanted.split(' ')[0];
+  for (const [st, districts] of Object.entries(DISTRICTS_BY_STATE)) {
+    const hit = districts.find(d => d.split(' ')[0] === w1);
+    if (hit) return { state: st, district: hit };
+  }
+  if (wanted.length >= 4) {
+    for (const [st, districts] of Object.entries(DISTRICTS_BY_STATE)) {
+      const hit = districts.find(d => d.includes(wanted) || wanted.includes(d));
+      if (hit) return { state: st, district: hit };
+    }
+  }
+  return null;
+}
 
-// Enter key support
-document.getElementById('citySearch').addEventListener('keydown', function(e) {
-  if (e.key === 'Enter') { e.preventDefault(); searchCity(); }
+// Nearby-city chip: select its state and closest district we have data for
+function nearbyCity(name) {
+  const m = findDistrictMatch(name);
+  if (m) { loadDistrict(m.state, m.district); }
+}
+
+// Auto-load default district
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('stateSelect').value = 'Karnataka';
+  populateDistricts('Karnataka', 'UDUPI');
+  searchCity();
 });
 </script>
 
