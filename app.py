@@ -24,17 +24,23 @@ app = Flask(__name__, template_folder='templates')
 # SESSION SECRET — never fall back to a literal committed to the repo.
 # The whole access-control guard below rests on session cookies being
 # unforgeable; a published default key would let anyone mint an admin
-# cookie. Fail loudly when deployed, use a throwaway key locally.
+# cookie. Fail loudly outside serverless; on Vercel fall back to a per-boot
+# random key (still unforgeable) with a boot warning.
 # ═══════════════════════════════════════════════════════════════
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
 if not app.secret_key:
-    if os.getenv('VERCEL') or os.getenv('FLASK_ENV') == 'production':
+    if os.getenv('FLASK_ENV') == 'production' and not os.getenv('VERCEL'):
         raise RuntimeError(
             'FLASK_SECRET_KEY is not set. Set it as an environment variable '
             'before deploying — without it, session cookies can be forged.'
         )
-    # Local dev: random per-process key. Sessions reset on restart, which is fine.
+    # Local dev and first-boot serverless: random per-process key. Sessions
+    # reset on restart, which is fine — cookies stay unforgeable either way.
     app.secret_key = os.urandom(32)
+    if os.getenv('VERCEL'):
+        print('WARNING: FLASK_SECRET_KEY not set; using a per-boot random key. '
+              'Set it in Vercel -> Settings -> Environment Variables.',
+              file=sys.stderr)
 
 # ═══════════════════════════════════════════════════════════════
 # RATE LIMITER — Prevents brute-force login attacks
@@ -1013,18 +1019,18 @@ def api_market_prices():
         )
         if state_arg:
             url += f"&filters[state]={state_arg}"
-        res = requests.get(url, timeout=6)
-        data = res.json() if res.status_code == 200 else {}
+        res = requests.get(url, timeout=6) if DATA_GOV_API_KEY else None
+        data = res.json() if res is not None and res.status_code == 200 else {}
         records = data.get('records', [])
 
         # If no district match, try state-level (only when the district call responded)
-        if not records and res.status_code == 200:
+        if not records and res is not None and res.status_code == 200:
             url2 = (
                 f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
                 f"?api-key={DATA_GOV_API_KEY}&format=json&limit=50"
                 f"&filters[state]={state_arg or city}"
             )
-            res2 = requests.get(url2, timeout=30)
+            res2 = requests.get(url2, timeout=6)
             data2 = res2.json() if res2.status_code == 200 else {}
             records = data2.get('records', [])
 
