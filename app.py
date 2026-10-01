@@ -984,7 +984,20 @@ def api_nearby_cities(lat, lon):
 # Live Market Prices Page (Farmer Portal)
 @app.route('/farmer/market_prices')
 def farmer_market_prices():
+<<<<<<< Updated upstream
     return render_template('market_prices.html')
+=======
+    # Districts grouped by state power the district dropdown; every entry comes
+    # from the ML training data, so users can only pick districts we have data for.
+    districts_by_state = {
+        state: sorted(districts) for state, districts in app._state_districts.items()
+    }
+    return render_template(
+        'market_prices.html',
+        states=sorted(districts_by_state.keys()),
+        districts_by_state=districts_by_state,
+    )
+>>>>>>> Stashed changes
 
 
 @app.route('/api/market_prices')
@@ -992,6 +1005,10 @@ def api_market_prices():
     """Fetch live mandi commodity prices from data.gov.in for a given city/district, with automatic fallback to last known rates."""
     from datetime import datetime
     city = request.args.get('city', 'Bangalore')
+<<<<<<< Updated upstream
+=======
+    state_arg = request.args.get('state', '').strip()
+>>>>>>> Stashed changes
     today = datetime.now().strftime('%d/%m/%Y')
 
     try:
@@ -1001,16 +1018,22 @@ def api_market_prices():
             f"?api-key={DATA_GOV_API_KEY}&format=json&limit=50"
             f"&filters[district]={city}"
         )
+<<<<<<< Updated upstream
         res = requests.get(url, timeout=30)
+=======
+        if state_arg:
+            url += f"&filters[state]={state_arg}"
+        res = requests.get(url, timeout=6)
+>>>>>>> Stashed changes
         data = res.json() if res.status_code == 200 else {}
         records = data.get('records', [])
 
-        # If no district match, try state-level
-        if not records:
+        # If no district match, try state-level (only when the district call responded)
+        if not records and res.status_code == 200:
             url2 = (
                 f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
                 f"?api-key={DATA_GOV_API_KEY}&format=json&limit=50"
-                f"&filters[state]={city}"
+                f"&filters[state]={state_arg or city}"
             )
             res2 = requests.get(url2, timeout=30)
             data2 = res2.json() if res2.status_code == 200 else {}
@@ -1034,6 +1057,7 @@ def api_market_prices():
                 'city': city,
                 'count': len(prices),
                 'prices': prices,
+                'state': state_arg or (records[0].get('state', '') if records else ''),
                 'is_fallback': False,
                 'source': 'data.gov.in (Agmarknet Live)',
             })
@@ -1105,8 +1129,13 @@ def api_market_prices():
                 return v
         return 'Karnataka'
 
+<<<<<<< Updated upstream
     # Look up district crops from training data, fallback to state
     state = _detect_state(city)
+=======
+    # Explicit state wins over the city-name heuristic (district names repeat across states)
+    state = state_arg or _detect_state(city)
+>>>>>>> Stashed changes
     crop_list = _find_district_crops(city, state)
 
     # Build fallback prices
@@ -1122,7 +1151,11 @@ def api_market_prices():
                 'variety': 'Local',
                 'market': f'{city} APMC',
                 'district': city,
+<<<<<<< Updated upstream
                 'state': _detect_state(city),
+=======
+                'state': state,
+>>>>>>> Stashed changes
                 'min_price': str(base - variation),
                 'max_price': str(base + variation),
                 'modal_price': str(base),
@@ -1131,7 +1164,10 @@ def api_market_prices():
 
     # Ultimate fallback: generic crops
     if not fallback_list:
+<<<<<<< Updated upstream
         state = _detect_state(city)
+=======
+>>>>>>> Stashed changes
         generic = [('Rice', 2200, 3200), ('Wheat', 2100, 2500), ('Maize', 1700, 2200),
                    ('Cotton(lint)', 5500, 7000), ('Groundnut', 5000, 6800),
                    ('Onion', 1400, 2800), ('Tomato', 1200, 2200),
@@ -1152,6 +1188,7 @@ def api_market_prices():
         'city': city,
         'count': len(fallback_list),
         'prices': fallback_list,
+        'state': state,
         'is_fallback': True,
         'source': f'Estimated Market Rates for {city}, {state} (govt API unavailable)',
     })
@@ -1199,6 +1236,7 @@ def delete_message():
 import csv as _csv_init
 from collections import Counter as _CounterInit
 app._district_crop_map = {}
+<<<<<<< Updated upstream
 _csv_path = os.path.join(BASE_DIR, 'farmer', 'ML', 'crop_prediction', 'preprocessed2.csv')
 if os.path.exists(_csv_path):
     _dc = {}
@@ -1222,11 +1260,54 @@ with open(_csv_path, 'r', encoding='utf-8') as _f:
             if _s not in app._state_districts:
                 app._state_districts[_s] = set()
             app._state_districts[_s].add(_d)
+=======
+app._district_crop_map_by_state = {}
+app._state_districts = {}
+_csv_path = os.path.join(BASE_DIR, 'farmer', 'ML', 'crop_prediction', 'preprocessed2.csv')
+if os.path.exists(_csv_path):
+    _dc = {}
+    _dcs = {}
+    with open(_csv_path, 'r', encoding='utf-8') as _f:
+        for _row in _csv_init.DictReader(_f):
+            _d = _row.get('District_Name', '').strip()
+            _s = _row.get('State_Name', '').strip()
+            _c = _row.get('Crop', '').strip()
+            if _s and _d:
+                if _s not in app._state_districts:
+                    app._state_districts[_s] = set()
+                app._state_districts[_s].add(_d)
+            if _d and _c:
+                if _d not in _dc: _dc[_d] = _CounterInit()
+                _dc[_d][_c] += 1
+                if _s:
+                    if _s not in _dcs: _dcs[_s] = {}
+                    if _d not in _dcs[_s]: _dcs[_s][_d] = _CounterInit()
+                    _dcs[_s][_d][_c] += 1
+    for _d, _cnt in _dc.items():
+        app._district_crop_map[_d] = [c for c, _ in _cnt.most_common(10)]
+    for _s, _dists in _dcs.items():
+        for _d, _cnt in _dists.items():
+            app._district_crop_map_by_state[(_s.upper(), _d.upper())] = [c for c, _ in _cnt.most_common(10)]
+>>>>>>> Stashed changes
 
 def _find_district_crops(district_name, state_name=""):
     """Find district crops with fuzzy matching, falling back to state-level top crops."""
     dmap = app._district_crop_map
     key = district_name.upper().strip()
+<<<<<<< Updated upstream
+=======
+    state_key = state_name.upper().strip()
+    # District names repeat across states (e.g. AURANGABAD in Bihar and
+    # Maharashtra), so a state-qualified lookup wins over the district-only map.
+    if state_key:
+        by_state = app._district_crop_map_by_state
+        if (state_key, key) in by_state:
+            return by_state[(state_key, key)]
+        for sk in app._state_districts:
+            if state_key in sk.upper() or sk.upper() in state_key:
+                if (sk.upper(), key) in by_state:
+                    return by_state[(sk.upper(), key)]
+>>>>>>> Stashed changes
     if key in dmap:
         return dmap[key]
     for k, v in dmap.items():
