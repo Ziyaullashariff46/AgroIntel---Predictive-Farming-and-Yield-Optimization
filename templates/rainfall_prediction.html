@@ -48,6 +48,34 @@
   <button type="button" class="soil-preset-btn" onclick="setRegion('TELANGANA')"><i class="fas fa-monument"></i> Telangana</button>
 </div>
 
+{# ── State → District → Subdivision Helper ── #}
+<div class="glass-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
+  <div class="row align-items-end" style="row-gap: 1rem;">
+    <div class="col-md-4">
+      <label for="stateSelect"><i class="fas fa-map" style="color: var(--cyan-500); margin-right: 6px;"></i> State</label>
+      <select id="stateSelect" class="form-control-agro" onchange="onRainStateChange()">
+        {% for st in states %}
+        <option value="{{ st }}">{{ st }}</option>
+        {% endfor %}
+      </select>
+    </div>
+    <div class="col-md-4">
+      <label for="districtSelect"><i class="fas fa-search" style="color: var(--cyan-500); margin-right: 6px;"></i> District</label>
+      <select id="districtSelect" class="form-control-agro" disabled>
+        <option value="">Select a state first…</option>
+      </select>
+    </div>
+    <div class="col-md-4 d-flex align-items-end">
+      <button type="button" class="btn-agro-secondary w-100" id="resolveZoneBtn" onclick="resolveSubdivision()" style="min-height: 48px;">
+        <i class="fas fa-arrow-down"></i> Find My Subdivision
+      </button>
+    </div>
+  </div>
+  <p class="mb-0 mt-2" style="font-size: 0.76rem; color: var(--text-muted);" id="zoneResolveNote">
+    IMD models use meteorological subdivisions — pick your district and we'll map it to the right zone below.
+  </p>
+</div>
+
 {# ── Estimation Form ── #}
 <div class="glass-card">
   <form method="POST" id="rainfallForm">
@@ -293,6 +321,84 @@ function detectLocation() {
 
 // Auto-detect on page load
 document.addEventListener('DOMContentLoaded', function() { detectLocation(); });
+</script>
+
+<script type="application/json" id="districts-data">{{ districts_by_state | tojson }}</script>
+
+<script>
+const DISTRICTS_BY_STATE = JSON.parse(document.getElementById('districts-data').textContent);
+
+function populateDistricts(state, selected) {
+  const sel = document.getElementById('districtSelect');
+  sel.innerHTML = '';
+  if (!state || !DISTRICTS_BY_STATE[state]) {
+    sel.innerHTML = '<option value="">Select a state first…</option>';
+    sel.disabled = true;
+    return false;
+  }
+  sel.disabled = false;
+  let found = false;
+  if (!selected) {
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = 'Select your district…';
+    ph.selected = true;
+    sel.appendChild(ph);
+  }
+  DISTRICTS_BY_STATE[state].forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d;
+    if (selected && d === selected) { opt.selected = true; found = true; }
+    sel.appendChild(opt);
+  });
+  return found;
+}
+
+function onRainStateChange() {
+  populateDistricts(document.getElementById('stateSelect').value);
+}
+
+// Resolve the selected district to its IMD meteorological subdivision
+function resolveSubdivision() {
+  const district = document.getElementById('districtSelect').value;
+  const note = document.getElementById('zoneResolveNote');
+  const btn = document.getElementById('resolveZoneBtn');
+  if (!district) {
+    note.textContent = 'Pick a state and district first, then we will map it to an IMD zone.';
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resolving…';
+  fetch(`/api/weather/city/${encodeURIComponent(district)}`)
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-arrow-down"></i> Find My Subdivision';
+      // Label looks like "Place, District, STATE" — the last segment is the state
+      const label = (data.current && data.current.label) ? data.current.label : '';
+      const parts = label.split(',').map(s => s.trim()).filter(Boolean);
+      const stateName = parts.length ? parts[parts.length - 1] : '';
+      const zone = ZONE_MAP[stateName.toLowerCase()];
+      if (zone) {
+        document.getElementById('region').value = zone;
+        note.textContent = `${district} falls under IMD zone: ${zone}.`;
+      } else {
+        note.textContent = `Could not map ${district} to an IMD zone — pick the subdivision manually.`;
+      }
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-arrow-down"></i> Find My Subdivision';
+      note.textContent = 'Zone lookup failed — pick the subdivision manually.';
+    });
+}
+
+// Auto-load a default region so the dropdown is instantly usable
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('stateSelect').value = 'Karnataka';
+  populateDistricts('Karnataka', '');
+});
 </script>
 
 {% endblock %}

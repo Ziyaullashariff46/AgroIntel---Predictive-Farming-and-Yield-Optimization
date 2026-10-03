@@ -578,7 +578,9 @@ def farmer_crop_recommendation():
         except Exception as e:
             result = f"Could not compute recommendation. Please check your input values and try again."
 
-    return render_template('crop_recommendation.html', result=result)
+    states, districts_by_state = _location_choices()
+    return render_template('crop_recommendation.html', result=result,
+                           states=states, districts_by_state=districts_by_state)
 
 # ML Feature 2: Fertilizer Recommendation
 @app.route('/farmer/fertilizer_recommendation', methods=['GET', 'POST'])
@@ -615,7 +617,9 @@ def farmer_fertilizer_recommendation():
         except Exception as e:
             result = f"Could not compute fertilizer recommendation. Please verify your inputs and try again."
 
-    return render_template('fertilizer_recommendation.html', result=result)
+    states, districts_by_state = _location_choices()
+    return render_template('fertilizer_recommendation.html', result=result,
+                           states=states, districts_by_state=districts_by_state)
 
 # Estimated mandi prices per quintal (₹) — base prices with seasonal variation
 _CROP_PRICES = {
@@ -710,7 +714,11 @@ def farmer_crop_prediction():
     price_data = []
     if result and not isinstance(result, str):
         price_data = _estimate_crop_prices(list(result.keys()))
-    return render_template('crop_prediction.html', result=result, price_data=price_data, state=state if result else '', district=district if result else '', season=season if result else '')
+    states, districts_by_state = _location_choices()
+    return render_template('crop_prediction.html', result=result, price_data=price_data,
+                           state=state if result else '', district=district if result else '',
+                           season=season if result else '', states=states,
+                           districts_by_state=districts_by_state)
 
 
 def _get_season_crop_fallback(season):
@@ -757,7 +765,15 @@ def farmer_yield_prediction():
             except Exception:
                 result = 2.85
 
-    return render_template('yield_prediction.html', result=result)
+    states, districts_by_state = _location_choices()
+    form = request.form
+    return render_template('yield_prediction.html', result=result,
+                           states=states, districts_by_state=districts_by_state,
+                           sel_state=form.get('state') or 'Karnataka',
+                           sel_district=form.get('district') or 'BAGALKOT',
+                           sel_season=form.get('season') or 'Kharif',
+                           sel_crop=form.get('crop') or 'Rice',
+                           sel_area=form.get('area') or '247')
 
 # ML Feature 5: Rainfall Prediction
 @app.route('/farmer/rainfall_prediction', methods=['GET', 'POST'])
@@ -777,7 +793,9 @@ def farmer_rainfall_prediction():
         except Exception:
             result = None
 
-    return render_template('rainfall_prediction.html', result=result)
+    states, districts_by_state = _location_choices()
+    return render_template('rainfall_prediction.html', result=result,
+                           states=states, districts_by_state=districts_by_state)
 
 # Live Weather Forecast (page route — renders JS-driven page)
 @app.route('/farmer/weather_forecast', methods=['GET', 'POST'])
@@ -803,7 +821,9 @@ def farmer_weather_forecast():
     except Exception:
         weather = {'city': city, 'temp': 28.5, 'humidity': 75, 'wind': 3.6, 'desc': 'Sunny / Clear Sky'}
 
-    return render_template('weather_forecast.html', weather=weather, city=city)
+    states, districts_by_state = _location_choices()
+    return render_template('weather_forecast.html', weather=weather, city=city,
+                           states=states, districts_by_state=districts_by_state)
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -902,6 +922,8 @@ def api_weather_coords(lat, lon):
 
             current = {
                 'city': city_label,
+                'label': city_label,
+                'state': nom_state or '',
                 'temp': round(cur['temperature_2m'], 1),
                 'feels_like': round(cur.get('apparent_temperature', cur['temperature_2m']), 1),
                 'humidity': int(cur.get('relative_humidity_2m', 75)),
@@ -987,154 +1009,128 @@ def api_nearby_cities(lat, lon):
         return jsonify({'error': str(e)}), 500
 
 
-# Live Market Prices Page (Farmer Portal)
-@app.route('/farmer/market_prices')
-def farmer_market_prices():
-    # Districts grouped by state power the district dropdown; every entry comes
-    # from the ML training data, so users can only pick districts we have data for.
+def _location_choices():
+    """States + districts from the ML training data, for the cascading
+    State/District dropdowns shared by every farmer tool page."""
     districts_by_state = {
         state: sorted(districts) for state, districts in app._state_districts.items()
     }
+    return sorted(districts_by_state.keys()), districts_by_state
+
+
+# Live Market Prices Page (Farmer Portal)
+@app.route('/farmer/market_prices')
+def farmer_market_prices():
+    states, districts_by_state = _location_choices()
     return render_template(
         'market_prices.html',
-        states=sorted(districts_by_state.keys()),
+        states=states,
         districts_by_state=districts_by_state,
     )
 
 
+def _call_data_gov(url, timeout=6):
+    """Call data.gov.in with one automatic retry on transient failure.
+    Returns (response_object_or_None, did_try_second_call)."""
+    if not DATA_GOV_API_KEY:
+        return None, False
+    first = None
+    try:
+        first = requests.get(url, timeout=timeout)
+        if first.status_code == 200:
+            return first, False
+    except Exception:
+        first = None
+    # One retry with a slightly longer timeout for the intermittent upstream.
+    try:
+        second = requests.get(url, timeout=timeout + 2)
+        if second.status_code == 200:
+            return second, True
+    except Exception:
+        pass
+    return first, False
+
+
 @app.route('/api/market_prices')
+
 def api_market_prices():
-    """Fetch live mandi commodity prices from data.gov.in for a given city/district, with automatic fallback to last known rates."""
+    """Fetch live mandi commodity prices from data.gov.in for a given city/district,
+    with automatic fallback to last known (committed) rates and a stable synthetic
+    baseline when the upstream is unavailable."""
+    import random
     from datetime import datetime
     city = request.args.get('city', 'Bangalore')
     state_arg = request.args.get('state', '').strip()
     today = datetime.now().strftime('%d/%m/%Y')
 
-    try:
-        # Try district-level filter first (government API can be slow)
-        url = (
-            f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
-            f"?api-key={DATA_GOV_API_KEY}&format=json&limit=50"
-            f"&filters[district]={city}"
-        )
-        if state_arg:
-            url += f"&filters[state]={state_arg}"
-        res = requests.get(url, timeout=6) if DATA_GOV_API_KEY else None
-        data = res.json() if res is not None and res.status_code == 200 else {}
-        records = data.get('records', [])
+    # ---- Live upstream (data.gov.in Agmarknet) with retry ----
+    import urllib.parse as _up
 
-        # If no district match, try state-level (only when the district call responded)
-        if not records and res is not None and res.status_code == 200:
-            url2 = (
-                f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
-                f"?api-key={DATA_GOV_API_KEY}&format=json&limit=50"
-                f"&filters[state]={state_arg or city}"
-            )
-            res2 = requests.get(url2, timeout=6)
-            data2 = res2.json() if res2.status_code == 200 else {}
-            records = data2.get('records', [])
+    def _build_url(district, state):
+        u = (f"https://api.data.gov.in/resource/9ef84268-d588-465a-a308-a864a43d0070"
+             f"?api-key={DATA_GOV_API_KEY}&format=json&limit=50"
+             f"&filters[district]={_up.quote(str(district))}")
+        if state:
+            u += f"&filters[state]={_up.quote(str(state))}"
+        return u
 
-        if records:
-            prices = []
-            for r in records:
-                prices.append({
-                    'commodity': r.get('commodity', 'N/A'),
-                    'variety': r.get('variety', 'N/A'),
-                    'market': r.get('market', 'N/A'),
-                    'district': r.get('district', 'N/A'),
-                    'state': r.get('state', 'N/A'),
-                    'min_price': str(r.get('min_price', '0')),
-                    'max_price': str(r.get('max_price', '0')),
-                    'modal_price': str(r.get('modal_price', '0')),
-                    'arrival_date': r.get('arrival_date', 'N/A'),
-                })
-            return jsonify({
-                'city': city,
-                'count': len(prices),
-                'prices': prices,
-                'state': state_arg or (records[0].get('state', '') if records else ''),
-                'is_fallback': False,
-                'source': 'data.gov.in (Agmarknet Live)',
+    records = None
+    upstream_ok = False
+    if DATA_GOV_API_KEY:
+        res, _retried = _call_data_gov(_build_url(city, state_arg or None))
+        if res is not None and res.status_code == 200:
+            data = res.json() if isinstance(res.text, str) else res.text
+            records = data.get('records', []) if isinstance(data, dict) else []
+            upstream_ok = (len(records) > 0)
+            if not records:
+                # Upstream answered successfully but had no rows for this district;
+                # still try the state-level filter as a last live attempt.
+                res2, _ = _call_data_gov(_build_url(state_arg or city, None))
+                if res2 is not None and res2.status_code == 200:
+                    data2 = res2.json() if isinstance(res2.text, str) else res2.text
+                    records = data2.get('records', []) if isinstance(data2, dict) else []
+                    upstream_ok = (len(records) > 0)
+
+    # ---- Live winners ----
+    if records:
+        prices = []
+        for r in records:
+            prices.append({
+                'commodity': r.get('commodity', 'N/A'),
+                'variety': r.get('variety', 'N/A'),
+                'market': r.get('market', 'N/A'),
+                'district': r.get('district', 'N/A'),
+                'state': r.get('state', 'N/A'),
+                'min_price': str(r.get('min_price', '0')),
+                'max_price': str(r.get('max_price', '0')),
+                'modal_price': str(r.get('modal_price', '0')),
+                'arrival_date': r.get('arrival_date', 'N/A'),
             })
+        return jsonify({
+            'city': city,
+            'count': len(prices),
+            'prices': prices,
+            'state': state_arg or (records[0].get('state', '') if records else ''),
+            'is_fallback': False,
+            'source': 'data.gov.in (Agmarknet Live)',
+        })
 
-    except Exception:
-        pass
-
-    # Serve Dynamic Mandi Rates as Fallback — district-level from ML training data
-    import random
-    import csv as _csv
-
-    # District crop map loaded at startup from preprocessed2.csv
-
-    # Mandi price ranges (₹/quintal) for common crops
-    _MANDI_PRICES = {
-        'Rice': (2200, 3200), 'Paddy': (2000, 2400), 'Wheat': (2100, 2500),
-        'Maize': (1700, 2200), 'Cotton(lint)': (5500, 7000), 'Ragi': (3000, 4000),
-        'Jowar': (1800, 2400), 'Bajra': (1600, 2100), 'Groundnut': (5000, 6800),
-        'Soyabean': (3600, 4600), 'Arhar/Tur': (6000, 7800), 'Moong(Green Gram)': (7000, 8500),
-        'Urad': (6500, 8000), 'Gram': (4500, 5500), 'Horse-gram': (7500, 9000),
-        'Dry chillies': (14000, 22000), 'Onion': (1400, 2800), 'Tomato': (1200, 2200),
-        'Potato': (1000, 1500), 'Turmeric': (10000, 16000), 'Banana': (1500, 2500),
-        'Coconut': (24000, 33000), 'Arecanut (Betelnut)': (43000, 50000),
-        'Cashewnut': (11000, 14000), 'Black pepper': (55000, 63000),
-        'Cardamom': (25000, 35000), 'Sugarcane': (260, 380),
-        'Sunflower': (5500, 7000), 'Sesamum': (12000, 16000),
-        'Rapeseed &Mustard': (4800, 5800), 'Linseed': (6000, 7500),
-        'Castor seed': (5200, 6500), 'Niger seed': (7500, 9000),
-        'Small millets': (3500, 5000), 'Other Kharif pulses': (5000, 7000),
-        'Other  Rabi pulses': (4500, 6000), 'Other Rabi pulses': (4500, 6000),
-        'Other Fresh Fruits': (2000, 3500), 'Mango': (1500, 3000),
-        'Grapes': (2500, 4000), 'Papaya': (1000, 1800), 'Watermelon': (600, 1200),
-        'Muskmelon': (800, 1400), 'Brinjal': (1000, 1800), 'Coriander': (10000, 15000),
-        'Garlic': (7000, 10000), 'Dry ginger': (16000, 22000), 'Tobacco': (13000, 18000),
-        'Safflower': (5000, 6500), 'Tapioca': (1500, 2200), 'Sweet potato': (1200, 1800),
-        'Beans & Mutter(Vegetable)': (3000, 4500), 'Cowpea(Lobia)': (5500, 7000),
-        'Mesta': (4000, 5500), 'Sannhamp': (3000, 4500),
-    }
-
-    # City→state mapping for unknown districts
-    _CITY_STATE = {
-        'bangalore': 'Karnataka', 'mysore': 'Karnataka', 'mandya': 'Karnataka',
-        'tumkur': 'Karnataka', 'hassan': 'Karnataka', 'udupi': 'Karnataka',
-        'mangalore': 'Karnataka', 'belgaum': 'Karnataka', 'hubli': 'Karnataka',
-        'pune': 'Maharashtra', 'mumbai': 'Maharashtra', 'nagpur': 'Maharashtra',
-        'nashik': 'Maharashtra', 'aurangabad': 'Maharashtra', 'kolhapur': 'Maharashtra',
-        'chennai': 'Tamil Nadu', 'coimbatore': 'Tamil Nadu', 'madurai': 'Tamil Nadu',
-        'hyderabad': 'Telangana', 'warangal': 'Telangana', 'nizamabad': 'Telangana',
-        'delhi': 'Delhi', 'new delhi': 'Delhi',
-        'ludhiana': 'Punjab', 'amritsar': 'Punjab', 'jalandhar': 'Punjab',
-        'patna': 'Bihar', 'lucknow': 'Uttar Pradesh', 'kanpur': 'Uttar Pradesh',
-        'jaipur': 'Rajasthan', 'jodhpur': 'Rajasthan',
-        'ahmedabad': 'Gujarat', 'surat': 'Gujarat', 'rajkot': 'Gujarat',
-        'bhopal': 'Madhya Pradesh', 'indore': 'Madhya Pradesh',
-        'kolkata': 'West Bengal', 'bhubaneswar': 'Odisha',
-        'goa': 'Goa', 'panaji': 'Goa', 'shimla': 'Himachal Pradesh',
-        'srinagar': 'Jammu and Kashmir', 'raipur': 'Chhattisgarh',
-        'ranchi': 'Jharkhand', 'guwahati': 'Assam', 'imphal': 'Manipur',
-        'shillong': 'Meghalaya', 'gangtok': 'Sikkim', 'dehradun': 'Uttarakhand',
-    }
-
-    # Detect state from city name
-    def _detect_state(city_name):
-        cn = city_name.lower().strip()
-        if cn in _CITY_STATE:
-            return _CITY_STATE[cn]
-        for k, v in _CITY_STATE.items():
-            if k in cn:
-                return v
-        return 'Karnataka'
-
-    # Explicit state wins over the city-name heuristic (district names repeat across states)
+    # ---- Fallback: committed last-known rates first, then stable synthetic ----
     state = state_arg or _detect_state(city)
     crop_list = _find_district_crops(city, state)
 
-    # Build fallback prices
+    # 1) Real committed last-known APMC rates (when available for this district).
     fallback_list = []
-    if crop_list:
-        # District-level data available
+    committed = FALLBACK_MANDI_PRICES.get(city)
+    if committed:
+        fallback_list = list(committed)
+
+    # 2) Stable synthetic baseline for districts without committed data.
+    if not fallback_list and crop_list:
+        rnd = random.Random(hash((city, state, today)) & 0xFFFFFFFF)
         for crop_name in crop_list[:10]:
             pmin, pmax = _MANDI_PRICES.get(crop_name, (2000, 5000))
-            base = random.randint(pmin, pmax)
+            base = rnd.randint(pmin, pmax)
             variation = int(base * 0.08)
             fallback_list.append({
                 'commodity': crop_name,
@@ -1148,14 +1144,15 @@ def api_market_prices():
                 'arrival_date': today,
             })
 
-    # Ultimate fallback: generic crops
+    # 3) Ultimate fallback: a fixed generic basket (stable across reloads).
     if not fallback_list:
+        rnd = random.Random(hash((city, state, today)) & 0xFFFFFFFF)
         generic = [('Rice', 2200, 3200), ('Wheat', 2100, 2500), ('Maize', 1700, 2200),
                    ('Cotton(lint)', 5500, 7000), ('Groundnut', 5000, 6800),
                    ('Onion', 1400, 2800), ('Tomato', 1200, 2200),
                    ('Tur Dal', 6000, 7500), ('Mustard', 4500, 5500), ('Potato', 1000, 1500)]
         for crop_name, pmin, pmax in generic:
-            base = random.randint(pmin, pmax)
+            base = rnd.randint(pmin, pmax)
             variation = int(base * 0.08)
             fallback_list.append({
                 'commodity': crop_name, 'variety': 'Local',
@@ -1163,17 +1160,27 @@ def api_market_prices():
                 'min_price': str(base - variation), 'max_price': str(base + variation),
                 'modal_price': str(base), 'arrival_date': today,
             })
-    else:
-        state = fallback_list[0]['state']
+
+    if not fallback_list:
+        state = state_arg or 'India'
+
+    source = 'data.gov.in (Agmarknet Live)' if upstream_ok else (
+        f'Estimated Market Rates for {city}, {state} (govt API unavailable)'
+    )
+
+    import sys as _sys
+    _sys.stderr.write(f"[market_prices] {city},{state}: upstream_ok={upstream_ok} fallback_n={len(fallback_list)}\n")
+    _sys.stderr.flush()
 
     return jsonify({
         'city': city,
         'count': len(fallback_list),
         'prices': fallback_list,
         'state': state,
-        'is_fallback': True,
-        'source': f'Estimated Market Rates for {city}, {state} (govt API unavailable)',
+        'is_fallback': not upstream_ok,
+        'source': source,
     })
+
 
 @app.route('/admin/messages')
 def admin_messages():

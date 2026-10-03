@@ -50,16 +50,22 @@
     <form action="{{ url_for('farmer_crop_prediction') }}" method="POST">
       <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
       <div class="row">
-        <div class="col-sm-6 col-md-4 mb-3">
-          <label><i class="fas fa-map-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> State</label>
-          <input type="text" name="state" id="stateInput" class="form-control form-control-agro" value="Karnataka" required>
+        <div class="col-sm-6 col-md-3 mb-3">
+          <label for="stateInput"><i class="fas fa-map-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> State</label>
+          <select name="state" id="stateInput" class="form-control form-control-agro" onchange="onCpStateChange()" required>
+            {% for st in states %}
+            <option value="{{ st }}">{{ st }}</option>
+            {% endfor %}
+          </select>
         </div>
-        <div class="col-sm-6 col-md-4 mb-3">
-          <label><i class="fas fa-city" style="color: var(--cyan-500);" aria-hidden="true"></i> District</label>
-          <input type="text" name="district" id="districtInput" class="form-control form-control-agro" value="BANGALORE" required>
+        <div class="col-sm-6 col-md-3 mb-3">
+          <label for="districtInput"><i class="fas fa-city" style="color: var(--cyan-500);" aria-hidden="true"></i> District</label>
+          <select name="district" id="districtInput" class="form-control form-control-agro" required>
+            <option value="">Select a state first…</option>
+          </select>
         </div>
-        <div class="col-sm-6 col-md-4 mb-3">
-          <label><i class="fas fa-calendar-days" style="color: var(--amber-500);" aria-hidden="true"></i> Season</label>
+        <div class="col-sm-6 col-md-3 mb-3">
+          <label for="seasonSelect"><i class="fas fa-calendar-days" style="color: var(--amber-500);" aria-hidden="true"></i> Season</label>
           <select name="season" id="seasonSelect" class="form-control form-control-agro" required>
             <option value="Kharif" selected>Kharif (Monsoon)</option>
             <option value="Rabi">Rabi (Winter)</option>
@@ -67,11 +73,12 @@
             <option value="Summer">Summer</option>
           </select>
         </div>
+        <div class="col-sm-12 col-md-3 d-flex align-items-end mb-3">
+          <button type="submit" class="btn-agro-primary w-100" style="min-height: 48px; font-size: 0.95rem;">
+            <i class="fas fa-magnifying-glass-chart" aria-hidden="true"></i> Predict Crops
+          </button>
+        </div>
       </div>
-
-      <button type="submit" class="btn-agro-primary w-100" style="min-height: 52px; font-size: 1rem;">
-        <i class="fas fa-magnifying-glass-chart" aria-hidden="true"></i> Predict High-Demand & High-Value Crops
-      </button>
     </form>
 
     {% if result %}
@@ -195,15 +202,50 @@
   </div>
 
 </div>
+
+<script type="application/json" id="districts-data">{{ districts_by_state | tojson }}</script>
 {% endblock %}
 
 {% block extra_scripts %}
 {{ super() }}
 <script>
+const DISTRICTS_BY_STATE = JSON.parse(document.getElementById('districts-data').textContent);
+
+function populateDistricts(state, selected) {
+  const sel = document.getElementById('districtInput');
+  sel.innerHTML = '';
+  if (!state || !DISTRICTS_BY_STATE[state]) {
+    sel.innerHTML = '<option value="">Select a state first…</option>';
+    sel.disabled = true;
+    return false;
+  }
+  sel.disabled = false;
+  let found = false;
+  if (!selected) {
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = 'Select your district…';
+    ph.selected = true;
+    sel.appendChild(ph);
+  }
+  DISTRICTS_BY_STATE[state].forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d;
+    if (selected && d === selected) { opt.selected = true; found = true; }
+    sel.appendChild(opt);
+  });
+  return found;
+}
+
+function onCpStateChange() {
+  populateDistricts(document.getElementById('stateInput').value);
+}
+
 function applyRegionPreset(state, district, season){
-  document.getElementById('stateInput').value=state;
-  document.getElementById('districtInput').value=district;
-  document.getElementById('seasonSelect').value=season;
+  document.getElementById('stateInput').value = state;
+  populateDistricts(state, district);
+  document.getElementById('seasonSelect').value = season;
 }
 
 function detectPriceLocation() {
@@ -222,8 +264,24 @@ function detectPriceLocation() {
         .then(r => r.json())
         .then(data => {
           if (data.success && data.place) {
-            document.getElementById('districtInput').value = data.place.toUpperCase();
-            document.getElementById('stateInput').value = data.state ? data.state.toUpperCase() : 'Karnataka';
+            const detectedState = data.state ? data.state.toUpperCase() : '';
+            const place = data.place.toUpperCase();
+            // Auto-select the state so the district dropdown shows valid entries,
+            // then match the geocoded place to the closest district we have data for.
+            let matchedState = DISTRICTS_BY_STATE[detectedState] ? detectedState : '';
+            if (!matchedState) {
+              const wanted = place.split(' ')[0];
+              matchedState = Object.keys(DISTRICTS_BY_STATE).find(st =>
+                DISTRICTS_BY_STATE[st].some(d => d.split(' ')[0] === wanted)) || '';
+            }
+            if (matchedState) {
+              document.getElementById('stateInput').value = matchedState;
+              const districts = DISTRICTS_BY_STATE[matchedState];
+              const hit = districts.find(d => d === place)
+                || districts.find(d => d.split(' ')[0] === place.split(' ')[0])
+                || districts.find(d => place.length >= 4 && (d.includes(place) || place.includes(d)));
+              populateDistricts(matchedState, hit || '');
+            }
             document.getElementById('locStatusTitle').textContent = `Live Location: ${data.current.city}`;
             document.getElementById('locStatusSub').textContent = `Coordinates: ${lat}°, ${lon}° • District mapped to ${data.current.city}`;
           }
@@ -239,5 +297,11 @@ function detectPriceLocation() {
     { timeout: 8000 }
   );
 }
+
+// Auto-load a default region so the page is instantly usable
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('stateInput').value = 'Karnataka';
+  populateDistricts('Karnataka', 'BAGALKOT');
+});
 </script>
 {% endblock %}

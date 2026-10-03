@@ -66,6 +66,37 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
+       STATE → DISTRICT PICKER
+       ═══════════════════════════════════════════ -->
+  <div class="glass-card mb-4">
+    <div class="row align-items-end g-3">
+      <div class="col-lg-4">
+        <label for="stateSelect" class="d-block mb-2" style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
+          <i class="fas fa-map" style="color: var(--emerald-500);" aria-hidden="true"></i> State
+        </label>
+        <select id="stateSelect" class="form-control form-control-agro" onchange="onWxStateChange()">
+          {% for st in states %}
+          <option value="{{ st }}">{{ st }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-lg-4">
+        <label for="districtSelect" class="d-block mb-2" style="font-weight: 700; font-size: 0.82rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.04em;">
+          <i class="fas fa-city" style="color: var(--cyan-500);" aria-hidden="true"></i> District
+        </label>
+        <select id="districtSelect" class="form-control form-control-agro" disabled>
+          <option value="">Select a state first…</option>
+        </select>
+      </div>
+      <div class="col-lg-4">
+        <button class="btn-agro-primary w-100" onclick="searchDistrictWeather()" style="min-height: 48px;">
+          <i class="fas fa-cloud-sun" aria-hidden="true"></i> Get District Weather
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══════════════════════════════════════════
        CURRENT WEATHER CARD
        ═══════════════════════════════════════════ -->
   <div id="currentWeatherSection" style="display: none;">
@@ -249,6 +280,7 @@
 {% endblock %}
 
 {% block extra_scripts %}
+<script type="application/json" id="districts-data">{{ districts_by_state | tojson }}</script>
 <script>
 /* ════════════════════════════════════════════════════════
    WEATHER INTELLIGENCE HUB — Client-Side Engine
@@ -523,7 +555,53 @@ function fetchNearbyCities(lat, lon) {
     });
 }
 
+/* ── STATE → DISTRICT PICKER ── */
+const DISTRICTS_BY_STATE = JSON.parse(document.getElementById('districts-data').textContent);
+
+function populateDistricts(state, selected) {
+  const sel = document.getElementById('districtSelect');
+  sel.innerHTML = '';
+  if (!state || !DISTRICTS_BY_STATE[state]) {
+    sel.innerHTML = '<option value="">Select a state first…</option>';
+    sel.disabled = true;
+    return false;
+  }
+  sel.disabled = false;
+  let found = false;
+  if (!selected) {
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = 'Select your district…';
+    ph.selected = true;
+    sel.appendChild(ph);
+  }
+  DISTRICTS_BY_STATE[state].forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d;
+    if (selected && d === selected) { opt.selected = true; found = true; }
+    sel.appendChild(opt);
+  });
+  return found;
+}
+
+function onWxStateChange() {
+  populateDistricts(document.getElementById('stateSelect').value);
+}
+
+function searchDistrictWeather() {
+  const district = document.getElementById('districtSelect').value;
+  if (!district) return;
+  fetchWeatherByCity(district);
+}
+
 /* ── INIT ── */
-document.addEventListener('DOMContentLoaded', requestLocation);
+document.addEventListener('DOMContentLoaded', function() {
+  requestLocation();
+  document.getElementById('stateSelect').value = 'Karnataka';
+  populateDistricts('Karnataka', '');
+});
 </script>
+
+<script type="application/json" id="districts-data">{{ districts_by_state | tojson }}</script>
 {% endblock %}
