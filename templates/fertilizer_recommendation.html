@@ -93,6 +93,34 @@
     {% endif %}
   </div>
 
+  {# ── Location & Live Weather Prefill (optional) ── #}
+  <div class="glass-card" style="margin-top: 1.5rem; padding: 1.25rem 1.5rem;">
+    <div class="row align-items-end" style="row-gap: 1rem;">
+      <div class="col-md-4">
+        <label for="stateSelect"><i class="fas fa-map" style="color: var(--cyan-500); margin-right: 6px;"></i> State</label>
+        <select id="stateSelect" class="form-control-agro" onchange="onLocStateChange()">
+          {% for st in states %}
+          <option value="{{ st }}">{{ st }}</option>
+          {% endfor %}
+        </select>
+      </div>
+      <div class="col-md-4">
+        <label for="districtSelect"><i class="fas fa-search" style="color: var(--cyan-500); margin-right: 6px;"></i> District</label>
+        <select id="districtSelect" class="form-control-agro" disabled>
+          <option value="">Select a state first…</option>
+        </select>
+      </div>
+      <div class="col-md-4 d-flex align-items-end">
+        <button type="button" class="btn-agro-secondary w-100" id="weatherPrefillBtn" onclick="prefillWeather()" style="min-height: 48px;">
+          <i class="fas fa-cloud-sun"></i> Fetch District Weather
+        </button>
+      </div>
+    </div>
+    <p class="mb-0 mt-2" style="font-size: 0.76rem; color: var(--text-muted);" id="weatherPrefillNote">
+      Optional — fetch your district's live temperature & humidity into the form above.
+    </p>
+  </div>
+
   <!-- ═══════════════════════════════════════════
        EXPLANATION CARD — ML MODEL & BASIS
        ═══════════════════════════════════════════ -->
@@ -147,5 +175,82 @@ function applyFertPreset(n,p,k,t,h,sm,soil,crop){
   document.getElementById('soilFert').value=soil;
   document.getElementById('cropFert').value=crop;
 }
+</script>
+
+<script type="application/json" id="districts-data">{{ districts_by_state | tojson }}</script>
+
+<script>
+const DISTRICTS_BY_STATE = JSON.parse(document.getElementById('districts-data').textContent);
+
+function populateDistricts(state, selected) {
+  const sel = document.getElementById('districtSelect');
+  sel.innerHTML = '';
+  if (!state || !DISTRICTS_BY_STATE[state]) {
+    sel.innerHTML = '<option value="">Select a state first…</option>';
+    sel.disabled = true;
+    return false;
+  }
+  sel.disabled = false;
+  let found = false;
+  if (!selected) {
+    const ph = document.createElement('option');
+    ph.value = '';
+    ph.textContent = 'Select your district…';
+    ph.selected = true;
+    sel.appendChild(ph);
+  }
+  DISTRICTS_BY_STATE[state].forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d;
+    if (selected && d === selected) { opt.selected = true; found = true; }
+    sel.appendChild(opt);
+  });
+  return found;
+}
+
+function onLocStateChange() {
+  populateDistricts(document.getElementById('stateSelect').value);
+}
+
+// Fill the climate inputs from live district weather (Open-Meteo, free)
+function prefillWeather() {
+  const district = document.getElementById('districtSelect').value;
+  const btn = document.getElementById('weatherPrefillBtn');
+  const note = document.getElementById('weatherPrefillNote');
+  if (!district) {
+    note.textContent = 'Pick a state and district first to fetch live weather.';
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching…';
+  fetch(`/api/weather/city/${encodeURIComponent(district)}`)
+    .then(r => r.json())
+    .then(data => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-cloud-sun"></i> Fetch District Weather';
+      if (data.error || !data.current) {
+        note.textContent = 'Weather unavailable right now — enter values manually.';
+        return;
+      }
+      const rain = (data.forecast && data.forecast[0]) ? (data.forecast[0].rain_mm || 0) : 0;
+      const soilMoisture = rain > 5 ? 75 : rain > 0 ? 55 : 35;
+      document.getElementById('tFert').value = data.current.temp;
+      document.getElementById('hFert').value = data.current.humidity;
+      document.getElementById('smFert').value = soilMoisture;
+      note.textContent = `Loaded live weather for ${data.current.city}: ${data.current.temp}°C, ${data.current.humidity}% humidity.`;
+    })
+    .catch(() => {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="fas fa-cloud-sun"></i> Fetch District Weather';
+      note.textContent = 'Weather unavailable right now — enter values manually.';
+    });
+}
+
+// Auto-load a default region so the dropdown is instantly usable
+document.addEventListener('DOMContentLoaded', function() {
+  document.getElementById('stateSelect').value = 'Karnataka';
+  populateDistricts('Karnataka', '');
+});
 </script>
 {% endblock %}
