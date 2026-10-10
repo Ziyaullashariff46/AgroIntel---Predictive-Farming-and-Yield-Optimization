@@ -116,17 +116,6 @@ FALLBACK_MANDI_PRICES = {
     ]
 }
 
-DEFAULT_FALLBACK_PRICES = [
-    {'commodity': 'Rice / Paddy', 'variety': 'MTU 1010 (Swarna)', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '2200', 'max_price': '2550', 'modal_price': '2380', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Wheat', 'variety': 'GW-322 (Sharbati)', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '2300', 'max_price': '2650', 'modal_price': '2450', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Maize (Corn)', 'variety': 'Ganga Safed-2', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '1950', 'max_price': '2250', 'modal_price': '2100', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Cotton', 'variety': 'Shankar-6 (Long Staple)', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '6700', 'max_price': '7350', 'modal_price': '7050', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Sugarcane', 'variety': 'Co 86032', 'market': 'Regional Mill Gate', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '315', 'max_price': '350', 'modal_price': '330', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Soyabean', 'variety': 'JS 335', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '4300', 'max_price': '4850', 'modal_price': '4600', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Tomato', 'variety': 'PKM-1 (Local Hybrid)', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '1500', 'max_price': '2300', 'modal_price': '1900', 'arrival_date': '10/08/2026'},
-    {'commodity': 'Onion', 'variety': 'Nasik Red (Agrifound)', 'market': 'Regional APMC', 'district': 'Regional Mandi', 'state': 'India', 'min_price': '2100', 'max_price': '2800', 'modal_price': '2450', 'arrival_date': '10/08/2026'},
-]
-
 
 # ═══════════════════════════════════════════════════════════════
 # CURATED INDIAN CITIES DATABASE (for nearby city lookup)
@@ -1121,39 +1110,12 @@ def _load_mandi_snapshot(city, today, state=''):
 
 def api_market_prices():
     """Fetch live mandi commodity prices from data.gov.in for a given city/district,
-    with automatic fallback to last known (committed) rates and a stable synthetic
-    baseline when the upstream is unavailable."""
-    import random
+    with automatic fallback to last known (committed) rates from the CSV
+    snapshot when the upstream is unavailable."""
     from datetime import datetime
     city = request.args.get('city', 'Bangalore')
     state_arg = request.args.get('state', '').strip()
     today = datetime.now().strftime('%d/%m/%Y')
-    # crop->price-range lookup (₹/quintal min,max) for synthetic fallback baselines
-    _MANDI_PRICE_RANGES = {
-        'Rice': (2200, 3200), 'Paddy': (2000, 2400), 'Wheat': (2100, 2500),
-        'Maize': (1700, 2200), 'Cotton(lint)': (5500, 7000), 'Ragi': (3000, 4000),
-        'Jowar': (1800, 2400), 'Bajra': (1600, 2100), 'Groundnut': (5000, 6800),
-        'Soyabean': (3600, 4600), 'Arhar/Tur': (6000, 7800), 'Moong(Green Gram)': (7000, 8500),
-        'Urad': (6500, 8000), 'Gram': (4500, 5500), 'Horse-gram': (7500, 9000),
-        'Dry chillies': (14000, 22000), 'Onion': (1400, 2800), 'Tomato': (1200, 2200),
-        'Potato': (1000, 1500), 'Turmeric': (10000, 16000), 'Banana': (1500, 2500),
-        'Coconut': (24000, 33000), 'Arecanut (Betelnut)': (43000, 50000),
-        'Cashewnut': (11000, 14000), 'Black pepper': (55000, 63000),
-        'Cardamom': (25000, 35000), 'Sugarcane': (260, 380),
-        'Sunflower': (5500, 7000), 'Sesamum': (12000, 16000),
-        'Rapeseed &Mustard': (4800, 5800), 'Linseed': (6000, 7500),
-        'Castor seed': (5200, 6500), 'Niger seed': (7500, 9000),
-        'Small millets': (3500, 5000), 'Other Kharif pulses': (5000, 7000),
-        'Other  Rabi pulses': (4500, 6000), 'Other Rabi pulses': (4500, 6000),
-        'Other Fresh Fruits': (2000, 3500), 'Mango': (1500, 3000),
-        'Grapes': (2500, 4000), 'Papaya': (1000, 1800), 'Watermelon': (600, 1200),
-        'Muskmelon': (800, 1400), 'Brinjal': (1000, 1800), 'Coriander': (10000, 15000),
-        'Garlic': (7000, 10000), 'Dry ginger': (16000, 22000), 'Tobacco': (13000, 18000),
-        'Safflower': (5000, 6500), 'Tapioca': (1500, 2200), 'Sweet potato': (1200, 1800),
-        'Beans & Mutter(Vegetable)': (3000, 4500), 'Cowpea(Lobia)': (5500, 7000),
-        'Mesta': (4000, 5500), 'Sannhamp': (3000, 4500),
-    }
-
     # ---- Live upstream (data.gov.in Agmarknet) with retry ----
     import urllib.parse as _up
 
