@@ -1034,22 +1034,19 @@ def _call_data_gov(url, timeout=6):
     Returns (response_object_or_None, did_try_second_call)."""
     if not DATA_GOV_API_KEY:
         return None, False
-    first = None
+    # First attempt with the base timeout.
     try:
-        first = requests.get(url, timeout=timeout)
-        if first.status_code == 200:
-            return first, False
-    except Exception:
-        first = None
-    # One retry with a slightly longer timeout for the intermittent upstream.
-    try:
-        second = requests.get(url, timeout=timeout + 2)
-        if second.status_code == 200:
-            return second, True
+        res = requests.get(url, timeout=timeout)
+        if res.status_code == 200:
+            return res, False
     except Exception:
         pass
-    return first, False
-
+    # One retry with a slightly longer timeout for the intermittent upstream.
+    try:
+        res2 = requests.get(url, timeout=timeout + 2)
+        return (res2, True) if res2.status_code == 200 else (res2, True)
+    except Exception:
+        return None, False
 
 @app.route('/api/market_prices')
 
@@ -1062,6 +1059,31 @@ def api_market_prices():
     city = request.args.get('city', 'Bangalore')
     state_arg = request.args.get('state', '').strip()
     today = datetime.now().strftime('%d/%m/%Y')
+    # crop->price-range lookup (₹/quintal min,max) for synthetic fallback baselines
+    _MANDI_PRICE_RANGES = {
+        'Rice': (2200, 3200), 'Paddy': (2000, 2400), 'Wheat': (2100, 2500),
+        'Maize': (1700, 2200), 'Cotton(lint)': (5500, 7000), 'Ragi': (3000, 4000),
+        'Jowar': (1800, 2400), 'Bajra': (1600, 2100), 'Groundnut': (5000, 6800),
+        'Soyabean': (3600, 4600), 'Arhar/Tur': (6000, 7800), 'Moong(Green Gram)': (7000, 8500),
+        'Urad': (6500, 8000), 'Gram': (4500, 5500), 'Horse-gram': (7500, 9000),
+        'Dry chillies': (14000, 22000), 'Onion': (1400, 2800), 'Tomato': (1200, 2200),
+        'Potato': (1000, 1500), 'Turmeric': (10000, 16000), 'Banana': (1500, 2500),
+        'Coconut': (24000, 33000), 'Arecanut (Betelnut)': (43000, 50000),
+        'Cashewnut': (11000, 14000), 'Black pepper': (55000, 63000),
+        'Cardamom': (25000, 35000), 'Sugarcane': (260, 380),
+        'Sunflower': (5500, 7000), 'Sesamum': (12000, 16000),
+        'Rapeseed &Mustard': (4800, 5800), 'Linseed': (6000, 7500),
+        'Castor seed': (5200, 6500), 'Niger seed': (7500, 9000),
+        'Small millets': (3500, 5000), 'Other Kharif pulses': (5000, 7000),
+        'Other  Rabi pulses': (4500, 6000), 'Other Rabi pulses': (4500, 6000),
+        'Other Fresh Fruits': (2000, 3500), 'Mango': (1500, 3000),
+        'Grapes': (2500, 4000), 'Papaya': (1000, 1800), 'Watermelon': (600, 1200),
+        'Muskmelon': (800, 1400), 'Brinjal': (1000, 1800), 'Coriander': (10000, 15000),
+        'Garlic': (7000, 10000), 'Dry ginger': (16000, 22000), 'Tobacco': (13000, 18000),
+        'Safflower': (5000, 6500), 'Tapioca': (1500, 2200), 'Sweet potato': (1200, 1800),
+        'Beans & Mutter(Vegetable)': (3000, 4500), 'Cowpea(Lobia)': (5500, 7000),
+        'Mesta': (4000, 5500), 'Sannhamp': (3000, 4500),
+    }
 
     # ---- Live upstream (data.gov.in Agmarknet) with retry ----
     import urllib.parse as _up
@@ -1119,17 +1141,36 @@ def api_market_prices():
     state = state_arg or _detect_state(city)
     crop_list = _find_district_crops(city, state)
 
-    # 1) Real committed last-known APMC rates (when available for this district).
+    # 1) Real committed last-known APMC rates for this district (case-insensitive
+    #    match because the upstream/district names vary in casing).
+    committed = None
+    for k, v in FALLBACK_MANDI_PRICES.items():
+        if k.lower() == city.lower():
+            committed = v
+            break
     fallback_list = []
-    committed = FALLBACK_MANDI_PRICES.get(city)
     if committed:
-        fallback_list = list(committed)
+        fallback_list = [{**row, 'arrival_date': today} for row in committed]
 
-    # 2) Stable synthetic baseline for districts without committed data.
-    if not fallback_list and crop_list:
+    # 2) Stable synthetic baseline topping the list up to 10 rows (and covering
+    #    districts with no committed data at all). Seeded per (city, state, date)
+    #    so refreshes are stable rather than changing every reload.
+    if len(fallback_list) < 10:
+        if crop_list:
+            crops = crop_list
+            ranges = None
+        else:
+            crops = [d['commodity'] for d in DEFAULT_FALLBACK_PRICES]
+            ranges = [(int(d['min_price']), int(d['max_price'])) for d in DEFAULT_FALLBACK_PRICES]
+        seen = {p['commodity'].split(' (')[0].lower() for p in fallback_list}
         rnd = random.Random(hash((city, state, today)) & 0xFFFFFFFF)
-        for crop_name in crop_list[:10]:
-            pmin, pmax = _MANDI_PRICES.get(crop_name, (2000, 5000))
+        for i, crop_name in enumerate(crops):
+            if len(fallback_list) >= 10:
+                break
+            if crop_name.split(' (')[0].lower() in seen:
+                continue
+            pmin, pmax = (ranges[i % len(ranges)] if ranges
+                          else _MANDI_PRICE_RANGES.get(crop_name, (2000, 5000)))
             base = rnd.randint(pmin, pmax)
             variation = int(base * 0.08)
             fallback_list.append({
@@ -1142,23 +1183,6 @@ def api_market_prices():
                 'max_price': str(base + variation),
                 'modal_price': str(base),
                 'arrival_date': today,
-            })
-
-    # 3) Ultimate fallback: a fixed generic basket (stable across reloads).
-    if not fallback_list:
-        rnd = random.Random(hash((city, state, today)) & 0xFFFFFFFF)
-        generic = [('Rice', 2200, 3200), ('Wheat', 2100, 2500), ('Maize', 1700, 2200),
-                   ('Cotton(lint)', 5500, 7000), ('Groundnut', 5000, 6800),
-                   ('Onion', 1400, 2800), ('Tomato', 1200, 2200),
-                   ('Tur Dal', 6000, 7500), ('Mustard', 4500, 5500), ('Potato', 1000, 1500)]
-        for crop_name, pmin, pmax in generic:
-            base = rnd.randint(pmin, pmax)
-            variation = int(base * 0.08)
-            fallback_list.append({
-                'commodity': crop_name, 'variety': 'Local',
-                'market': f'{city} APMC', 'district': city, 'state': state,
-                'min_price': str(base - variation), 'max_price': str(base + variation),
-                'modal_price': str(base), 'arrival_date': today,
             })
 
     if not fallback_list:
@@ -1252,6 +1276,13 @@ if os.path.exists(_csv_path):
     for _s, _dists in _dcs.items():
         for _d, _cnt in _dists.items():
             app._district_crop_map_by_state[(_s.upper(), _d.upper())] = [c for c, _ in _cnt.most_common(10)]
+
+def _detect_state(city_name):
+    """Best-effort state inference for a city name (used for mandi fallback)."""
+    for c in INDIAN_CITIES:
+        if c['name'].lower() == city_name.lower().strip():
+            return c['state']
+    return ''
 
 def _find_district_crops(district_name, state_name=""):
     """Find district crops with fuzzy matching, falling back to state-level top crops."""
