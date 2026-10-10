@@ -20,6 +20,13 @@ load_dotenv()
 
 app = Flask(__name__, template_folder='templates')
 
+# Session cookie hardening: HTTPS-only and cross-site-request-proof.
+# (HttpOnly is already Flask's default; these two close the deploy gaps.)
+app.config.update(
+    SESSION_COOKIE_SECURE=bool(os.getenv('FLASK_ENV') == 'production' or os.getenv('VERCEL')),
+    SESSION_COOKIE_SAMESITE='Lax',
+)
+
 # ═══════════════════════════════════════════════════════════════
 # SESSION SECRET — never fall back to a literal committed to the repo.
 # The whole access-control guard below rests on session cookies being
@@ -1048,6 +1055,68 @@ def _call_data_gov(url, timeout=6):
     except Exception:
         return None, False
 
+def _fallback_generic_rows():
+    """Committed regional India basket from the same snapshot CSV, for districts
+    that have no rows of their own."""
+    import csv as _csv_gen
+    path = os.path.join(BASE_DIR, 'data', 'mandi_snapshot.csv')
+    generic = []
+    if os.path.exists(path):
+        try:
+            with open(path, 'r', encoding='utf-8') as f:
+                for r in _csv_gen.DictReader(f):
+                    if (r.get('district') or '') == 'Regional Mandi':
+                        generic.append({
+                            'commodity': r.get('commodity', 'N/A'),
+                            'variety': r.get('variety', ''),
+                            'market': r.get('market', 'Regional APMC'),
+                            'district': 'Regional Mandi',
+                            'state': r.get('state', 'India'),
+                            'min_price': r.get('min_price', '0'),
+                            'max_price': r.get('max_price', '0'),
+                            'modal_price': r.get('modal_price', '0'),
+                        })
+        except Exception:
+            pass
+    return generic
+
+
+def _load_mandi_snapshot(city, today, state=''):
+    """Load last-known APMC rates for a district from the committed CSV snapshot.
+    Case-insensitive district match; when `state` is given (ambiguous district
+    names repeat across states), only rows for that state qualify. Empty list
+    when the district isn't in the snapshot (the regional India basket rows
+    cover every district instead)."""
+    import csv as _csv_snap
+    path = os.path.join(BASE_DIR, 'data', 'mandi_snapshot.csv')
+    if not os.path.exists(path):
+        return []
+    rows = []
+    wanted = city.lower().strip()
+    state_wanted = (state or '').lower().strip()
+    try:
+        with open(path, 'r', encoding='utf-8') as f:
+            for r in _csv_snap.DictReader(f):
+                if (r.get('district') or '').lower().strip() != wanted:
+                    continue
+                if state_wanted and (r.get('state') or '').lower().strip() != state_wanted:
+                    continue
+                rows.append({
+                        'commodity': r.get('commodity', 'N/A'),
+                        'variety': r.get('variety', ''),
+                        'market': r.get('market', ''),
+                        'district': r.get('district', city),
+                        'state': r.get('state', ''),
+                        'min_price': r.get('min_price', '0'),
+                        'max_price': r.get('max_price', '0'),
+                        'modal_price': r.get('modal_price', '0'),
+                        'arrival_date': today,
+                    })
+    except Exception:
+        return []
+    return rows
+
+
 @app.route('/api/market_prices')
 
 def api_market_prices():
@@ -1137,53 +1206,15 @@ def api_market_prices():
             'source': 'data.gov.in (Agmarknet Live)',
         })
 
-    # ---- Fallback: committed last-known rates first, then stable synthetic ----
+    # ---- Fallback: committed last-known rates (CSV snapshot), always real rows ----
     state = state_arg or _detect_state(city)
-    crop_list = _find_district_crops(city, state)
-
-    # 1) Real committed last-known APMC rates for this district (case-insensitive
-    #    match because the upstream/district names vary in casing).
-    committed = None
-    for k, v in FALLBACK_MANDI_PRICES.items():
-        if k.lower() == city.lower():
-            committed = v
-            break
-    fallback_list = []
-    if committed:
-        fallback_list = [{**row, 'arrival_date': today} for row in committed]
-
-    # 2) Stable synthetic baseline topping the list up to 10 rows (and covering
-    #    districts with no committed data at all). Seeded per (city, state, date)
-    #    so refreshes are stable rather than changing every reload.
-    if len(fallback_list) < 10:
-        if crop_list:
-            crops = crop_list
-            ranges = None
-        else:
-            crops = [d['commodity'] for d in DEFAULT_FALLBACK_PRICES]
-            ranges = [(int(d['min_price']), int(d['max_price'])) for d in DEFAULT_FALLBACK_PRICES]
-        seen = {p['commodity'].split(' (')[0].lower() for p in fallback_list}
-        rnd = random.Random(hash((city, state, today)) & 0xFFFFFFFF)
-        for i, crop_name in enumerate(crops):
-            if len(fallback_list) >= 10:
-                break
-            if crop_name.split(' (')[0].lower() in seen:
-                continue
-            pmin, pmax = (ranges[i % len(ranges)] if ranges
-                          else _MANDI_PRICE_RANGES.get(crop_name, (2000, 5000)))
-            base = rnd.randint(pmin, pmax)
-            variation = int(base * 0.08)
-            fallback_list.append({
-                'commodity': crop_name,
-                'variety': 'Local',
-                'market': f'{city} APMC',
-                'district': city,
-                'state': state,
-                'min_price': str(base - variation),
-                'max_price': str(base + variation),
-                'modal_price': str(base),
-                'arrival_date': today,
-            })
+    fallback_list = _load_mandi_snapshot(city, today, state)
+    if not fallback_list:
+        # District not in the snapshot: serve the committed regional India basket,
+        # relabeled to the requested district so the table is never empty.
+        generic = _fallback_generic_rows()
+        fallback_list = [{**row, 'market': f'{city} APMC', 'district': city, 'state': state}
+                         for row in generic]
 
     if not fallback_list:
         state = state_arg or 'India'

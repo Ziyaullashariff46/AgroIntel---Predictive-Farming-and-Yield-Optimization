@@ -1,0 +1,62 @@
+commodity,variety,market,district,state,min_price,max_price,modal_price
+Paddy (Dhan),Jyothi,Udupi APMC,Udupi,Karnataka,2100,2350,2250
+Coconut,Local,Udupi APMC,Udupi,Karnataka,28000,32000,30000
+Arecanut (Betelnut),Red/Chali,Kundapura APMC,Udupi,Karnataka,44000,49500,47000
+Black Pepper,Garbled,Karkala APMC,Udupi,Karnataka,56000,62000,59000
+Cashewnut,Raw,Udupi APMC,Udupi,Karnataka,11500,13500,12600
+Banana,Robusta,Udupi APMC,Udupi,Karnataka,1800,2400,2100
+Dry chillies,Byadgi,Udupi APMC,Udupi,Karnataka,14000,22000,18000
+Rice,Sona Masuri,Udupi APMC,Udupi,Karnataka,2400,2600,2500
+Maize,Ganga Safed-2,Udupi APMC,Udupi,Karnataka,2050,2350,2200
+Ragi (Finger Millet),GPU-28,Udupi APMC,Udupi,Karnataka,3200,3700,3450
+Rice,Sona Masuri,Yeshwanthpur APMC,Bangalore,Karnataka,3800,4400,4100
+Tomato,PKM-1 (Hybrid),Kolar/Bangalore APMC,Bangalore,Karnataka,1400,2200,1800
+Onion,Bellary Red,Yeshwanthpur APMC,Bangalore,Karnataka,2200,2900,2550
+Potato,Jyoti,Yeshwanthpur APMC,Bangalore,Karnataka,1600,2100,1850
+Maize,Ganga Safed-2,Bangalore APMC,Bangalore,Karnataka,2050,2350,2200
+Ragi (Finger Millet),GPU-28,Bangalore APMC,Bangalore,Karnataka,3200,3700,3450
+Cotton(lint),Shankar-6,Bangalore APMC,Bangalore,Karnataka,5500,7000,6250
+Groundnut,Tagris,Bangalore APMC,Bangalore,Karnataka,5000,6800,5900
+Soyabean,JS 335,Bangalore APMC,Bangalore,Karnataka,3600,4600,4100
+Arhar/Tur,ICPL 87119,Bangalore APMC,Bangalore,Karnataka,6000,7800,6900
+Onion,Nasik Red (Agrifound),Vashi APMC (Mumbai),Mumbai,Maharashtra,2400,3100,2750
+Potato,Kufri Jyoti,Vashi APMC (Mumbai),Mumbai,Maharashtra,1700,2200,1950
+Cotton,Shankar-6 (H4),Mumbai APMC,Mumbai,Maharashtra,6800,7400,7100
+Soyabean,JS 335,Vashi APMC,Mumbai,Maharashtra,4400,4900,4650
+Tur (Pigeon Pea),ICPL 87119 (Asha),Vashi APMC,Mumbai,Maharashtra,9200,10500,9800
+Maize,Ganga Safed-2,Vashi APMC,Mumbai,Maharashtra,1950,2250,2100
+Tomato,Local,Vashi APMC,Mumbai,Maharashtra,1400,2200,1800
+Wheat,HD 2967 (Dara),Azadpur APMC,Delhi,Delhi,2350,2600,2480
+Rice (Basmati),Pusa Basmati 1121 (Raw),Naya Bazar APMC,Delhi,Delhi,8200,9500,8800
+Tomato,Pusa Ruby (Hybrid),Azadpur APMC,Delhi,Delhi,1600,2400,2000
+Mustard,Pusa Bold (RH-30),Delhi APMC,Delhi,Delhi,5200,5800,5500
+Onion,Nasik Red,Azadpur APMC,Delhi,Delhi,2200,2800,2500
+Potato,Kufri Chandramukhi,Azadpur APMC,Delhi,Delhi,1400,1900,1650
+Wheat / Paddy (regional),MTU 1010 (Swarna),Regional APMC,Regional Mandi,India,2200,2550,2380
+Wheat,GW-322 (Sharbati),Regional APMC,Regional Mandi,India,2300,2650,2450
+Maize (Corn),Ganga Safed-2,Regional APMC,Regional Mandi,India,1950,2250,2100
+Cotton,Shankar-6 (Long Staple),Regional APMC,Regional Mandi,India,6700,7350,7050
+Sugarcane,Co 86032,Regional Mill Gate,Regional Mandi,India,315,350,330
+Soyabean,JS 335,Regional APMC,Regional Mandi,India,4300,4850,4600
+Tomato,PKM-1 (Local Hybrid),Regional APMC,Regional Mandi,India,1500,2300,1900
+Onion,Nasik Red (Agrifound),Regional APMC,Regional Mandi,India,2100,2800,2450
+Maize,Local,Aurangabad APMC,Aurangabad,Maharashtra,1900,2200,2050
+Sunflower,Local,Aurangabad APMC,Aurangabad,Maharashtra,5800,6800,6300
+Jowar,Local,Aurangabad APMC,Aurangabad,Maharashtra,1900,2400,2150
+Groundnut,Local,Aurangabad APMC,Aurangabad,Maharashtra,5200,6600,5900
+Arhar/Tur,Local,Aurangabad APMC,Aurangabad,Maharashtra,6200,7600,6900
+Bajra,Local,Aurangabad APMC,Aurangabad,Maharashtra,1700,2100,1900
+Gram,Local,Aurangabad APMC,Aurangabad,Maharashtra,4600,5400,5000
+Moong(Green Gram),Local,Aurangabad APMC,Aurangabad,Maharashtra,7200,8400,7800
+Maize,Local,Aurangabad APMC,Aurangabad,Bihar,1950,2250,2100
+Moong(Green Gram),Local,Aurangabad APMC,Aurangabad,Bihar,7100,8300,7700
+Rice,Local,Aurangabad APMC,Aurangabad,Bihar,2300,2700,2500
+Arhar/Tur,Local,Aurangabad APMC,Aurangabad,Bihar,6400,7800,7100
+Gram,Local,Aurangabad APMC,Aurangabad,Bihar,4700,5500,5100
+Linseed,Local,Aurangabad APMC,Aurangabad,Bihar,6200,7400,6800
+Rapeseed &Mustard,Local,Aurangabad APMC,Aurangabad,Bihar,5000,5800,5400
+Wheat,Local,Aurangabad APMC,Aurangabad,Bihar,2200,2600,2400
+Wheat,Local,Aurangabad APMC,Aurangabad,Maharashtra,2350,2650,2500
+Cotton(lint),Local,Aurangabad APMC,Aurangabad,Maharashtra,6100,7200,6650
+Ragi,Local,Aurangabad APMC,Aurangabad,Bihar,3300,3800,3550
+Sesamum,Local,Aurangabad APMC,Aurangabad,Bihar,13000,15500,14250
