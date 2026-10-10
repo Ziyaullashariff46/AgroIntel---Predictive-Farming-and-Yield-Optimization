@@ -371,12 +371,12 @@ function requestLocation() {
     fetchNearbyCities(13.341, 74.742);
   }
 
-  // maximumAge: 0 forces a FRESH GPS fix — prevents stale cached position from returning wrong location
-  // timeout: 15000 gives enough time for GPS to lock accurately
+  // maximumAge: 0 forces a FRESH fix — prevents stale cached position from returning wrong location
+  // enableHighAccuracy: true uses hardware GPS/Wi-Fi positioning for high precision
   navigator.geolocation.getCurrentPosition(onSuccess, onError, {
-    enableHighAccuracy: false,
-    timeout: 8000,
-    maximumAge: 300000
+    enableHighAccuracy: true,
+    timeout: 10000,
+    maximumAge: 0
   });
   
   // Safety net: if geolocation takes too long, load default weather
@@ -412,15 +412,22 @@ function fetchWeatherByCoords(lat, lon) {
     .catch(err => { hideLoading(); showError(err.message); });
 }
 
-function fetchWeatherByCity(city) {
+function fetchWeatherByCity(city, state) {
   showLoading();
-  fetch(`/api/weather/city/${encodeURIComponent(city)}`)
+  let url = `/api/weather/city/${encodeURIComponent(city)}`;
+  if (state) {
+    url += `?state=${encodeURIComponent(state)}`;
+  }
+  fetch(url)
     .then(r => r.json())
     .then(data => {
       hideLoading();
       if (data.error) { showError(data.error); return; }
       renderCurrentWeather(data.current);
       renderForecast(data.forecast);
+      if (data.current && data.current.city) {
+        document.getElementById('citySearchInput').value = data.current.city;
+      }
       // Also get nearby cities for the new location
       if (data.current && data.current.lat) {
         fetchNearbyCities(data.current.lat, data.current.lon);
@@ -590,9 +597,10 @@ function onWxStateChange() {
 }
 
 function searchDistrictWeather() {
+  const state = document.getElementById('stateSelect').value;
   const district = document.getElementById('districtSelect').value;
   if (!district) return;
-  fetchWeatherByCity(district);
+  fetchWeatherByCity(district, state);
 }
 
 /* ── INIT ── */
@@ -602,6 +610,4 @@ document.addEventListener('DOMContentLoaded', function() {
   populateDistricts('Karnataka', '');
 });
 </script>
-
-<script type="application/json" id="districts-data">{{ districts_by_state | tojson }}</script>
 {% endblock %}

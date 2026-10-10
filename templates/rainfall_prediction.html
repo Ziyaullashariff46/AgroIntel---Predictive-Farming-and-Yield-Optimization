@@ -316,7 +316,7 @@ function detectLocation() {
     sub.textContent = 'Please select a zone manually';
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect';
-  }, { enableHighAccuracy: true, timeout: 8000 });
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
 }
 
 // Auto-detect on page load

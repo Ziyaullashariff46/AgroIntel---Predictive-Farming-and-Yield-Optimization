@@ -380,7 +380,7 @@ function detectMyLocation() {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> My Location';
     alert('Location access denied. Please search manually.');
-  }, { enableHighAccuracy: true, timeout: 8000 });
+  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
 }
 
 // Map a city name to a district we have data for (exact → first-word → substring)
