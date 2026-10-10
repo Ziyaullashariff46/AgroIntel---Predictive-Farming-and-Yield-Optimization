@@ -72,6 +72,17 @@
   </div>
 </div>
 
+{# ── Fallback Notice ── #}
+<div id="fallbackNotice" style="display: none; margin-bottom: 1.25rem; padding: 0.9rem 1.1rem; border-radius: var(--r-lg); background: rgba(245,158,11,0.10); border: 1px solid rgba(245,158,11,0.35);">
+  <div class="d-flex align-items-start" style="gap: 0.75rem;">
+    <i class="fas fa-circle-exclamation" style="color: var(--amber-500); font-size: 1.1rem; margin-top: 2px;" aria-hidden="true"></i>
+    <div style="font-size: 0.86rem; line-height: 1.55;">
+      <p style="margin: 0; font-weight: 700; color: var(--text-primary);">Live feed temporarily unavailable — showing estimated rates</p>
+      <p id="fallbackDetail" style="margin: 0.25rem 0 0; color: var(--text-muted);"></p>
+    </div>
+  </div>
+</div>
+
 {# ── Loading State ── #}
 <div id="loadingState" style="display: none; text-align: center; padding: 3rem;">
   <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--emerald-500); margin-bottom: 1rem; display: block;"></i>
@@ -144,6 +155,7 @@ function showLoading() {
   document.getElementById('tableSection').style.display = 'none';
   document.getElementById('emptyState').style.display = 'none';
   document.getElementById('statusBar').style.display = 'none';
+  document.getElementById('fallbackNotice').style.display = 'none';
 }
 
 // Repopulate the district dropdown from the selected state
@@ -203,9 +215,21 @@ function searchCity() {
       }
 
       // Status bar
+      const asOf = data.prices[0].arrival_date || '';
       document.getElementById('statusCity').innerHTML = `<i class="fas fa-city"></i> ${data.city}${data.state ? ', ' + data.state : ''}`;
       document.getElementById('statusCount').innerHTML = `<i class="fas fa-boxes-stacked"></i> ${data.count} commodities`;
-      document.getElementById('statusSource').innerHTML = `<i class="fas fa-database"></i> ${data.source}`;
+      const srcBadge = document.getElementById('statusSource');
+      srcBadge.className = 'badge-agro ' + (data.is_fallback ? 'badge-agro-amber' : 'badge-agro-cyan');
+      srcBadge.innerHTML = data.is_fallback
+        ? `<i class="fas fa-clock"></i> Rates as of ${asOf} (estimated)`
+        : `<i class="fas fa-database"></i> ${data.source} • ${asOf}`;
+
+      // Fallback notice
+      const notice = document.getElementById('fallbackNotice');
+      document.getElementById('fallbackDetail').textContent = data.is_fallback
+        ? `The Government of India (data.gov.in) feed could not be reached. Rates below are last-known or estimated values for ${data.city}${data.state ? ', ' + data.state : ''}, dated ${asOf}. Try again shortly — the live feed usually recovers within minutes.`
+        : '';
+      notice.style.display = data.is_fallback ? 'block' : 'none';
       document.getElementById('statusBar').style.display = 'block';
 
       // Highlight cards (top 6)
