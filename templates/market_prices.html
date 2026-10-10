@@ -149,6 +149,14 @@
 <script>
 const DISTRICTS_BY_STATE = JSON.parse(document.getElementById('districts-data').textContent);
 
+// Small helper: a Font Awesome <i> element (icons are ours, never user data)
+function createIcon(faClass) {
+  const i = document.createElement('i');
+  i.className = 'fas ' + faClass;
+  i.setAttribute('aria-hidden', 'true');
+  return i;
+}
+
 function showLoading() {
   document.getElementById('loadingState').style.display = 'block';
   document.getElementById('highlightSection').style.display = 'none';
@@ -215,19 +223,25 @@ function searchCity() {
       }
 
       // Status bar
-      const asOf = data.prices[0].arrival_date || '';
-      document.getElementById('statusCity').innerHTML = `<i class="fas fa-city"></i> ${data.city}${data.state ? ', ' + data.state : ''}`;
-      document.getElementById('statusCount').innerHTML = `<i class="fas fa-boxes-stacked"></i> ${data.count} commodities`;
+      const asOf = String(data.prices[0].arrival_date || '');
+      const cityTxt = String(data.city);
+      const stateTxt = String(data.state || '');
+      const statusCity = document.getElementById('statusCity');
+      statusCity.replaceChildren(createIcon('fa-city'), document.createTextNode(` ${cityTxt}${stateTxt ? ', ' + stateTxt : ''}`));
+      const statusCount = document.getElementById('statusCount');
+      statusCount.replaceChildren(createIcon('fa-boxes-stacked'), document.createTextNode(` ${data.count} commodities`));
       const srcBadge = document.getElementById('statusSource');
       srcBadge.className = 'badge-agro ' + (data.is_fallback ? 'badge-agro-amber' : 'badge-agro-cyan');
-      srcBadge.innerHTML = data.is_fallback
-        ? `<i class="fas fa-clock"></i> Rates as of ${asOf} (estimated)`
-        : `<i class="fas fa-database"></i> ${data.source} • ${asOf}`;
+      if (data.is_fallback) {
+        srcBadge.replaceChildren(createIcon('fa-clock'), document.createTextNode(` Rates as of ${asOf} (estimated)`));
+      } else {
+        srcBadge.replaceChildren(createIcon('fa-database'), document.createTextNode(` ${data.source} • ${asOf}`));
+      }
 
       // Fallback notice
       const notice = document.getElementById('fallbackNotice');
       document.getElementById('fallbackDetail').textContent = data.is_fallback
-        ? `The Government of India (data.gov.in) feed could not be reached. Rates below are last-known or estimated values for ${data.city}${data.state ? ', ' + data.state : ''}, dated ${asOf}. Try again shortly — the live feed usually recovers within minutes.`
+        ? `The Government of India (data.gov.in) feed could not be reached. Rates below are last-known or estimated values for ${cityTxt}${stateTxt ? ', ' + stateTxt : ''}, dated ${asOf}. Try again shortly — the live feed usually recovers within minutes.`
         : '';
       notice.style.display = data.is_fallback ? 'block' : 'none';
       document.getElementById('statusBar').style.display = 'block';
@@ -235,43 +249,75 @@ function searchCity() {
       // Highlight cards (top 6)
       const highlights = data.prices.slice(0, 6);
       const hContainer = document.getElementById('highlightCards');
-      hContainer.innerHTML = '';
+      hContainer.replaceChildren();
       highlights.forEach(p => {
-        hContainer.innerHTML += `
-          <div class="col-sm-6 col-lg-4">
-            <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-lg); padding: 1.25rem; height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease;"
-                 onmouseover="this.style.transform='translateY(-3px)';this.style.boxShadow='var(--shadow-lg)'"
-                 onmouseout="this.style.transform='';this.style.boxShadow=''">
-              <p style="font-weight: 700; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 0.35rem;">${p.commodity}</p>
-              <p style="font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;">${p.variety} • ${p.market}</p>
-              <div style="display: flex; align-items: baseline; gap: 0.5rem;">
-                <span style="font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; color: var(--emerald-500);">\u20b9${Number(p.modal_price).toLocaleString('en-IN')}</span>
-                <span style="font-size: 0.76rem; color: var(--text-muted);">per quintal</span>
-              </div>
-              <div style="margin-top: 0.5rem; display: flex; gap: 0.75rem; font-size: 0.76rem; color: var(--text-muted);">
-                <span>Min: \u20b9${Number(p.min_price).toLocaleString('en-IN')}</span>
-                <span>Max: \u20b9${Number(p.max_price).toLocaleString('en-IN')}</span>
-              </div>
-            </div>
-          </div>`;
+        // Build with DOM APIs so API-sourced text (commodity/variety/market) can't inject HTML
+        const col = document.createElement('div');
+        col.className = 'col-sm-6 col-lg-4';
+        const card = document.createElement('div');
+        card.style.cssText = 'background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-lg); padding: 1.25rem; height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease;';
+        card.addEventListener('mouseover', () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = 'var(--shadow-lg)'; });
+        card.addEventListener('mouseout', () => { card.style.transform = ''; card.style.boxShadow = ''; });
+        const cName = document.createElement('p');
+        cName.style.cssText = 'font-weight: 700; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 0.35rem;';
+        cName.textContent = p.commodity;
+        const cSub = document.createElement('p');
+        cSub.style.cssText = 'font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;';
+        cSub.textContent = `${p.variety} • ${p.market}`;
+        const priceRow = document.createElement('div');
+        priceRow.style.cssText = 'display: flex; align-items: baseline; gap: 0.5rem;';
+        const price = document.createElement('span');
+        price.style.cssText = 'font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; color: var(--emerald-500);';
+        price.textContent = `\u20b9${Number(p.modal_price).toLocaleString('en-IN')}`;
+        const perQ = document.createElement('span');
+        perQ.style.cssText = 'font-size: 0.76rem; color: var(--text-muted);';
+        perQ.textContent = 'per quintal';
+        priceRow.append(price, perQ);
+        const minMax = document.createElement('div');
+        minMax.style.cssText = 'margin-top: 0.5rem; display: flex; gap: 0.75rem; font-size: 0.76rem; color: var(--text-muted);';
+        const minS = document.createElement('span');
+        minS.textContent = `Min: \u20b9${Number(p.min_price).toLocaleString('en-IN')}`;
+        const maxS = document.createElement('span');
+        maxS.textContent = `Max: \u20b9${Number(p.max_price).toLocaleString('en-IN')}`;
+        minMax.append(minS, maxS);
+        card.append(cName, cSub, priceRow, minMax);
+        col.appendChild(card);
+        hContainer.appendChild(col);
       });
       document.getElementById('highlightSection').style.display = 'block';
 
       // Full table
       const tbody = document.getElementById('priceTableBody');
-      tbody.innerHTML = '';
+      tbody.replaceChildren();
       data.prices.forEach(p => {
-        tbody.innerHTML += `
-          <tr>
-            <td><strong>${p.commodity}</strong></td>
-            <td>${p.variety}</td>
-            <td style="white-space: nowrap;">${p.market}</td>
-            <td>${p.district}</td>
-            <td style="text-align: right; white-space: nowrap;">₹${Number(p.min_price).toLocaleString('en-IN')}</td>
-            <td style="text-align: right; white-space: nowrap;">₹${Number(p.max_price).toLocaleString('en-IN')}</td>
-            <td style="text-align: right; font-weight: 700; color: var(--emerald-500); white-space: nowrap; background: rgba(16,185,129,0.04);">₹${Number(p.modal_price).toLocaleString('en-IN')}</td>
-            <td style="white-space: nowrap;">${p.arrival_date}</td>
-          </tr>`;
+        const tr = document.createElement('tr');
+        const cells = [
+          { text: p.commodity, bold: true },
+          { text: p.variety },
+          { text: p.market, nowrap: true },
+          { text: p.district },
+          { text: `₹${Number(p.min_price).toLocaleString('en-IN')}`, right: true },
+          { text: `₹${Number(p.max_price).toLocaleString('en-IN')}`, right: true },
+          { text: `₹${Number(p.modal_price).toLocaleString('en-IN')}`, right: true, modal: true },
+          { text: p.arrival_date, nowrap: true },
+        ];
+        cells.forEach(c => {
+          const td = document.createElement('td');
+          let css = '';
+          if (c.right) css += 'text-align: right; ';
+          if (c.nowrap) css += 'white-space: nowrap; ';
+          if (c.modal) css += 'font-weight: 700; color: var(--emerald-500); background: rgba(16,185,129,0.04);';
+          if (css) td.style.cssText = css;
+          if (c.bold) {
+            const strong = document.createElement('strong');
+            strong.textContent = String(c.text);
+            td.appendChild(strong);
+          } else {
+            td.textContent = String(c.text);
+          }
+          tr.appendChild(td);
+        });
+        tbody.appendChild(tr);
       });
       document.getElementById('tableSection').style.display = 'block';
     })
