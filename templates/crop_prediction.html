@@ -54,7 +54,7 @@
           <label for="stateInput"><i class="fas fa-map-location-dot" style="color: var(--emerald-500);" aria-hidden="true"></i> State</label>
           <select name="state" id="stateInput" class="form-control form-control-agro" onchange="onCpStateChange()" required>
             {% for st in states %}
-            <option value="{{ st }}">{{ st }}</option>
+            <option value="{{ st }}" {% if st == state %}selected{% endif %}>{{ st }}</option>
             {% endfor %}
           </select>
         </div>
@@ -67,10 +67,10 @@
         <div class="col-sm-6 col-md-3 mb-3">
           <label for="seasonSelect"><i class="fas fa-calendar-days" style="color: var(--amber-500);" aria-hidden="true"></i> Season</label>
           <select name="season" id="seasonSelect" class="form-control form-control-agro" required>
-            <option value="Kharif" selected>Kharif (Monsoon)</option>
-            <option value="Rabi">Rabi (Winter)</option>
-            <option value="Whole Year">Whole Year</option>
-            <option value="Summer">Summer</option>
+            <option value="Kharif" {% if season == 'Kharif' or not season %}selected{% endif %}>Kharif (Monsoon)</option>
+            <option value="Rabi" {% if season == 'Rabi' %}selected{% endif %}>Rabi (Winter)</option>
+            <option value="Whole Year" {% if season == 'Whole Year' %}selected{% endif %}>Whole Year</option>
+            <option value="Summer" {% if season == 'Summer' %}selected{% endif %}>Summer</option>
           </select>
         </div>
         <div class="col-sm-12 col-md-3 d-flex align-items-end mb-3">
@@ -299,10 +299,16 @@ function detectPriceLocation() {
   );
 }
 
-// Auto-load a default region so the page is instantly usable
+// Auto-load region: preserves selected state/district/season or defaults to Karnataka/BAGALKOT
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('stateInput').value = 'Karnataka';
-  populateDistricts('Karnataka', 'BAGALKOT');
+  const curState = {{ (state or 'Karnataka') | tojson }};
+  const curDistrict = {{ (district or 'BAGALKOT') | tojson }};
+  const curSeason = {{ (season or 'Kharif') | tojson }};
+  document.getElementById('stateInput').value = curState;
+  populateDistricts(curState, curDistrict);
+  if (curSeason) {
+    document.getElementById('seasonSelect').value = curSeason;
+  }
 });
 </script>
 {% endblock %}

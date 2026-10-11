@@ -565,6 +565,7 @@ AgroIntel/
 ├── test_access_control.py            # Automated test suite verifying session guards & 302/401 redirects
 ├── test_market_prices.py             # Automated test suite verifying 646 APMC districts & state disambiguation
 ├── test_weather_resolution.py        # Automated test suite verifying Mysore/Hassan/Bangalore geocoding accuracy
+├── test_ml_services.py               # Automated test suite verifying all 5 ML models & regional crop differentiation
 │
 ├── data/
 │   └── mandi_snapshot.csv            # Curated APMC snapshot covering commercial varieties & modal prices
@@ -718,6 +719,10 @@ python test_market_prices.py
 # 3. Weather Geocoding & District Resolution Suite
 python test_weather_resolution.py
 # Asserts that Mysore, Hassan, Bangalore, etc., resolve to exact coordinates without municipal corporation artifacts.
+
+# 4. ML Services & Regional Crop Differentiation Suite
+python test_ml_services.py
+# Asserts that all 5 ML models execute with agronomic ground truth, distinct regional/seasonal crops, dynamic APMC pricing, and in-process Decision Tree inference.
 ```
 
 ---
