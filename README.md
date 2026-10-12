@@ -54,9 +54,9 @@
 11. [Hardware, Software & System Requirements](#11-hardware-software--system-requirements)
 12. [Installation, Configuration & Execution Guide](#12-installation-configuration--execution-guide)
 13. [Sample Demo Credentials & Automated Verification](#13-sample-demo-credentials--automated-verification)
-14. [Multilingual Localization & Hands-Free Voice Assistant Architecture](#14-multilingual-localization--hands-free-voice-assistant-architecture)
+14. [Multilingual Localization, Crop & Mandi Market Intelligence Architecture](#14-multilingual-localization-crop--mandi-market-intelligence-architecture)
     - [Multilingual Localization & Crop Language Module (Kannada, Hindi & English)](#multilingual-localization--crop-language-module-kannada-hindi--english)
-    - [Continuous Hands-Free Voice Assistant (Speech-to-Intent & TTS Engine)](#continuous-hands-free-voice-assistant-speech-to-intent--tts-engine)
+    - [State & District Geo-Localization Engine (All 33 States & 30 Karnataka Districts)](#state--district-geo-localization-engine-all-33-states--30-karnataka-districts)
 15. [Academic Viva Voce & Project Defense Q&A](#15-academic-viva-voce--project-defense-qa)
 16. [Academic References & Dataset Acknowledgments](#16-academic-references--dataset-acknowledgments)
 
@@ -314,6 +314,16 @@ The estimated value is classified into 4 agro-hydrological risk zones:
 - $150\text{ mm} < \bar{R} \le 300\text{ mm}$: **Moderate–Heavy Rainfall** (Optimal for water-intensive crops like Paddy and Sugarcane).
 - $50\text{ mm} < \bar{R} \le 150\text{ mm}$: **Light–Moderate Rainfall** (Ideal for Millets, Pulses, and Maize; standard irrigation required).
 - $\bar{R} \le 50\text{ mm}$: **Low Rainfall / Dry Period** (Drought mitigation necessary; drip irrigation recommended).
+
+#### District-to-IMD Subdivision Mapping Engine
+IMD models utilize 36 meteorological subdivisions rather than standard administrative districts. To eliminate the bug where subdivisions stayed stuck as Coastal Karnataka:
+1. **Accurate Karnataka Subdivisional Resolution:** All 30 Karnataka districts are classified into their official meteorological subdivisions:
+   - **Coastal Karnataka:** Udupi, Dakshina Kannada (Mangalore), Uttara Kannada (Karwar).
+   - **North Interior Karnataka:** Bagalkot, Belgaum (Belagavi), Bellary (Ballari), Bidar, Bijapur (Vijayapura), Dharwad, Gadag, Gulbarga (Kalaburagi), Haveri, Koppal, Raichur, Yadgir, Vijayanagara.
+   - **South Interior Karnataka:** Bengaluru Urban, Bengaluru Rural, Chamarajanagar, Chikkaballapura, Chikkamagaluru, Chitradurga, Davanagere, Hassan, Kodagu (Coorg), Kolar, Mandya, Mysuru (Mysore), Ramanagara, Shivamogga (Shimoga), Tumakuru (Tumkur).
+2. **National Multi-Zone Resolution:** Covers Maharashtra (Konkan & Goa, Madhya Maharashtra, Marathwada, Vidarbha), Andhra Pradesh (Rayalaseema, Coastal Andhra), West Bengal (Sub-Himalayan vs Gangetic), Rajasthan (West vs East), Madhya Pradesh (West vs East), Uttar Pradesh (West vs East), Gujarat (Saurashtra & Kutch vs Gujarat Region), and all remaining single-zone states.
+3. **Live Sync & Geolocation Mapping:** Selecting a district immediately synchronizes the `#region` selector without requiring manual button clicks. Auto-detect reverse geocodes coordinates to `geo.place` and `geo.state`, automatically selecting the farmer's state, district, and exact subdivision.
+4. **Historical Dataset Spelling Normalization:** In `app.py`, dataset spelling variations (e.g. `MATATHWADA` $\leftrightarrow$ `MARATHWADA`, `RAYALSEEMA` $\leftrightarrow$ `RAYALASEEMA`, `ORISSA` $\leftrightarrow$ `ODISHA`) are aliased, ensuring queries against `rainfall_in_india_1901-2015.csv` always retrieve valid time-series averages.
 
 ---
 
@@ -713,9 +723,11 @@ python test_multilingual_and_voice.py
 
 ---
 
-## 14. Multilingual Localization & Hands-Free Voice Assistant Architecture
+## 14. Multilingual Localization, Crop & Mandi Market Intelligence Architecture
 
-To bridge the literacy barrier and support non-English speaking farmers across Karnataka and northern agricultural states, AgroIntel incorporates a production-grade **Multilingual Localization Engine** with a dedicated **Crop Language Module**, paired with a **Hands-Free Speech-to-Intent Voice Assistant**.
+To bridge the literacy barrier and support non-English speaking farmers across Karnataka and northern agricultural belts, AgroIntel incorporates a production-grade **Multilingual Localization Engine** (`agrointel-i18n.js`) with dedicated **Crop & Mandi Commodity Dictionaries** and a **State & District Geo-Localization Engine**.
+
+*(Note: In accordance with user preference and browser compatibility best practices, the speech-recognition voice assistant was decommissioned in favor of an uninterrupted, 100% reliable, zero-latency visual translation system).*
 
 ---
 
@@ -724,9 +736,10 @@ To bridge the literacy barrier and support non-English speaking farmers across K
 ```
 AgroIntel/
 └── assets/
+    ├── css/
+    │   └── agrointel-multilingual.css  # Typography tokens (Noto Sans Kannada & Devanagari)
     └── js/
-        ├── agrointel-i18n.js        # Core translation engine, 40+ crop dictionary, DOM walker
-        └── agrointel-voice.js       # Continuous voice recognition, intent matcher, regional TTS
+        └── agrointel-i18n.js           # 50+ crop dictionary, 33 states, 40+ districts, DOM walker
 ```
 
 #### Dedicated Crop Language Module
@@ -745,34 +758,24 @@ Rural farmers frequently struggle to recognize English names of crops (such as *
 
 ---
 
-### Continuous Hands-Free Voice Assistant (Speech-to-Intent & TTS Engine)
+### State & District Geo-Localization Engine (All 33 States & 30 Karnataka Districts)
 
-```
-[ Farmer Spoken Audio (Mic) ]
-           │
-           ▼
-[ Web Speech API: webkitSpeechRecognition (continuous: true) ]
-           │
-           ├── Persistent Keepalive Loop (Gracefully absorbs 'no-speech' pauses)
-           ▼
-[ Real-Time Transcript in kn-IN / hi-IN / en-IN ]
-           │
-           ▼
-[ Regex Intent Classifier & Numerical Field Extractor ]
-           ├── Intent: RECOMMENDATION ──► Navigates & auto-fills N-P-K soil parameters
-           ├── Intent: WEATHER        ──► Triggers /api/weather/city/ with live radar
-           ├── Intent: MANDI_PRICES   ──► Queries APMC rates for mentioned district
-           └── Intent: READ_RESULTS   ──► Speaks active results aloud in native dialect
-           │
-           ▼
-[ Web SpeechSynthesis API (Text-to-Speech) ]
-           └── Native pronunciation using cached browser kn-IN / hi-IN voice engines
-```
-
-#### Key Engineering Highlights
-1. **Elimination of the 1-Second Silence Shutdown:** Standard browser speech recognition terminates after 1 second of pause if configured in single-shot mode. AgroIntel configures `recognition.continuous = true` along with an intelligent `shouldBeListening` state keeper in `onend` and `onerror`. Short natural pauses no longer terminate the assistant; it remains active until the user explicitly toggles the microphone off.
-2. **Multi-Dialect Intent Parsing:** Recognizes natural spoken commands in Kannada (e.g., *"ಬೆಳೆ ಶಿಫಾರಸು"*, *"ಹವಾಮಾನ"*, *"ಮಂಡಿ ದರ"*), Hindi (e.g., *"फसल सिफारिश"*, *"मौसम"*, *"मंडी भाव"*), and English.
-3. **Auditory Audio Feedback:** Evaluated outputs (e.g., recommended crops and market prices) are voiced aloud back to the farmer using the browser's native `SpeechSynthesisUtterance` engine configured to the selected regional locale.
+In the Live Mandi Prices portal (`/farmer/market_prices`), state and district names are fully localized:
+- **All 33 Indian States & Union Territories:** State dropdown options, status badges, and table indicators render in regional scripts:
+  - *Karnataka:* **ಕರ್ನಾಟಕ (Karnataka)**
+  - *Maharashtra:* **ಮಹಾರಾಷ್ಟ್ರ (Maharashtra)** / **महाराष्ट्र (Maharashtra)**
+  - *Tamil Nadu:* **ತಮಿಳುನಾಡು (Tamil Nadu)** / **तमिलनाडु (Tamil Nadu)**
+  - *Telangana:* **ತೆಲಂಗಾಣ (Telangana)** / **तेलंगाना (Telangana)**
+  - *Punjab:* **ಪಂಜಾಬ್ (Punjab)** / **पंजाब (Punjab)**
+  - *Gujarat, Rajasthan, Uttar Pradesh, Bihar, Kerala, West Bengal, Odisha, etc.*
+- **All 30 Karnataka Districts & Major Agricultural Hubs:**
+  - *Udupi:* **ಉಡುಪಿ (Udupi)** / **उडुपी (Udupi)**
+  - *Bengaluru Urban:* **ಬೆಂಗಳೂರು ನಗರ (Bengaluru Urban)** / **बेंगलुरु शहरी (Bengaluru Urban)**
+  - *Belagavi / Belgaum:* **ಬೆಳಗಾವಿ (Belagavi)** / **बेलगावी (Belagavi)**
+  - *Mysuru / Mysore:* **ಮೈಸೂರು (Mysuru)** / **मैसूर (Mysuru)**
+  - *Shivamogga, Davanagere, Dharwad, Hassan, Mandya, Bellary, Bagalkot, Raichur, etc.*
+  - *Major National Hubs:* Mumbai, Pune, Nashik, Hyderabad, Ludhiana, Delhi, Jaipur, Ahmedabad, Chennai, Kolkata, Patna, etc.
+- **Instant Client-Side Re-Rendering:** When switching languages via the top navbar dropdown, all active mandi commodity cards, status bars, and table records re-render instantly without requiring another round-trip HTTP request to the government Agmarknet API.
 
 ---
 

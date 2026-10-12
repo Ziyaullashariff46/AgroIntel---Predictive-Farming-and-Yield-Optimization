@@ -40,12 +40,14 @@
 
 {# ── Quick Region Presets ── #}
 <div class="soil-preset-container mb-4">
-  <button type="button" class="soil-preset-btn" onclick="setRegion('COASTAL KARNATAKA')"><i class="fas fa-water"></i> Coastal Karnataka</button>
+  <button type="button" class="soil-preset-btn" onclick="setRegion('SOUTH INTERIOR KARNATAKA')"><i class="fas fa-tree"></i> S. Interior Karnataka</button>
   <button type="button" class="soil-preset-btn" onclick="setRegion('NORTH INTERIOR KARNATAKA')"><i class="fas fa-mountain"></i> N. Interior Karnataka</button>
+  <button type="button" class="soil-preset-btn" onclick="setRegion('COASTAL KARNATAKA')"><i class="fas fa-water"></i> Coastal Karnataka</button>
   <button type="button" class="soil-preset-btn" onclick="setRegion('TAMIL NADU')"><i class="fas fa-gopuram"></i> Tamil Nadu</button>
   <button type="button" class="soil-preset-btn" onclick="setRegion('KERALA')"><i class="fas fa-leaf"></i> Kerala</button>
   <button type="button" class="soil-preset-btn" onclick="setRegion('KONKAN & GOA')"><i class="fas fa-umbrella-beach"></i> Konkan & Goa</button>
   <button type="button" class="soil-preset-btn" onclick="setRegion('TELANGANA')"><i class="fas fa-monument"></i> Telangana</button>
+  <button type="button" class="soil-preset-btn" onclick="setRegion('MADHYA MAHARASHTRA')"><i class="fas fa-tractor"></i> Madhya Maharashtra</button>
 </div>
 
 {# ── State → District → Subdivision Helper ── #}
@@ -55,90 +57,91 @@
       <label for="stateSelect"><i class="fas fa-map" style="color: var(--cyan-500); margin-right: 6px;"></i> State</label>
       <select id="stateSelect" class="form-control-agro" onchange="onRainStateChange()">
         {% for st in states %}
-        <option value="{{ st }}">{{ st }}</option>
+        <option value="{{ st }}" {% if st == 'Karnataka' %}selected{% endif %}>{{ st }}</option>
         {% endfor %}
       </select>
     </div>
     <div class="col-md-4">
       <label for="districtSelect"><i class="fas fa-search" style="color: var(--cyan-500); margin-right: 6px;"></i> District</label>
-      <select id="districtSelect" class="form-control-agro" disabled>
+      <select id="districtSelect" class="form-control-agro" onchange="onRainDistrictChange()">
         <option value="">Select a state first…</option>
       </select>
     </div>
     <div class="col-md-4 d-flex align-items-end">
       <button type="button" class="btn-agro-secondary w-100" id="resolveZoneBtn" onclick="resolveSubdivision()" style="min-height: 48px;">
-        <i class="fas fa-arrow-down"></i> Find My Subdivision
+        <i class="fas fa-arrow-down"></i> Sync Subdivision
       </button>
     </div>
   </div>
-  <p class="mb-0 mt-2" style="font-size: 0.76rem; color: var(--text-muted);" id="zoneResolveNote">
-    IMD models use meteorological subdivisions — pick your district and we'll map it to the right zone below.
+  <p class="mb-0 mt-2" style="font-size: 0.78rem; color: var(--text-muted);" id="zoneResolveNote">
+    <i class="fas fa-circle-info" style="color: var(--cyan-500); margin-right: 4px;"></i>
+    Pick your district above to automatically map to the accurate IMD meteorological subdivision below.
   </p>
 </div>
 
 {# ── Estimation Form ── #}
 <div class="glass-card">
   <form method="POST" id="rainfallForm">
-      <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
     <div class="row" style="row-gap: 1.25rem;">
       <div class="col-md-5">
         <label for="region"><i class="fas fa-map-marked-alt" style="color: var(--cyan-500); margin-right: 6px;"></i> Meteorological Subdivision</label>
         <select name="region" id="region" class="form-control-agro" required>
-          <option value="" disabled selected>Select zone...</option>
-          <option value="ANDAMAN & NICOBAR ISLANDS">Andaman & Nicobar Islands</option>
-          <option value="ARUNACHAL PRADESH">Arunachal Pradesh</option>
-          <option value="ASSAM & MEGHALAYA">Assam & Meghalaya</option>
-          <option value="NAGA MANI MIZO TRIPURA">Nagaland, Manipur, Mizoram & Tripura</option>
-          <option value="SUB HIMALAYAN WEST BENGAL & SIKKIM">Sub-Himalayan WB & Sikkim</option>
-          <option value="GANGETIC WEST BENGAL">Gangetic West Bengal</option>
-          <option value="ORISSA">Odisha</option>
-          <option value="JHARKHAND">Jharkhand</option>
-          <option value="BIHAR">Bihar</option>
-          <option value="EAST UTTAR PRADESH">East Uttar Pradesh</option>
-          <option value="WEST UTTAR PRADESH">West Uttar Pradesh</option>
-          <option value="UTTARAKHAND">Uttarakhand</option>
-          <option value="HARYANA DELHI & CHANDIGARH">Haryana, Delhi & Chandigarh</option>
-          <option value="PUNJAB">Punjab</option>
-          <option value="HIMACHAL PRADESH">Himachal Pradesh</option>
-          <option value="JAMMU & KASHMIR">Jammu & Kashmir</option>
-          <option value="WEST RAJASTHAN">West Rajasthan</option>
-          <option value="EAST RAJASTHAN">East Rajasthan</option>
-          <option value="WEST MADHYA PRADESH">West Madhya Pradesh</option>
-          <option value="EAST MADHYA PRADESH">East Madhya Pradesh</option>
-          <option value="GUJARAT REGION">Gujarat Region</option>
-          <option value="SAURASHTRA & KUTCH">Saurashtra & Kutch</option>
-          <option value="KONKAN & GOA">Konkan & Goa</option>
-          <option value="MADHYA MAHARASHTRA">Madhya Maharashtra</option>
-          <option value="MARATHWADA">Marathwada</option>
-          <option value="VIDARBHA">Vidarbha</option>
-          <option value="CHHATTISGARH">Chhattisgarh</option>
-          <option value="COASTAL ANDHRA PRADESH">Coastal Andhra Pradesh</option>
-          <option value="TELANGANA">Telangana</option>
-          <option value="RAYALASEEMA">Rayalaseema</option>
-          <option value="TAMIL NADU">Tamil Nadu</option>
-          <option value="COASTAL KARNATAKA">Coastal Karnataka</option>
-          <option value="NORTH INTERIOR KARNATAKA">North Interior Karnataka</option>
-          <option value="SOUTH INTERIOR KARNATAKA">South Interior Karnataka</option>
-          <option value="KERALA">Kerala</option>
-          <option value="LAKSHADWEEP">Lakshadweep</option>
+          <option value="" disabled {% if not sel_region %}selected{% endif %}>Select zone...</option>
+          <option value="ANDAMAN & NICOBAR ISLANDS" {% if sel_region == 'ANDAMAN & NICOBAR ISLANDS' %}selected{% endif %}>Andaman & Nicobar Islands</option>
+          <option value="ARUNACHAL PRADESH" {% if sel_region == 'ARUNACHAL PRADESH' %}selected{% endif %}>Arunachal Pradesh</option>
+          <option value="ASSAM & MEGHALAYA" {% if sel_region == 'ASSAM & MEGHALAYA' %}selected{% endif %}>Assam & Meghalaya</option>
+          <option value="NAGA MANI MIZO TRIPURA" {% if sel_region == 'NAGA MANI MIZO TRIPURA' %}selected{% endif %}>Nagaland, Manipur, Mizoram & Tripura</option>
+          <option value="SUB HIMALAYAN WEST BENGAL & SIKKIM" {% if sel_region == 'SUB HIMALAYAN WEST BENGAL & SIKKIM' %}selected{% endif %}>Sub-Himalayan WB & Sikkim</option>
+          <option value="GANGETIC WEST BENGAL" {% if sel_region == 'GANGETIC WEST BENGAL' %}selected{% endif %}>Gangetic West Bengal</option>
+          <option value="ORISSA" {% if sel_region == 'ORISSA' %}selected{% endif %}>Odisha</option>
+          <option value="JHARKHAND" {% if sel_region == 'JHARKHAND' %}selected{% endif %}>Jharkhand</option>
+          <option value="BIHAR" {% if sel_region == 'BIHAR' %}selected{% endif %}>Bihar</option>
+          <option value="EAST UTTAR PRADESH" {% if sel_region == 'EAST UTTAR PRADESH' %}selected{% endif %}>East Uttar Pradesh</option>
+          <option value="WEST UTTAR PRADESH" {% if sel_region == 'WEST UTTAR PRADESH' %}selected{% endif %}>West Uttar Pradesh</option>
+          <option value="UTTARAKHAND" {% if sel_region == 'UTTARAKHAND' %}selected{% endif %}>Uttarakhand</option>
+          <option value="HARYANA DELHI & CHANDIGARH" {% if sel_region == 'HARYANA DELHI & CHANDIGARH' %}selected{% endif %}>Haryana, Delhi & Chandigarh</option>
+          <option value="PUNJAB" {% if sel_region == 'PUNJAB' %}selected{% endif %}>Punjab</option>
+          <option value="HIMACHAL PRADESH" {% if sel_region == 'HIMACHAL PRADESH' %}selected{% endif %}>Himachal Pradesh</option>
+          <option value="JAMMU & KASHMIR" {% if sel_region == 'JAMMU & KASHMIR' %}selected{% endif %}>Jammu & Kashmir</option>
+          <option value="WEST RAJASTHAN" {% if sel_region == 'WEST RAJASTHAN' %}selected{% endif %}>West Rajasthan</option>
+          <option value="EAST RAJASTHAN" {% if sel_region == 'EAST RAJASTHAN' %}selected{% endif %}>East Rajasthan</option>
+          <option value="WEST MADHYA PRADESH" {% if sel_region == 'WEST MADHYA PRADESH' %}selected{% endif %}>West Madhya Pradesh</option>
+          <option value="EAST MADHYA PRADESH" {% if sel_region == 'EAST MADHYA PRADESH' %}selected{% endif %}>East Madhya Pradesh</option>
+          <option value="GUJARAT REGION" {% if sel_region == 'GUJARAT REGION' %}selected{% endif %}>Gujarat Region</option>
+          <option value="SAURASHTRA & KUTCH" {% if sel_region == 'SAURASHTRA & KUTCH' %}selected{% endif %}>Saurashtra & Kutch</option>
+          <option value="KONKAN & GOA" {% if sel_region == 'KONKAN & GOA' %}selected{% endif %}>Konkan & Goa</option>
+          <option value="MADHYA MAHARASHTRA" {% if sel_region == 'MADHYA MAHARASHTRA' %}selected{% endif %}>Madhya Maharashtra</option>
+          <option value="MARATHWADA" {% if sel_region in ['MARATHWADA', 'MATATHWADA'] %}selected{% endif %}>Marathwada</option>
+          <option value="VIDARBHA" {% if sel_region == 'VIDARBHA' %}selected{% endif %}>Vidarbha</option>
+          <option value="CHHATTISGARH" {% if sel_region == 'CHHATTISGARH' %}selected{% endif %}>Chhattisgarh</option>
+          <option value="COASTAL ANDHRA PRADESH" {% if sel_region == 'COASTAL ANDHRA PRADESH' %}selected{% endif %}>Coastal Andhra Pradesh</option>
+          <option value="TELANGANA" {% if sel_region == 'TELANGANA' %}selected{% endif %}>Telangana</option>
+          <option value="RAYALASEEMA" {% if sel_region in ['RAYALASEEMA', 'RAYALSEEMA'] %}selected{% endif %}>Rayalaseema</option>
+          <option value="TAMIL NADU" {% if sel_region == 'TAMIL NADU' %}selected{% endif %}>Tamil Nadu</option>
+          <option value="COASTAL KARNATAKA" {% if sel_region == 'COASTAL KARNATAKA' %}selected{% endif %}>Coastal Karnataka</option>
+          <option value="NORTH INTERIOR KARNATAKA" {% if sel_region == 'NORTH INTERIOR KARNATAKA' %}selected{% endif %}>North Interior Karnataka</option>
+          <option value="SOUTH INTERIOR KARNATAKA" {% if sel_region == 'SOUTH INTERIOR KARNATAKA' or not sel_region %}selected{% endif %}>South Interior Karnataka</option>
+          <option value="KERALA" {% if sel_region == 'KERALA' %}selected{% endif %}>Kerala</option>
+          <option value="LAKSHADWEEP" {% if sel_region == 'LAKSHADWEEP' %}selected{% endif %}>Lakshadweep</option>
         </select>
       </div>
       <div class="col-md-4">
         <label for="month"><i class="fas fa-calendar-day" style="color: var(--amber-500); margin-right: 6px;"></i> Target Month</label>
         <select name="month" id="month" class="form-control-agro" required>
-          <option value="" disabled selected>Select month...</option>
-          <option value="JAN">January</option>
-          <option value="FEB">February</option>
-          <option value="MAR">March</option>
-          <option value="APR">April</option>
-          <option value="MAY">May</option>
-          <option value="JUN">June</option>
-          <option value="JUL">July</option>
-          <option value="AUG">August</option>
-          <option value="SEP">September</option>
-          <option value="OCT">October</option>
-          <option value="NOV">November</option>
-          <option value="DEC">December</option>
+          <option value="" disabled {% if not sel_month %}selected{% endif %}>Select month...</option>
+          <option value="JAN" {% if sel_month == 'JAN' %}selected{% endif %}>January</option>
+          <option value="FEB" {% if sel_month == 'FEB' %}selected{% endif %}>February</option>
+          <option value="MAR" {% if sel_month == 'MAR' %}selected{% endif %}>March</option>
+          <option value="APR" {% if sel_month == 'APR' %}selected{% endif %}>April</option>
+          <option value="MAY" {% if sel_month == 'MAY' %}selected{% endif %}>May</option>
+          <option value="JUN" {% if sel_month == 'JUN' %}selected{% endif %}>June</option>
+          <option value="JUL" {% if sel_month == 'JUL' or not sel_month %}selected{% endif %}>July</option>
+          <option value="AUG" {% if sel_month == 'AUG' %}selected{% endif %}>August</option>
+          <option value="SEP" {% if sel_month == 'SEP' %}selected{% endif %}>September</option>
+          <option value="OCT" {% if sel_month == 'OCT' %}selected{% endif %}>October</option>
+          <option value="NOV" {% if sel_month == 'NOV' %}selected{% endif %}>November</option>
+          <option value="DEC" {% if sel_month == 'DEC' %}selected{% endif %}>December</option>
         </select>
       </div>
       <div class="col-md-3 d-flex align-items-end">
@@ -198,7 +201,7 @@
   </h5>
   <div class="row" style="row-gap: 1.5rem;">
     <div class="col-md-6">
-      <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md);">
+      <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md); height: 100%;">
         <h6 style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cyan-500); margin-bottom: 0.75rem;">
           <i class="fas fa-microchip"></i> ML Model Used
         </h6>
@@ -209,7 +212,7 @@
       </div>
     </div>
     <div class="col-md-6">
-      <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md);">
+      <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md); height: 100%;">
         <h6 style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--emerald-500); margin-bottom: 0.75rem;">
           <i class="fas fa-flask"></i> Estimation Basis
         </h6>
@@ -222,23 +225,311 @@
   </div>
 </div>
 
+<script type="application/json" id="districts-data">{{ districts_by_state | tojson }}</script>
+
 <script>
-const ZONE_MAP = {
-  'karnataka': 'COASTAL KARNATAKA', 'goa': 'KONKAN & GOA', 'maharashtra': 'MADHYA MAHARASHTRA',
-  'tamil nadu': 'TAMIL NADU', 'kerala': 'KERALA', 'andhra pradesh': 'COASTAL ANDHRA PRADESH',
-  'telangana': 'TELANGANA', 'rajasthan': 'WEST RAJASTHAN', 'gujarat': 'GUJARAT REGION',
-  'madhya pradesh': 'WEST MADHYA PRADESH', 'uttar pradesh': 'EAST UTTAR PRADESH',
-  'bihar': 'BIHAR', 'odisha': 'ORISSA', 'west bengal': 'GANGETIC WEST BENGAL',
-  'jharkhand': 'JHARKHAND', 'chhattisgarh': 'CHHATTISGARH', 'punjab': 'PUNJAB',
-  'haryana': 'HARYANA DELHI & CHANDIGARH', 'himachal pradesh': 'HIMACHAL PRADESH',
-  'uttarakhand': 'UTTARAKHAND', 'assam': 'ASSAM & MEGHALAYA',
-  'arunachal pradesh': 'ARUNACHAL PRADESH'
+// ═══════════════════════════════════════════════════════════════
+// IMD METEOROLOGICAL SUBDIVISION MAPPING ENGINE
+// Maps districts across India to their exact 36 IMD subdivisions
+// ═══════════════════════════════════════════════════════════════
+
+const DISTRICT_ZONE_MAP = {
+  // Karnataka (30 districts)
+  'karnataka': {
+    'coastal': [
+      'UDUPI', 'DAKSHIN KANNAD', 'DAKSHINA KANNADA', 'MANGALORE', 'MANGALURU',
+      'UTTAR KANNAD', 'UTTARA KANNADA', 'KARWAR'
+    ],
+    'north': [
+      'BAGALKOT', 'BAGALKOTE', 'BELGAUM', 'BELAGAVI', 'BELLARY', 'BALLARI',
+      'BIDAR', 'BIJAPUR', 'VIJAYAPURA', 'DHARWAD', 'GADAG', 'GULBARGA', 'KALABURAGI',
+      'HAVERI', 'KOPPAL', 'RAICHUR', 'YADGIR', 'VIJAYANAGARA'
+    ],
+    'south': [
+      'BANGALORE RURAL', 'BENGALURU RURAL', 'BENGALURU URBAN', 'BANGALORE', 'BENGALURU',
+      'CHAMARAJANAGAR', 'CHIKBALLAPUR', 'CHIKKABALLAPURA', 'CHIKMAGALUR', 'CHIKKAMAGALURU',
+      'CHITRADURGA', 'DAVANGERE', 'DAVANAGERE', 'HASSAN', 'KODAGU', 'COORG', 'KOLAR',
+      'MANDYA', 'MYSORE', 'MYSURU', 'RAMANAGARA', 'SHIMOGA', 'SHIVAMOGGA', 'TUMKUR', 'TUMAKURU'
+    ]
+  },
+  // Maharashtra
+  'maharashtra': {
+    'konkan & goa': ['MUMBAI', 'PALGHAR', 'RAIGAD', 'RATNAGIRI', 'SINDHUDURG', 'THANE'],
+    'madhya maharashtra': ['AHMEDNAGAR', 'DHULE', 'JALGAON', 'KOLHAPUR', 'NANDURBAR', 'NASHIK', 'PUNE', 'SANGLI', 'SATARA', 'SOLAPUR'],
+    'marathwada': ['AURANGABAD', 'BEED', 'HINGOLI', 'JALNA', 'LATUR', 'NANDED', 'OSMANABAD', 'PARBHANI'],
+    'vidarbha': ['AKOLA', 'AMRAVATI', 'BHANDARA', 'BULDHANA', 'CHANDRAPUR', 'GADCHIROLI', 'GONDIA', 'NAGPUR', 'WARDHA', 'WASHIM', 'YAVATMAL']
+  },
+  // Andhra Pradesh
+  'andhra pradesh': {
+    'rayalaseema': ['ANANTAPUR', 'CHITTOOR', 'KADAPA', 'KURNOOL', 'NANDYAL', 'TIRUPATI', 'ANNAMAYYA', 'SRI SATHYA SAI'],
+    'coastal andhra pradesh': ['EAST GODAVARI', 'GUNTUR', 'KRISHNA', 'PRAKASAM', 'SPSR NELLORE', 'SRIKAKULAM', 'VISAKHAPATANAM', 'VISAKHAPATNAM', 'VIZIANAGARAM', 'WEST GODAVARI']
+  },
+  // West Bengal
+  'west bengal': {
+    'sub himalayan west bengal & sikkim': ['COOCHBEHAR', 'DARJEELING', 'DINAJPUR DAKSHIN', 'DINAJPUR UTTAR', 'JALPAIGURI', 'MALDAH', 'ALIPURDUAR', 'KALIMPONG'],
+    'gangetic west bengal': ['24 PARAGANAS NORTH', '24 PARAGANAS SOUTH', 'BANKURA', 'BARDHAMAN', 'BIRBHUM', 'HOOGHLY', 'HOWRAH', 'MEDINIPUR EAST', 'MEDINIPUR WEST', 'MURSHIDABAD', 'NADIA', 'PURULIA', 'KOLKATA']
+  },
+  // Rajasthan
+  'rajasthan': {
+    'west rajasthan': ['BARMER', 'BIKANER', 'CHURU', 'GANGANAGAR', 'HANUMANGARH', 'JAISALMER', 'JALORE', 'JODHPUR', 'NAGAUR', 'PALI'],
+    'east rajasthan': ['AJMER', 'ALWAR', 'BANSWARA', 'BARAN', 'BHARATPUR', 'BHILWARA', 'BUNDI', 'CHITTORGARH', 'DAUSA', 'DHOLPUR', 'DUNGARPUR', 'JAIPUR', 'JHALAWAR', 'JHUNJHUNU', 'KARAULI', 'KOTA', 'PRATAPGARH', 'RAJSAMAND', 'SAWAI MADHOPUR', 'SIKAR', 'SIROHI', 'TONK', 'UDAIPUR']
+  },
+  // Gujarat
+  'gujarat': {
+    'saurashtra & kutch': ['AMRELI', 'BHAVNAGAR', 'JAMNAGAR', 'JUNAGADH', 'KACHCHH', 'PORBANDAR', 'RAJKOT', 'SURENDRANAGAR', 'MORBI', 'DEVBHUMI DWARKA', 'GIR SOMNATH', 'BOTAD'],
+    'gujarat region': ['AHMADABAD', 'AHMEDABAD', 'ANAND', 'BANAS KANTHA', 'BHARUCH', 'DANG', 'DOHAD', 'GANDHINAGAR', 'KHEDA', 'MAHESANA', 'NARMADA', 'NAVSARI', 'PANCH MAHALS', 'PATAN', 'SABAR KANTHA', 'SURAT', 'TAPI', 'VADODARA', 'VALSAD']
+  },
+  // Madhya Pradesh
+  'madhya pradesh': {
+    'west madhya pradesh': ['AGAR MALWA', 'ALIRAJPUR', 'ASHOKNAGAR', 'BARWANI', 'BETUL', 'BHIND', 'BHOPAL', 'BURHANPUR', 'DATIA', 'DEWAS', 'DHAR', 'GUNA', 'GWALIOR', 'HARDA', 'HOSHANGABAD', 'INDORE', 'JHABUA', 'KHANDWA', 'KHARGONE', 'MANDSAUR', 'MORENA', 'NEEMUCH', 'RAISEN', 'RAJGARH', 'RATLAM', 'SEHORE', 'SHAJAPUR', 'SHEOPUR', 'SHIVPURI', 'UJJAIN', 'VIDISHA'],
+    'east madhya pradesh': ['ANUPPUR', 'BALAGHAT', 'CHHATARPUR', 'CHHINDWARA', 'DAMOH', 'DINDORI', 'JABALPUR', 'KATNI', 'MANDLA', 'NARSINGHPUR', 'PANNA', 'REWA', 'SAGAR', 'SATNA', 'SEONI', 'SHAHDOL', 'SIDHI', 'SINGRAULI', 'TIKAMGARH', 'UMARIA']
+  },
+  // Uttar Pradesh
+  'uttar pradesh': {
+    'west uttar pradesh': ['AGRA', 'ALIGARH', 'AMROHA', 'AURAIYA', 'BAGHPAT', 'BAREILLY', 'BIJNOR', 'BUDAUN', 'BULANDSHAHR', 'ETAH', 'ETAWAH', 'FARRUKHABAD', 'FIROZABAD', 'GAUTAM BUDDHA NAGAR', 'NOIDA', 'GHAZIABAD', 'HAPUR', 'HATHRAS', 'JALAUN', 'JHANSI', 'KANNAUJ', 'KANPUR DEHAT', 'KANPUR NAGAR', 'KASGANJ', 'LALITPUR', 'MAINPURI', 'MATHURA', 'MEERUT', 'MORADABAD', 'MUZAFFARNAGAR', 'PILIBHIT', 'RAMPUR', 'SAHARANPUR', 'SAMBHAL', 'SHAHJAHANPUR', 'SHAMLI'],
+    'east uttar pradesh': ['ALLAHABAD', 'PRAYAGRAJ', 'AMBEDKAR NAGAR', 'AMETHI', 'AZAMGARH', 'BAHRAICH', 'BALLIA', 'BALRAMPUR', 'BANDA', 'BARABANKI', 'BASTI', 'CHANDAULI', 'CHITRAKOOT', 'DEORIA', 'FAIZABAD', 'AYODHYA', 'FATEHPUR', 'GHAZIPUR', 'GONDA', 'GORAKHPUR', 'HAMIRPUR', 'HARDOI', 'JAUNPUR', 'KAUSHAMBI', 'KHERI', 'KUSHI NAGAR', 'LUCKNOW', 'MAHARAJGANJ', 'MAHOBA', 'MAU', 'MIRZAPUR', 'PRATAPGARH', 'RAE BARELI', 'SANT KABEER NAGAR', 'SANT RAVIDAS NAGAR', 'SHRAVASTI', 'SIDDHARTH NAGAR', 'SITAPUR', 'SONBHADRA', 'SULTANPUR', 'UNNAO', 'VARANASI']
+  }
+};
+
+const STATE_DEFAULT_ZONES = {
+  'tamil nadu': 'TAMIL NADU',
+  'puducherry': 'TAMIL NADU',
+  'kerala': 'KERALA',
+  'telangana': 'TELANGANA',
+  'goa': 'KONKAN & GOA',
+  'dadra and nagar haveli': 'KONKAN & GOA',
+  'punjab': 'PUNJAB',
+  'haryana': 'HARYANA DELHI & CHANDIGARH',
+  'chandigarh': 'HARYANA DELHI & CHANDIGARH',
+  'delhi': 'HARYANA DELHI & CHANDIGARH',
+  'himachal pradesh': 'HIMACHAL PRADESH',
+  'jammu and kashmir': 'JAMMU & KASHMIR',
+  'uttarakhand': 'UTTARAKHAND',
+  'bihar': 'BIHAR',
+  'jharkhand': 'JHARKHAND',
+  'odisha': 'ORISSA',
+  'chhattisgarh': 'CHHATTISGARH',
+  'assam': 'ASSAM & MEGHALAYA',
+  'meghalaya': 'ASSAM & MEGHALAYA',
+  'arunachal pradesh': 'ARUNACHAL PRADESH',
+  'nagaland': 'NAGA MANI MIZO TRIPURA',
+  'manipur': 'NAGA MANI MIZO TRIPURA',
+  'mizoram': 'NAGA MANI MIZO TRIPURA',
+  'tripura': 'NAGA MANI MIZO TRIPURA',
+  'sikkim': 'SUB HIMALAYAN WEST BENGAL & SIKKIM',
+  'andaman and nicobar islands': 'ANDAMAN & NICOBAR ISLANDS',
+  'lakshadweep': 'LAKSHADWEEP'
 };
 
 const MONTHS = ['JAN','FEB','MAR','APR','MAY','JUN','JUL','AUG','SEP','OCT','NOV','DEC'];
 
+/**
+ * Returns the exact IMD meteorological subdivision for any Indian state and district.
+ */
+function getIMDSubdivision(state, district) {
+  if (!state) return 'SOUTH INTERIOR KARNATAKA';
+  const sNorm = state.trim().toLowerCase();
+  const dNorm = (district || '').trim().toUpperCase();
+
+  // 1. Karnataka
+  if (sNorm.includes('karnataka')) {
+    if (dNorm) {
+      if (DISTRICT_ZONE_MAP.karnataka.coastal.some(d => dNorm.includes(d) || d.includes(dNorm))) {
+        return 'COASTAL KARNATAKA';
+      }
+      if (DISTRICT_ZONE_MAP.karnataka.north.some(d => dNorm.includes(d) || d.includes(dNorm))) {
+        return 'NORTH INTERIOR KARNATAKA';
+      }
+      if (DISTRICT_ZONE_MAP.karnataka.south.some(d => dNorm.includes(d) || d.includes(dNorm))) {
+        return 'SOUTH INTERIOR KARNATAKA';
+      }
+    }
+    return 'SOUTH INTERIOR KARNATAKA';
+  }
+
+  // 2. Maharashtra
+  if (sNorm.includes('maharashtra')) {
+    if (dNorm) {
+      if (DISTRICT_ZONE_MAP.maharashtra['konkan & goa'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'KONKAN & GOA';
+      if (DISTRICT_ZONE_MAP.maharashtra['vidarbha'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'VIDARBHA';
+      if (DISTRICT_ZONE_MAP.maharashtra['marathwada'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'MARATHWADA';
+      if (DISTRICT_ZONE_MAP.maharashtra['madhya maharashtra'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'MADHYA MAHARASHTRA';
+    }
+    return 'MADHYA MAHARASHTRA';
+  }
+
+  // 3. Andhra Pradesh
+  if (sNorm.includes('andhra')) {
+    if (dNorm) {
+      if (DISTRICT_ZONE_MAP['andhra pradesh']['rayalaseema'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'RAYALASEEMA';
+      if (DISTRICT_ZONE_MAP['andhra pradesh']['coastal andhra pradesh'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'COASTAL ANDHRA PRADESH';
+    }
+    return 'COASTAL ANDHRA PRADESH';
+  }
+
+  // 4. West Bengal
+  if (sNorm.includes('bengal')) {
+    if (dNorm) {
+      if (DISTRICT_ZONE_MAP['west bengal']['sub himalayan west bengal & sikkim'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'SUB HIMALAYAN WEST BENGAL & SIKKIM';
+      if (DISTRICT_ZONE_MAP['west bengal']['gangetic west bengal'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'GANGETIC WEST BENGAL';
+    }
+    return 'GANGETIC WEST BENGAL';
+  }
+
+  // 5. Rajasthan
+  if (sNorm.includes('rajasthan')) {
+    if (dNorm) {
+      if (DISTRICT_ZONE_MAP.rajasthan['west rajasthan'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'WEST RAJASTHAN';
+      if (DISTRICT_ZONE_MAP.rajasthan['east rajasthan'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'EAST RAJASTHAN';
+    }
+    return 'EAST RAJASTHAN';
+  }
+
+  // 6. Gujarat
+  if (sNorm.includes('gujarat')) {
+    if (dNorm) {
+      if (DISTRICT_ZONE_MAP.gujarat['saurashtra & kutch'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'SAURASHTRA & KUTCH';
+      if (DISTRICT_ZONE_MAP.gujarat['gujarat region'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'GUJARAT REGION';
+    }
+    return 'GUJARAT REGION';
+  }
+
+  // 7. Madhya Pradesh
+  if (sNorm.includes('madhya')) {
+    if (dNorm) {
+      if (DISTRICT_ZONE_MAP['madhya pradesh']['west madhya pradesh'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'WEST MADHYA PRADESH';
+      if (DISTRICT_ZONE_MAP['madhya pradesh']['east madhya pradesh'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'EAST MADHYA PRADESH';
+    }
+    return 'WEST MADHYA PRADESH';
+  }
+
+  // 8. Uttar Pradesh
+  if (sNorm.includes('uttar pradesh')) {
+    if (dNorm) {
+      if (DISTRICT_ZONE_MAP['uttar pradesh']['west uttar pradesh'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'WEST UTTAR PRADESH';
+      if (DISTRICT_ZONE_MAP['uttar pradesh']['east uttar pradesh'].some(d => dNorm.includes(d) || d.includes(dNorm))) return 'EAST UTTAR PRADESH';
+    }
+    return 'EAST UTTAR PRADESH';
+  }
+
+  // 9. Single-subdivision state lookup
+  for (const [stKey, zone] of Object.entries(STATE_DEFAULT_ZONES)) {
+    if (sNorm.includes(stKey)) {
+      return zone;
+    }
+  }
+
+  return 'SOUTH INTERIOR KARNATAKA';
+}
+
 function setRegion(val) {
-  document.getElementById('region').value = val;
+  const regSelect = document.getElementById('region');
+  if (regSelect) {
+    regSelect.value = val;
+    // Visual flash feedback
+    regSelect.style.borderColor = 'var(--cyan-500)';
+    setTimeout(() => { regSelect.style.borderColor = ''; }, 600);
+    const note = document.getElementById('zoneResolveNote');
+    if (note) {
+      note.innerHTML = `<i class="fas fa-check-circle" style="color: var(--emerald-500); margin-right: 4px;"></i> Selected Meteorological Zone: <strong>${val}</strong>.`;
+    }
+  }
+}
+
+const DISTRICTS_BY_STATE = JSON.parse(document.getElementById('districts-data').textContent || '{}');
+
+function populateDistricts(state, selected) {
+  const sel = document.getElementById('districtSelect');
+  sel.innerHTML = '';
+  if (!state || !DISTRICTS_BY_STATE[state]) {
+    sel.innerHTML = '<option value="">Select a state first…</option>';
+    sel.disabled = true;
+    return false;
+  }
+  sel.disabled = false;
+  let found = false;
+
+  const ph = document.createElement('option');
+  ph.value = '';
+  ph.textContent = 'Select your district…';
+  if (!selected) ph.selected = true;
+  sel.appendChild(ph);
+
+  const selUpper = (selected || '').trim().toUpperCase();
+  DISTRICTS_BY_STATE[state].forEach(d => {
+    const opt = document.createElement('option');
+    opt.value = d;
+    opt.textContent = d;
+    if (selUpper && (d.toUpperCase() === selUpper || d.toUpperCase().includes(selUpper) || selUpper.includes(d.toUpperCase()))) {
+      opt.selected = true;
+      found = true;
+    }
+    sel.appendChild(opt);
+  });
+  return found;
+}
+
+/**
+ * Applies the mapped IMD subdivision to the #region dropdown and provides user feedback
+ */
+function applyDistrictSubdivision(state, district) {
+  const zone = getIMDSubdivision(state, district);
+  const regSelect = document.getElementById('region');
+  const note = document.getElementById('zoneResolveNote');
+
+  if (regSelect) {
+    regSelect.value = zone;
+    regSelect.style.borderColor = 'var(--cyan-500)';
+    setTimeout(() => { regSelect.style.borderColor = ''; }, 800);
+  }
+
+  if (note) {
+    if (district) {
+      note.innerHTML = `<i class="fas fa-check-circle" style="color: var(--emerald-500); margin-right: 4px;"></i> <strong>${district}</strong> (${state}) mapped to IMD Meteorological Subdivision: <strong>${zone}</strong>.`;
+    } else {
+      note.innerHTML = `<i class="fas fa-check-circle" style="color: var(--emerald-500); margin-right: 4px;"></i> State <strong>${state}</strong> primary IMD Zone: <strong>${zone}</strong>. Select your district for exact subdivision.`;
+    }
+  }
+  return zone;
+}
+
+function onRainStateChange() {
+  const state = document.getElementById('stateSelect').value;
+  populateDistricts(state);
+  // Apply primary subdivision for state immediately
+  applyDistrictSubdivision(state, '');
+}
+
+function onRainDistrictChange() {
+  const state = document.getElementById('stateSelect').value;
+  const district = document.getElementById('districtSelect').value;
+  if (district) {
+    applyDistrictSubdivision(state, district);
+  }
+}
+
+function resolveSubdivision() {
+  const state = document.getElementById('stateSelect').value;
+  const district = document.getElementById('districtSelect').value;
+  const note = document.getElementById('zoneResolveNote');
+  const btn = document.getElementById('resolveZoneBtn');
+
+  if (!district) {
+    note.innerHTML = `<i class="fas fa-triangle-exclamation" style="color: var(--amber-500); margin-right: 4px;"></i> Please select a district to resolve your exact meteorological subdivision.`;
+    return;
+  }
+
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Syncing…';
+
+  setTimeout(() => {
+    const zone = applyDistrictSubdivision(state, district);
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-check"></i> Subdivision Synced';
+    setTimeout(() => {
+      btn.innerHTML = '<i class="fas fa-arrow-down"></i> Sync Subdivision';
+    }, 1500);
+  }, 150);
 }
 
 function detectLocation() {
@@ -251,7 +542,7 @@ function detectLocation() {
 
   if (!navigator.geolocation) {
     status.textContent = 'Geolocation not supported';
-    sub.textContent = 'Please select a zone manually';
+    sub.textContent = 'Please select your state and district manually';
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect';
     return;
@@ -260,25 +551,41 @@ function detectLocation() {
   navigator.geolocation.getCurrentPosition(function(pos) {
     const lat = pos.coords.latitude, lon = pos.coords.longitude;
     status.textContent = `Located: ${lat.toFixed(3)}°N, ${lon.toFixed(3)}°E`;
-    sub.textContent = 'Fetching weather data...';
+    sub.textContent = 'Resolving district & meteorological zone...';
 
-    // Auto-select month
+    // Auto-select current month if none set
     const curMonth = MONTHS[new Date().getMonth()];
-    document.getElementById('month').value = curMonth;
+    const mSelect = document.getElementById('month');
+    if (mSelect && !mSelect.value) {
+      mSelect.value = curMonth;
+    }
 
-    // Reverse geocode to guess state
+    // Reverse geocode to find exact state & district
     fetch(`/api/reverse_geocode/${lat}/${lon}`)
       .then(r => r.json())
       .then(geo => {
-        const state = (geo.state) ? geo.state.toLowerCase() : '';
-        const zone = ZONE_MAP[state];
-        if (zone) {
-          document.getElementById('region').value = zone;
-          sub.textContent = `Zone: ${zone} | Month: ${curMonth}`;
-        } else {
-          sub.textContent = `State: ${geo.state || 'Unknown'} — select zone manually`;
+        const place = geo.place || '';
+        const state = geo.state || 'Karnataka';
+
+        // Auto-select State dropdown
+        const stateSel = document.getElementById('stateSelect');
+        for (let i = 0; i < stateSel.options.length; i++) {
+          if (stateSel.options[i].value.toLowerCase() === state.toLowerCase()) {
+            stateSel.selectedIndex = i;
+            break;
+          }
         }
-      }).catch(() => { sub.textContent = 'Could not determine state — select zone manually'; });
+
+        // Populate and auto-select District dropdown
+        populateDistricts(stateSel.value, place);
+
+        // Apply exact IMD subdivision
+        const zone = applyDistrictSubdivision(stateSel.value, place);
+        sub.textContent = `📍 ${place ? place + ', ' : ''}${stateSel.value} → IMD Zone: ${zone} | Month: ${mSelect.value || curMonth}`;
+      })
+      .catch(() => {
+        sub.textContent = 'Could not resolve district — please select manually';
+      });
 
     // Fetch 5-day rain forecast
     fetch(`/api/weather/coords/${lat}/${lon}`)
@@ -306,98 +613,41 @@ function detectLocation() {
         }
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect';
-      }).catch(() => {
+      })
+      .catch(() => {
         btn.disabled = false;
         btn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect';
       });
 
   }, function(err) {
     status.textContent = 'Location access denied';
-    sub.textContent = 'Please select a zone manually';
+    sub.textContent = 'Please select your state and district manually';
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect';
   }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
 }
 
-// Auto-detect on page load
-document.addEventListener('DOMContentLoaded', function() { detectLocation(); });
-</script>
-
-<script type="application/json" id="districts-data">{{ districts_by_state | tojson }}</script>
-
-<script>
-const DISTRICTS_BY_STATE = JSON.parse(document.getElementById('districts-data').textContent);
-
-function populateDistricts(state, selected) {
-  const sel = document.getElementById('districtSelect');
-  sel.innerHTML = '';
-  if (!state || !DISTRICTS_BY_STATE[state]) {
-    sel.innerHTML = '<option value="">Select a state first…</option>';
-    sel.disabled = true;
-    return false;
-  }
-  sel.disabled = false;
-  let found = false;
-  if (!selected) {
-    const ph = document.createElement('option');
-    ph.value = '';
-    ph.textContent = 'Select your district…';
-    ph.selected = true;
-    sel.appendChild(ph);
-  }
-  DISTRICTS_BY_STATE[state].forEach(d => {
-    const opt = document.createElement('option');
-    opt.value = d;
-    opt.textContent = d;
-    if (selected && d === selected) { opt.selected = true; found = true; }
-    sel.appendChild(opt);
-  });
-  return found;
-}
-
-function onRainStateChange() {
-  populateDistricts(document.getElementById('stateSelect').value);
-}
-
-// Resolve the selected district to its IMD meteorological subdivision
-function resolveSubdivision() {
-  const district = document.getElementById('districtSelect').value;
-  const note = document.getElementById('zoneResolveNote');
-  const btn = document.getElementById('resolveZoneBtn');
-  if (!district) {
-    note.textContent = 'Pick a state and district first, then we will map it to an IMD zone.';
-    return;
-  }
-  btn.disabled = true;
-  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Resolving…';
-  fetch(`/api/weather/city/${encodeURIComponent(district)}`)
-    .then(r => r.json())
-    .then(data => {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-arrow-down"></i> Find My Subdivision';
-      // Label looks like "Place, District, STATE" — the last segment is the state
-      const label = (data.current && data.current.label) ? data.current.label : '';
-      const parts = label.split(',').map(s => s.trim()).filter(Boolean);
-      const stateName = parts.length ? parts[parts.length - 1] : '';
-      const zone = ZONE_MAP[stateName.toLowerCase()];
-      if (zone) {
-        document.getElementById('region').value = zone;
-        note.textContent = `${district} falls under IMD zone: ${zone}.`;
-      } else {
-        note.textContent = `Could not map ${district} to an IMD zone — pick the subdivision manually.`;
-      }
-    })
-    .catch(() => {
-      btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-arrow-down"></i> Find My Subdivision';
-      note.textContent = 'Zone lookup failed — pick the subdivision manually.';
-    });
-}
-
-// Auto-load a default region so the dropdown is instantly usable
+// Initialize on page load
 document.addEventListener('DOMContentLoaded', function() {
-  document.getElementById('stateSelect').value = 'Karnataka';
-  populateDistricts('Karnataka', '');
+  const stateSel = document.getElementById('stateSelect');
+  if (stateSel) {
+    const currentState = stateSel.value || 'Karnataka';
+    populateDistricts(currentState, 'BENGALURU URBAN');
+  }
+
+  // Check if server passed a selected region
+  const selRegionServer = "{{ sel_region }}";
+  if (selRegionServer) {
+    document.getElementById('region').value = selRegionServer;
+  }
+
+  // Only trigger GPS auto-detect if page wasn't just rendered with a POST calculation
+  {% if result is not number %}
+  detectLocation();
+  {% else %}
+  document.getElementById('locationStatus').textContent = 'Location set for estimation';
+  document.getElementById('locationSub').textContent = 'Selected zone: {{ request.form.get("region") }}';
+  {% endif %}
 });
 </script>
 

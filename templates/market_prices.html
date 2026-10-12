@@ -7,12 +7,12 @@
 <div class="mb-4">
   <div class="badge-agro badge-agro-emerald mb-3">
     <i class="fas fa-indian-rupee-sign" aria-hidden="true"></i>
-    Market Intelligence
+    <span data-i18n="Market Intelligence">Market Intelligence</span>
   </div>
-  <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 1.65rem; margin-bottom: 0.35rem; color: var(--text-primary);">
+  <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 1.65rem; margin-bottom: 0.35rem; color: var(--text-primary);" data-i18n="Live Mandi Prices">
     Live Mandi Prices
   </h2>
-  <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
+  <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;" data-i18n="Real-time APMC commodity rates from Agmarknet — pick a state and district, or detect your location.">
     Real-time APMC commodity rates from Agmarknet — pick a state and district, or detect your location.
   </p>
 </div>
@@ -21,46 +21,46 @@
 <div class="glass-card" style="padding: 1.25rem 1.5rem; margin-bottom: 1.5rem;">
   <div class="row align-items-end" style="row-gap: 1rem;">
     <div class="col-md-4">
-      <label for="stateSelect"><i class="fas fa-map" style="color: var(--emerald-500); margin-right: 6px;"></i> State</label>
+      <label for="stateSelect"><i class="fas fa-map" style="color: var(--emerald-500); margin-right: 6px;"></i> <span data-i18n="State">State</span></label>
       <select id="stateSelect" class="form-control-agro" onchange="onStateChange()">
-        <option value="">Select a state…</option>
+        <option value="" data-i18n="Select a state…">Select a state…</option>
         {% for st in states %}
         <option value="{{ st }}">{{ st }}</option>
         {% endfor %}
       </select>
     </div>
     <div class="col-md-4">
-      <label for="districtSelect"><i class="fas fa-search" style="color: var(--emerald-500); margin-right: 6px;"></i> District</label>
+      <label for="districtSelect"><i class="fas fa-search" style="color: var(--emerald-500); margin-right: 6px;"></i> <span data-i18n="District">District</span></label>
       <select id="districtSelect" class="form-control-agro" disabled>
-        <option value="">Select a state first…</option>
+        <option value="" data-i18n="Select a state first…">Select a state first…</option>
       </select>
     </div>
     <div class="col-md-3">
       <div class="d-flex" style="gap: 0.5rem;">
         <button class="btn-agro-primary" style="flex: 1; min-height: 48px;" onclick="searchCity()">
-          <i class="fas fa-search"></i> Search
+          <i class="fas fa-search"></i> <span data-i18n="Search">Search</span>
         </button>
         <button class="btn-agro-secondary" style="min-height: 48px;" onclick="detectMyLocation()" id="locBtn">
-          <i class="fas fa-location-crosshairs"></i> My Location
+          <i class="fas fa-location-crosshairs"></i> <span data-i18n="My Location">My Location</span>
         </button>
       </div>
     </div>
     <div class="col-md-1" id="nearbyCol" style="display: none;">
-      <label style="font-size: 0.8rem;"><i class="fas fa-map-pin" style="color: var(--amber-500);"></i> Nearby</label>
+      <label style="font-size: 0.8rem;"><i class="fas fa-map-pin" style="color: var(--amber-500);"></i> <span data-i18n="Nearby">Nearby</span></label>
       <div id="nearbyChips" style="display: flex; flex-wrap: wrap; gap: 0.4rem;"></div>
     </div>
   </div>
 </div>
 
 {# ── Quick Access Chips (real districts from our data) ── #}
-<div class="soil-preset-container mb-4">
-  <button class="soil-preset-btn" onclick="loadDistrict('Karnataka', 'UDUPI')"><i class="fas fa-map-marker-alt"></i> Udupi</button>
-  <button class="soil-preset-btn" onclick="loadDistrict('Karnataka', 'BENGALURU URBAN')"><i class="fas fa-map-marker-alt"></i> Bengaluru Urban</button>
-  <button class="soil-preset-btn" onclick="loadDistrict('Maharashtra', 'MUMBAI')"><i class="fas fa-map-marker-alt"></i> Mumbai</button>
-  <button class="soil-preset-btn" onclick="loadDistrict('Maharashtra', 'PUNE')"><i class="fas fa-map-marker-alt"></i> Pune</button>
-  <button class="soil-preset-btn" onclick="loadDistrict('Maharashtra', 'NASHIK')"><i class="fas fa-map-marker-alt"></i> Nashik</button>
-  <button class="soil-preset-btn" onclick="loadDistrict('Telangana', 'HYDERABAD')"><i class="fas fa-map-marker-alt"></i> Hyderabad</button>
-  <button class="soil-preset-btn" onclick="loadDistrict('Punjab', 'LUDHIANA')"><i class="fas fa-map-marker-alt"></i> Ludhiana</button>
+<div class="soil-preset-container mb-4" id="quickChipsContainer">
+  <button class="soil-preset-btn" onclick="loadDistrict('Karnataka', 'UDUPI')" data-district="UDUPI"><i class="fas fa-map-marker-alt"></i> <span class="chip-text">Udupi</span></button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Karnataka', 'BENGALURU URBAN')" data-district="BENGALURU URBAN"><i class="fas fa-map-marker-alt"></i> <span class="chip-text">Bengaluru Urban</span></button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Maharashtra', 'MUMBAI')" data-district="MUMBAI"><i class="fas fa-map-marker-alt"></i> <span class="chip-text">Mumbai</span></button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Maharashtra', 'PUNE')" data-district="PUNE"><i class="fas fa-map-marker-alt"></i> <span class="chip-text">Pune</span></button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Maharashtra', 'NASHIK')" data-district="NASHIK"><i class="fas fa-map-marker-alt"></i> <span class="chip-text">Nashik</span></button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Telangana', 'HYDERABAD')" data-district="HYDERABAD"><i class="fas fa-map-marker-alt"></i> <span class="chip-text">Hyderabad</span></button>
+  <button class="soil-preset-btn" onclick="loadDistrict('Punjab', 'LUDHIANA')" data-district="LUDHIANA"><i class="fas fa-map-marker-alt"></i> <span class="chip-text">Ludhiana</span></button>
 </div>
 
 {# ── Status Bar ── #}
@@ -77,7 +77,7 @@
   <div class="d-flex align-items-start" style="gap: 0.75rem;">
     <i class="fas fa-circle-exclamation" style="color: var(--amber-500); font-size: 1.1rem; margin-top: 2px;" aria-hidden="true"></i>
     <div style="font-size: 0.86rem; line-height: 1.55;">
-      <p style="margin: 0; font-weight: 700; color: var(--text-primary);">Live feed temporarily unavailable — showing estimated rates</p>
+      <p style="margin: 0; font-weight: 700; color: var(--text-primary);" data-i18n="Live feed temporarily unavailable — showing estimated rates">Live feed temporarily unavailable — showing estimated rates</p>
       <p id="fallbackDetail" style="margin: 0.25rem 0 0; color: var(--text-muted);"></p>
     </div>
   </div>
@@ -86,13 +86,13 @@
 {# ── Loading State ── #}
 <div id="loadingState" style="display: none; text-align: center; padding: 3rem;">
   <i class="fas fa-spinner fa-spin" style="font-size: 2rem; color: var(--emerald-500); margin-bottom: 1rem; display: block;"></i>
-  <p style="color: var(--text-muted); font-weight: 600;">Fetching live market prices...</p>
+  <p style="color: var(--text-muted); font-weight: 600;" data-i18n="Fetching live market prices...">Fetching live market prices...</p>
 </div>
 
 {# ── Highlight Cards ── #}
 <div id="highlightSection" style="display: none; margin-bottom: 1.5rem;">
   <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 1rem; color: var(--text-primary);">
-    <i class="fas fa-star" style="color: var(--amber-500); margin-right: 6px;"></i> Top Commodities
+    <i class="fas fa-star" style="color: var(--amber-500); margin-right: 6px;"></i> <span data-i18n="Top Commodities">Top Commodities</span>
   </h5>
   <div class="row" style="row-gap: 1rem;" id="highlightCards"></div>
 </div>
@@ -114,14 +114,14 @@
         </colgroup>
         <thead>
           <tr>
-            <th>Commodity</th>
-            <th>Variety</th>
-            <th>Market / APMC</th>
-            <th>District</th>
-            <th style="text-align: right;">Min ₹/q</th>
-            <th style="text-align: right;">Max ₹/q</th>
-            <th style="text-align: right; color: var(--emerald-500); background: rgba(16,185,129,0.06);">Modal ₹/q</th>
-            <th>Date</th>
+            <th data-i18n="Commodity">Commodity</th>
+            <th data-i18n="Variety">Variety</th>
+            <th data-i18n="Market / APMC">Market / APMC</th>
+            <th data-i18n="District">District</th>
+            <th style="text-align: right;" data-i18n="Min ₹/q">Min ₹/q</th>
+            <th style="text-align: right;" data-i18n="Max ₹/q">Max ₹/q</th>
+            <th style="text-align: right; color: var(--emerald-500); background: rgba(16,185,129,0.06);" data-i18n="Modal ₹/q">Modal ₹/q</th>
+            <th data-i18n="Date">Date</th>
           </tr>
         </thead>
         <tbody id="priceTableBody"></tbody>
@@ -133,8 +133,8 @@
 {# ── Empty State ── #}
 <div id="emptyState" style="display: none; text-align: center; padding: 3rem;">
   <i class="fas fa-shop-slash" style="font-size: 3rem; color: var(--text-muted); opacity: 0.4; margin-bottom: 1rem; display: block;"></i>
-  <p style="color: var(--text-muted); font-weight: 600; font-size: 1.05rem;">No market data found for this location</p>
-  <p style="color: var(--text-muted); font-size: 0.88rem;">Try a different state or district</p>
+  <p style="color: var(--text-muted); font-weight: 600; font-size: 1.05rem;" data-i18n="No market data found for this location">No market data found for this location</p>
+  <p style="color: var(--text-muted); font-size: 0.88rem;" data-i18n="Try a different state or district">Try a different state or district</p>
 </div>
 
 {# ── Attribution ── #}
@@ -148,8 +148,9 @@
 
 <script>
 const DISTRICTS_BY_STATE = JSON.parse(document.getElementById('districts-data').textContent);
+let lastMarketData = null;
 
-// Small helper: a Font Awesome <i> element (icons are ours, never user data)
+// Font Awesome helper
 function createIcon(faClass) {
   const i = document.createElement('i');
   i.className = 'fas ' + faClass;
@@ -166,12 +167,33 @@ function showLoading() {
   document.getElementById('fallbackNotice').style.display = 'none';
 }
 
-// Repopulate the district dropdown from the selected state
+function getCurLang() {
+  return (window.AgroIntelI18N && window.AgroIntelI18N.getLanguage) ? window.AgroIntelI18N.getLanguage() : 'en';
+}
+
+// Translate states in dropdown
+function updateStateDropdownTranslations() {
+  const sel = document.getElementById('stateSelect');
+  const curLang = getCurLang();
+  Array.from(sel.options).forEach(opt => {
+    if (!opt.value) {
+      opt.textContent = (window.AgroIntelI18N) ? window.AgroIntelI18N.t('Select a state…') : 'Select a state…';
+    } else if (window.AgroIntelI18N) {
+      opt.textContent = window.AgroIntelI18N.getStateName(opt.value, curLang);
+    }
+  });
+}
+
+// Repopulate the district dropdown from the selected state with localized labels
 function populateDistricts(state, selected) {
   const sel = document.getElementById('districtSelect');
+  const curLang = getCurLang();
   sel.innerHTML = '';
   if (!state || !DISTRICTS_BY_STATE[state]) {
-    sel.innerHTML = '<option value="">Select a state first…</option>';
+    const defaultOpt = document.createElement('option');
+    defaultOpt.value = '';
+    defaultOpt.textContent = (window.AgroIntelI18N) ? window.AgroIntelI18N.t('Select a state first…') : 'Select a state first…';
+    sel.appendChild(defaultOpt);
     sel.disabled = true;
     return false;
   }
@@ -180,18 +202,29 @@ function populateDistricts(state, selected) {
   if (!selected) {
     const ph = document.createElement('option');
     ph.value = '';
-    ph.textContent = 'Select your district…';
+    ph.textContent = (window.AgroIntelI18N) ? window.AgroIntelI18N.t('Select your district…') : 'Select your district…';
     ph.selected = true;
     sel.appendChild(ph);
   }
   DISTRICTS_BY_STATE[state].forEach(d => {
     const opt = document.createElement('option');
-    opt.value = d;
-    opt.textContent = d;
+    opt.value = d; // Keeps canonical uppercase key for API queries
+    opt.textContent = (window.AgroIntelI18N) ? window.AgroIntelI18N.getDistrictName(d, curLang) : d;
     if (selected && d === selected) { opt.selected = true; found = true; }
     sel.appendChild(opt);
   });
   return found;
+}
+
+function updateQuickChips() {
+  const curLang = getCurLang();
+  document.querySelectorAll('#quickChipsContainer .soil-preset-btn').forEach(btn => {
+    const d = btn.getAttribute('data-district');
+    const labelSpan = btn.querySelector('.chip-text');
+    if (d && labelSpan && window.AgroIntelI18N) {
+      labelSpan.textContent = window.AgroIntelI18N.getDistrictName(d, curLang);
+    }
+  });
 }
 
 function onStateChange() {
@@ -205,6 +238,142 @@ function loadDistrict(state, district) {
   searchCity();
 }
 
+function renderMarketData(data) {
+  const curLang = getCurLang();
+  lastMarketData = data;
+
+  if (!data.prices || data.prices.length === 0) {
+    document.getElementById('emptyState').style.display = 'block';
+    return;
+  }
+
+  // 1. Status bar
+  const asOf = String(data.prices[0].arrival_date || '');
+  const rawCity = String(data.city);
+  const rawState = String(data.state || '');
+  const locDisplay = (window.AgroIntelI18N)
+    ? `${window.AgroIntelI18N.getDistrictName(rawCity, curLang)}${rawState ? ', ' + window.AgroIntelI18N.getStateName(rawState, curLang) : ''}`
+    : `${rawCity}${rawState ? ', ' + rawState : ''}`;
+
+  const statusCity = document.getElementById('statusCity');
+  statusCity.replaceChildren(createIcon('fa-city'), document.createTextNode(` ${locDisplay}`));
+
+  const statusCount = document.getElementById('statusCount');
+  const countLabel = curLang === 'kn' ? 'ಕೃಷಿ ಉತ್ಪನ್ನಗಳು' : (curLang === 'hi' ? 'कृषि उत्पाद' : 'commodities');
+  statusCount.replaceChildren(createIcon('fa-boxes-stacked'), document.createTextNode(` ${data.count} ${countLabel}`));
+
+  const srcBadge = document.getElementById('statusSource');
+  srcBadge.className = 'badge-agro ' + (data.is_fallback ? 'badge-agro-amber' : 'badge-agro-cyan');
+  if (data.is_fallback) {
+    const rateLabel = curLang === 'kn' ? `ದರಗಳು: ${asOf} (ಅಂದಾಜು)` : (curLang === 'hi' ? `दरें: ${asOf} (अनुमानित)` : `Rates as of ${asOf} (estimated)`);
+    srcBadge.replaceChildren(createIcon('fa-clock'), document.createTextNode(` ${rateLabel}`));
+  } else {
+    srcBadge.replaceChildren(createIcon('fa-database'), document.createTextNode(` ${data.source} • ${asOf}`));
+  }
+
+  // 2. Fallback notice
+  const notice = document.getElementById('fallbackNotice');
+  if (data.is_fallback) {
+    document.getElementById('fallbackDetail').textContent = (curLang === 'kn')
+      ? `ಸರ್ಕಾರಿ Agmarknet ಫೀಡ್ ತಾತ್ಕಾಲಿಕವಾಗಿ ಲಭ್ಯವಿಲ್ಲ. ${locDisplay} ಗಾಗಿ ಕೊನೆಯ ದಾಖಲಾದ ದರಗಳನ್ನು (${asOf}) ಪ್ರದರ್ಶಿಸಲಾಗುತ್ತಿದೆ.`
+      : (curLang === 'hi')
+      ? `सरकारी Agmarknet पोर्टल अस्थायी रूप से अनुपलब्ध है। ${locDisplay} के लिए अंतिम ज्ञात दरें (${asOf}) प्रदर्शित हैं।`
+      : `The Government of India (data.gov.in) feed could not be reached. Rates below are last-known or estimated values for ${locDisplay}, dated ${asOf}.`;
+    notice.style.display = 'block';
+  } else {
+    notice.style.display = 'none';
+  }
+  document.getElementById('statusBar').style.display = 'block';
+
+  // 3. Highlight cards (top 6 commodities)
+  const highlights = data.prices.slice(0, 6);
+  const hContainer = document.getElementById('highlightCards');
+  hContainer.replaceChildren();
+
+  const perQLabel = (window.AgroIntelI18N) ? window.AgroIntelI18N.t('per quintal') : 'per quintal';
+  const minLabel = (window.AgroIntelI18N) ? window.AgroIntelI18N.t('Min:') : 'Min:';
+  const maxLabel = (window.AgroIntelI18N) ? window.AgroIntelI18N.t('Max:') : 'Max:';
+
+  highlights.forEach(p => {
+    const col = document.createElement('div');
+    col.className = 'col-sm-6 col-lg-4';
+    const card = document.createElement('div');
+    card.style.cssText = 'background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-lg); padding: 1.25rem; height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease;';
+    card.addEventListener('mouseover', () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = 'var(--shadow-lg)'; });
+    card.addEventListener('mouseout', () => { card.style.transform = ''; card.style.boxShadow = ''; });
+
+    const cName = document.createElement('p');
+    cName.style.cssText = 'font-weight: 700; font-size: 0.95rem; color: var(--emerald-400); margin-bottom: 0.35rem;';
+    // Translate Commodity Name into Kannada / Hindi
+    cName.textContent = (window.AgroIntelI18N) ? window.AgroIntelI18N.getCropName(p.commodity, curLang) : p.commodity;
+
+    const cSub = document.createElement('p');
+    cSub.style.cssText = 'font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;';
+    cSub.textContent = `${p.variety} • ${p.market}`;
+
+    const priceRow = document.createElement('div');
+    priceRow.style.cssText = 'display: flex; align-items: baseline; gap: 0.5rem;';
+    const price = document.createElement('span');
+    price.style.cssText = 'font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; color: var(--emerald-500);';
+    price.textContent = `\u20b9${Number(p.modal_price).toLocaleString('en-IN')}`;
+    const perQ = document.createElement('span');
+    perQ.style.cssText = 'font-size: 0.76rem; color: var(--text-muted);';
+    perQ.textContent = perQLabel;
+    priceRow.append(price, perQ);
+
+    const minMax = document.createElement('div');
+    minMax.style.cssText = 'margin-top: 0.5rem; display: flex; gap: 0.75rem; font-size: 0.76rem; color: var(--text-muted);';
+    const minS = document.createElement('span');
+    minS.textContent = `${minLabel} \u20b9${Number(p.min_price).toLocaleString('en-IN')}`;
+    const maxS = document.createElement('span');
+    maxS.textContent = `${maxLabel} \u20b9${Number(p.max_price).toLocaleString('en-IN')}`;
+    minMax.append(minS, maxS);
+
+    card.append(cName, cSub, priceRow, minMax);
+    col.appendChild(card);
+    hContainer.appendChild(col);
+  });
+  document.getElementById('highlightSection').style.display = 'block';
+
+  // 4. Full price table
+  const tbody = document.getElementById('priceTableBody');
+  tbody.replaceChildren();
+  data.prices.forEach(p => {
+    const tr = document.createElement('tr');
+    const localCrop = (window.AgroIntelI18N) ? window.AgroIntelI18N.getCropName(p.commodity, curLang) : p.commodity;
+    const localDist = (window.AgroIntelI18N) ? window.AgroIntelI18N.getDistrictName(p.district, curLang) : p.district;
+
+    const cells = [
+      { text: localCrop, bold: true },
+      { text: p.variety },
+      { text: p.market, nowrap: true },
+      { text: localDist },
+      { text: `₹${Number(p.min_price).toLocaleString('en-IN')}`, right: true },
+      { text: `₹${Number(p.max_price).toLocaleString('en-IN')}`, right: true },
+      { text: `₹${Number(p.modal_price).toLocaleString('en-IN')}`, right: true, modal: true },
+      { text: p.arrival_date, nowrap: true },
+    ];
+    cells.forEach(c => {
+      const td = document.createElement('td');
+      let css = '';
+      if (c.right) css += 'text-align: right; ';
+      if (c.nowrap) css += 'white-space: nowrap; ';
+      if (c.modal) css += 'font-weight: 700; color: var(--emerald-500); background: rgba(16,185,129,0.04);';
+      if (css) td.style.cssText = css;
+      if (c.bold) {
+        const strong = document.createElement('strong');
+        strong.textContent = String(c.text);
+        td.appendChild(strong);
+      } else {
+        td.textContent = String(c.text);
+      }
+      tr.appendChild(td);
+    });
+    tbody.appendChild(tr);
+  });
+  document.getElementById('tableSection').style.display = 'block';
+}
+
 function searchCity() {
   const state = document.getElementById('stateSelect').value;
   const district = document.getElementById('districtSelect').value;
@@ -216,110 +385,7 @@ function searchCity() {
     .then(r => r.json())
     .then(data => {
       document.getElementById('loadingState').style.display = 'none';
-
-      if (!data.prices || data.prices.length === 0) {
-        document.getElementById('emptyState').style.display = 'block';
-        return;
-      }
-
-      // Status bar
-      const asOf = String(data.prices[0].arrival_date || '');
-      const cityTxt = String(data.city);
-      const stateTxt = String(data.state || '');
-      const statusCity = document.getElementById('statusCity');
-      statusCity.replaceChildren(createIcon('fa-city'), document.createTextNode(` ${cityTxt}${stateTxt ? ', ' + stateTxt : ''}`));
-      const statusCount = document.getElementById('statusCount');
-      statusCount.replaceChildren(createIcon('fa-boxes-stacked'), document.createTextNode(` ${data.count} commodities`));
-      const srcBadge = document.getElementById('statusSource');
-      srcBadge.className = 'badge-agro ' + (data.is_fallback ? 'badge-agro-amber' : 'badge-agro-cyan');
-      if (data.is_fallback) {
-        srcBadge.replaceChildren(createIcon('fa-clock'), document.createTextNode(` Rates as of ${asOf} (estimated)`));
-      } else {
-        srcBadge.replaceChildren(createIcon('fa-database'), document.createTextNode(` ${data.source} • ${asOf}`));
-      }
-
-      // Fallback notice
-      const notice = document.getElementById('fallbackNotice');
-      document.getElementById('fallbackDetail').textContent = data.is_fallback
-        ? `The Government of India (data.gov.in) feed could not be reached. Rates below are last-known or estimated values for ${cityTxt}${stateTxt ? ', ' + stateTxt : ''}, dated ${asOf}. Try again shortly — the live feed usually recovers within minutes.`
-        : '';
-      notice.style.display = data.is_fallback ? 'block' : 'none';
-      document.getElementById('statusBar').style.display = 'block';
-
-      // Highlight cards (top 6)
-      const highlights = data.prices.slice(0, 6);
-      const hContainer = document.getElementById('highlightCards');
-      hContainer.replaceChildren();
-      highlights.forEach(p => {
-        // Build with DOM APIs so API-sourced text (commodity/variety/market) can't inject HTML
-        const col = document.createElement('div');
-        col.className = 'col-sm-6 col-lg-4';
-        const card = document.createElement('div');
-        card.style.cssText = 'background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-lg); padding: 1.25rem; height: 100%; transition: transform 0.2s ease, box-shadow 0.2s ease;';
-        card.addEventListener('mouseover', () => { card.style.transform = 'translateY(-3px)'; card.style.boxShadow = 'var(--shadow-lg)'; });
-        card.addEventListener('mouseout', () => { card.style.transform = ''; card.style.boxShadow = ''; });
-        const cName = document.createElement('p');
-        cName.style.cssText = 'font-weight: 700; font-size: 0.92rem; color: var(--text-primary); margin-bottom: 0.35rem;';
-        cName.textContent = p.commodity;
-        const cSub = document.createElement('p');
-        cSub.style.cssText = 'font-size: 0.78rem; color: var(--text-muted); margin-bottom: 0.75rem;';
-        cSub.textContent = `${p.variety} • ${p.market}`;
-        const priceRow = document.createElement('div');
-        priceRow.style.cssText = 'display: flex; align-items: baseline; gap: 0.5rem;';
-        const price = document.createElement('span');
-        price.style.cssText = 'font-family: var(--font-display); font-weight: 800; font-size: 1.35rem; color: var(--emerald-500);';
-        price.textContent = `\u20b9${Number(p.modal_price).toLocaleString('en-IN')}`;
-        const perQ = document.createElement('span');
-        perQ.style.cssText = 'font-size: 0.76rem; color: var(--text-muted);';
-        perQ.textContent = 'per quintal';
-        priceRow.append(price, perQ);
-        const minMax = document.createElement('div');
-        minMax.style.cssText = 'margin-top: 0.5rem; display: flex; gap: 0.75rem; font-size: 0.76rem; color: var(--text-muted);';
-        const minS = document.createElement('span');
-        minS.textContent = `Min: \u20b9${Number(p.min_price).toLocaleString('en-IN')}`;
-        const maxS = document.createElement('span');
-        maxS.textContent = `Max: \u20b9${Number(p.max_price).toLocaleString('en-IN')}`;
-        minMax.append(minS, maxS);
-        card.append(cName, cSub, priceRow, minMax);
-        col.appendChild(card);
-        hContainer.appendChild(col);
-      });
-      document.getElementById('highlightSection').style.display = 'block';
-
-      // Full table
-      const tbody = document.getElementById('priceTableBody');
-      tbody.replaceChildren();
-      data.prices.forEach(p => {
-        const tr = document.createElement('tr');
-        const cells = [
-          { text: p.commodity, bold: true },
-          { text: p.variety },
-          { text: p.market, nowrap: true },
-          { text: p.district },
-          { text: `₹${Number(p.min_price).toLocaleString('en-IN')}`, right: true },
-          { text: `₹${Number(p.max_price).toLocaleString('en-IN')}`, right: true },
-          { text: `₹${Number(p.modal_price).toLocaleString('en-IN')}`, right: true, modal: true },
-          { text: p.arrival_date, nowrap: true },
-        ];
-        cells.forEach(c => {
-          const td = document.createElement('td');
-          let css = '';
-          if (c.right) css += 'text-align: right; ';
-          if (c.nowrap) css += 'white-space: nowrap; ';
-          if (c.modal) css += 'font-weight: 700; color: var(--emerald-500); background: rgba(16,185,129,0.04);';
-          if (css) td.style.cssText = css;
-          if (c.bold) {
-            const strong = document.createElement('strong');
-            strong.textContent = String(c.text);
-            td.appendChild(strong);
-          } else {
-            td.textContent = String(c.text);
-          }
-          tr.appendChild(td);
-        });
-        tbody.appendChild(tr);
-      });
-      document.getElementById('tableSection').style.display = 'block';
+      renderMarketData(data);
     })
     .catch(() => {
       document.getElementById('loadingState').style.display = 'none';
@@ -366,22 +432,24 @@ function detectMyLocation() {
             .slice(0, 4);
           actionable.forEach(x => {
             const cname = String(x.name).replace(/'/g, '');
-            container.innerHTML += `<button class="soil-preset-btn" style="font-size: 0.76rem; padding: 0.2rem 0.6rem; min-height: 28px;" onclick="nearbyCity('${cname}')">${x.name}</button>`;
+            const curLang = getCurLang();
+            const localCName = (window.AgroIntelI18N) ? window.AgroIntelI18N.getDistrictName(cname, curLang) : x.name;
+            container.innerHTML += `<button class="soil-preset-btn" style="font-size: 0.76rem; padding: 0.2rem 0.6rem; min-height: 28px;" onclick="nearbyCity('${cname}')">${localCName}</button>`;
           });
           if (actionable.length) document.getElementById('nearbyCol').style.display = 'block';
         }
       }).catch(() => {});
 
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> My Location';
+    btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> ' + ((window.AgroIntelI18N) ? window.AgroIntelI18N.t('My Location') : 'My Location');
   }, function() {
     btn.disabled = false;
-    btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> My Location';
+    btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> ' + ((window.AgroIntelI18N) ? window.AgroIntelI18N.t('My Location') : 'My Location');
     alert('Location access denied. Please search manually.');
   }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
 }
 
-// Map a city name to a district we have data for (exact → first-word → substring)
+// Map a city name to a district we have data for
 function findDistrictMatch(name) {
   const wanted = (name || '').toUpperCase().trim();
   if (!wanted) return null;
@@ -403,16 +471,32 @@ function findDistrictMatch(name) {
   return null;
 }
 
-// Nearby-city chip: select its state and closest district we have data for
+// Nearby-city chip handler
 function nearbyCity(name) {
   const m = findDistrictMatch(name);
   if (m) { loadDistrict(m.state, m.district); }
 }
 
+// Dynamic re-render on language change
+window.addEventListener('agrointel-language-changed', function() {
+  updateStateDropdownTranslations();
+  const curState = document.getElementById('stateSelect').value;
+  const curDist = document.getElementById('districtSelect').value;
+  if (curState) {
+    populateDistricts(curState, curDist);
+  }
+  updateQuickChips();
+  if (lastMarketData) {
+    renderMarketData(lastMarketData);
+  }
+});
+
 // Auto-load default district
 document.addEventListener('DOMContentLoaded', function() {
+  updateStateDropdownTranslations();
   document.getElementById('stateSelect').value = 'Karnataka';
   populateDistricts('Karnataka', 'UDUPI');
+  updateQuickChips();
   searchCity();
 });
 </script>

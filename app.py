@@ -887,14 +887,24 @@ def farmer_yield_prediction():
 @app.route('/farmer/rainfall_prediction', methods=['GET', 'POST'])
 def farmer_rainfall_prediction():
     result = None
+    sel_region = request.form.get('region', 'SOUTH INTERIOR KARNATAKA') if request.method == 'POST' else 'SOUTH INTERIOR KARNATAKA'
+    sel_month = request.form.get('month', 'JUL') if request.method == 'POST' else 'JUL'
     if request.method == 'POST':
         try:
             region = str(request.form.get('region', '')).strip()
             month = str(request.form.get('month', '')).strip()
 
+            # Normalize spelling variations to match IMD 115-Year historical dataset
+            SUBDIVISION_ALIASES = {
+                'MARATHWADA': 'MATATHWADA',
+                'RAYALASEEMA': 'RAYALSEEMA',
+                'ODISHA': 'ORISSA',
+            }
+            mapped_region = SUBDIVISION_ALIASES.get(region.upper(), region.upper())
+
             df = _get_rainfall_df()
             if df is not None:
-                state_data = df[df['SUBDIVISION'] == region]
+                state_data = df[df['SUBDIVISION'].str.upper() == mapped_region]
                 if not state_data.empty and month in state_data.columns:
                     avg_rainfall = state_data[month].mean()
                     if pd.notna(avg_rainfall):
@@ -904,7 +914,8 @@ def farmer_rainfall_prediction():
 
     states, districts_by_state = _location_choices()
     return render_template('rainfall_prediction.html', result=result,
-                           states=states, districts_by_state=districts_by_state)
+                           states=states, districts_by_state=districts_by_state,
+                           sel_region=sel_region, sel_month=sel_month)
 
 # Live Weather Forecast (page route — renders JS-driven page)
 @app.route('/farmer/weather_forecast', methods=['GET', 'POST'])

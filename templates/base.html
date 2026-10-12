@@ -82,10 +82,6 @@
           </div>
         </div>
 
-        {# Voice Assistant Nav Trigger — Desktop #}
-        <button type="button" class="agrointel-nav-voice-btn mr-2" onclick="window.AgroIntelVoice && window.AgroIntelVoice.toggle()" title="Voice Assistant / ಧ್ವನಿ ಸಹಾಯಕ" aria-label="Voice Assistant">
-          <i class="fas fa-microphone"></i>
-        </button>
 
         {# Theme Toggle — Desktop #}
         <div class="theme-switch-wrapper" title="Toggle Light / Dark Theme">
@@ -157,10 +153,6 @@
           </div>
         </div>
 
-        {# Voice Assistant Nav Trigger — Mobile #}
-        <button type="button" class="agrointel-nav-voice-btn mr-2" style="width: 32px; height: 32px; font-size: 0.82rem;" onclick="window.AgroIntelVoice && window.AgroIntelVoice.toggle()" aria-label="Voice Assistant">
-          <i class="fas fa-microphone"></i>
-        </button>
 
         {# Theme Toggle — Mobile #}
         <div class="theme-switch-wrapper mr-2">
@@ -358,9 +350,8 @@
     });
   </script>
 
-  {# ── Multilingual & Voice Assistant Scripts ── #}
+  {# ── Multilingual Translation Script ── #}
   <script src="{{ url_for('static_assets', path='js/agrointel-i18n.js') }}"></script>
-  <script src="{{ url_for('static_assets', path='js/agrointel-voice.js') }}"></script>
 
   {% block extra_scripts %}{% endblock %}
 </body>
