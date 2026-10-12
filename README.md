@@ -25,12 +25,11 @@
    - [Architectural Block Diagram](#architectural-block-diagram)
    - [Data Flow Diagrams (DFD Level 0, Level 1, Level 2)](#data-flow-diagrams)
    - [Request-Response Lifecycle](#request-response-lifecycle)
-5. [Core Predictive Modules (The 5 Machine Learning Models)](#5-core-predictive-modules-the-5-machine-learning-models)
+5. [Core Predictive Modules (The 4 Machine Learning Models)](#5-core-predictive-modules-the-4-machine-learning-models)
    - [Module 1: Crop Recommendation System (Random Forest Classifier)](#module-1-crop-recommendation-system-random-forest-classifier)
    - [Module 2: Fertilizer Advisory System (Decision Tree Classifier)](#module-2-fertilizer-advisory-system-decision-tree-classifier)
-   - [Module 3: Crop Price & Demand Predictor (Custom Decision Tree)](#module-3-crop-price--demand-predictor-custom-decision-tree)
-   - [Module 4: Crop Yield Forecast Engine (Random Forest Regressor)](#module-4-crop-yield-forecast-engine-random-forest-regressor)
-   - [Module 5: Rainfall Estimation & Monsoon Modeler (IMD Historical Time-Series Regressor)](#module-5-rainfall-estimation--monsoon-modeler-imd-historical-time-series-regressor)
+   - [Module 3: Crop Yield Forecast Engine (Random Forest Regressor)](#module-3-crop-yield-forecast-engine-random-forest-regressor)
+   - [Module 4: Rainfall Estimation & Monsoon Modeler (IMD Historical Time-Series Regressor)](#module-4-rainfall-estimation--monsoon-modeler-imd-historical-time-series-regressor)
 6. [Real-Time External Integrations & APIs](#6-real-time-external-integrations--apis)
    - [Live Weather Radar & Environmental Monitoring (Open-Meteo Integration)](#live-weather-radar--environmental-monitoring-open-meteo-integration)
    - [Real-Time Mandi Prices (Open Government Data Agmarknet API)](#real-time-mandi-prices-open-government-data-agmarknet-api)
@@ -55,9 +54,9 @@
 11. [Hardware, Software & System Requirements](#11-hardware-software--system-requirements)
 12. [Installation, Configuration & Execution Guide](#12-installation-configuration--execution-guide)
 13. [Sample Demo Credentials & Automated Verification](#13-sample-demo-credentials--automated-verification)
-14. [Guide-Recommended Future Architectural Roadmap](#14-guide-recommended-future-architectural-roadmap)
-    - [Multilingual Localization System (Kannada, Hindi & English i18n)](#multilingual-localization-system-kannada-hindi--english-i18n)
-    - [Voice-Activated Speech Recognition Assistant (Speech-to-Intent Engine)](#voice-activated-speech-recognition-assistant-speech-to-intent-engine)
+14. [Multilingual Localization & Hands-Free Voice Assistant Architecture](#14-multilingual-localization--hands-free-voice-assistant-architecture)
+    - [Multilingual Localization & Crop Language Module (Kannada, Hindi & English)](#multilingual-localization--crop-language-module-kannada-hindi--english)
+    - [Continuous Hands-Free Voice Assistant (Speech-to-Intent & TTS Engine)](#continuous-hands-free-voice-assistant-speech-to-intent--tts-engine)
 15. [Academic Viva Voce & Project Defense Q&A](#15-academic-viva-voce--project-defense-qa)
 16. [Academic References & Dataset Acknowledgments](#16-academic-references--dataset-acknowledgments)
 
@@ -67,7 +66,7 @@
 
 **AgroIntel** is an end-to-end agricultural decision-support web platform engineered to bridge the critical information gap faced by smallholder and commercial farmers in India. Traditional farming practices often rely on intuition, unverified historical practices, or fragmented advice, leading to sub-optimal crop selection, excessive or improper chemical fertilizer usage, unanticipated climate crop damage, and exploitation by middlemen in produce marketing.
 
-AgroIntel synthesizes **five dedicated, supervised Machine Learning (ML) models** trained on empirical agricultural datasets with **real-time government and meteorological APIs**. The platform operates completely deterministically and transparently without relying on non-deterministic generative models or hallucinating chatbot wrappers. Every recommendation is traceable to physical soil parameters (Nitrogen, Phosphorus, Potassium, pH), historical regional production datasets (Karnataka state records), 115 years of meteorological subdivisions records from the India Meteorological Department (IMD), live weather metrics from Open-Meteo, and live wholesale APMC mandi rates from Agmarknet (Ministry of Agriculture, Government of India).
+AgroIntel synthesizes **four dedicated, supervised Machine Learning (ML) models** trained on empirical agricultural datasets alongside **real-time government APMC market feeds and meteorological APIs**. The platform operates completely deterministically and transparently without relying on non-deterministic generative models or hallucinating chatbot wrappers. Every recommendation is traceable to physical soil parameters (Nitrogen, Phosphorus, Potassium, pH), historical regional production datasets (Karnataka state records), 115 years of meteorological subdivisions records from the India Meteorological Department (IMD), live weather metrics from Open-Meteo, and live wholesale APMC mandi rates from Agmarknet (Ministry of Agriculture, Government of India).
 
 Built using **Python 3**, **Flask**, **Scikit-Learn**, **Pandas**, **NumPy**, and **SQLite**, AgroIntel features a responsive glassmorphic frontend optimized for mobile and desktop screens, fortified by enterprise-grade access control, CSRF tokens, rate limiting, and salted password hashing.
 
@@ -133,9 +132,9 @@ AgroIntel resolves these challenges by providing a consolidated, web-based singl
 │  │ ROUTING & CONTROLLER LAYER (app.py)                                   │  │
 │  │ • /farmer/crop_recommendation       • /farmer/weather_forecast        │  │
 │  │ • /farmer/fertilizer_recommendation • /farmer/market_prices           │  │
-│  │ • /farmer/crop_prediction           • /admin/farmers & /admin/messages│  │
-│  │ • /farmer/yield_prediction          • /api/weather/coords & /city     │  │
-│  │ • /farmer/rainfall_prediction       • /api/market_prices & /nearby    │  │
+│  │ • /farmer/yield_prediction          • /admin/farmers & /admin/messages│  │
+│  │ • /farmer/rainfall_prediction       • /api/weather/coords & /city     │  │
+│  │ • /api/market_prices & /nearby      • /farmer/crop_prediction (redir) │  │
 │  └───────┬──────────────────────┬───────────────────────┬────────────────┘  │
 └──────────┼──────────────────────┼───────────────────────┼───────────────────┘
            │                      │                       │
@@ -148,13 +147,13 @@ AgroIntel resolves these challenges by providing a consolidated, web-based singl
 │   Classifier (Crops)│  │   (PK rowid)    │  │    - 7-Day WMO Forecast       │
 │ • Decision Tree     │  │ • admin         │  │ 2. data.gov.in (Agmarknet)    │
 │   Classifier (Fert) │  │ • contactus     │  │    - Live APMC Mandi Rates    │
-│ • Decision Tree     │  │                 │  │ 3. OpenStreetMap Nominatim    │
-│   Pickle (Prices)   │  │ Auto-migrating  │  │    - Reverse Geocoding        │
-│ • Random Forest     │  │ ephemeral/volume│  │ 4. Curated District Geo-Engine│
-│   Regressor (Yield) │  │ storage handler │  │    - 30 Karnataka Districts   │
-│ • IMD Time-Series   │  └─────────────────┘  │    - 60+ National Hubs        │
-│   Regressor (Rain)  │                       │    - Haversine Distance Calc  │
-└─────────────────────┘                       └───────────────────────────────┘
+│ • Random Forest     │  │                 │  │ 3. OpenStreetMap Nominatim    │
+│   Regressor (Yield) │  │ Auto-migrating  │  │    - Reverse Geocoding        │
+│ • IMD Time-Series   │  │ ephemeral/volume│  │ 4. Curated District Geo-Engine│
+│   Regressor (Rain)  │  │ storage handler │  │    - 30 Karnataka Districts   │
+│                     │  │                 │  │    - 60+ National Hubs        │
+│                     │  │                 │  │    - Haversine Distance Calc  │
+└─────────────────────┘  └─────────────────┘  └───────────────────────────────┘
 ```
 
 ### Data Flow Diagrams
@@ -164,7 +163,7 @@ AgroIntel resolves these challenges by providing a consolidated, web-based singl
              [ Soil, Climate, Location Inputs ]
 Farmer ───────────────────────────────────────────────► ┌─────────────┐
 User   ◄─────────────────────────────────────────────── │  AgroIntel  │
-             [ Crop, Fertilizer, Yield, Price Advice ] │   System    │
+             [ Crop, Fertilizer, Yield, Market Data ]   │   System    │
                                                         └─────────────┘
                                                                ▲
                                      Live APMC & Weather Feeds │
@@ -179,13 +178,12 @@ Farmer ─────────────────► [ 1.0 Authenticati
                           │   Validates user credentials against SQLite
                           ▼
                  [ 2.0 Feature Controller ]
-                  ├──► [ 2.1 Crop Model ] ──────► RandomForestClassifier ──► Best Crop
-                  ├──► [ 2.2 Fertilizer Model ] ► DecisionTreeClassifier  ──► Fertilizer
-                  ├──► [ 2.3 Price Model ] ─────► Traverses DT Pickle     ──► Top 5 Crops
-                  ├──► [ 2.4 Yield Model ] ─────► RandomForestRegressor   ──► Yield (Tonnes)
-                  ├──► [ 2.5 Rainfall Model ] ──► IMD 115-Yr Mean Filter  ──► Rain (mm)
-                  ├──► [ 2.6 Weather Engine ] ──► Open-Meteo REST API     ──► 7-Day Forecast
-                  └──► [ 2.7 Mandi Engine ] ────► Agmarknet API / DB      ──► APMC Prices
+                  ├──► [ 2.1 Crop Recommendation ] ─► RandomForestClassifier ──► Best Crop
+                  ├──► [ 2.2 Fertilizer Advisory ]  ─► DecisionTreeClassifier  ──► Fertilizer
+                  ├──► [ 2.3 Yield Forecast ]      ─► RandomForestRegressor   ──► Yield (Tonnes)
+                  ├──► [ 2.4 Rainfall Estimation ] ─► IMD 115-Yr Mean Filter  ──► Rain (mm)
+                  ├──► [ 2.5 Weather Engine ]      ─► Open-Meteo REST API     ──► 7-Day Forecast
+                  └──► [ 2.6 Mandi Engine ]        ─► Agmarknet API / DB      ──► Live APMC Prices
 ```
 
 ### Request-Response Lifecycle
@@ -199,7 +197,11 @@ Farmer ─────────────────► [ 1.0 Authenticati
 
 ## 5. Core Predictive Modules (The 5 Machine Learning Models)
 
-AgroIntel deploys five distinct supervised Machine Learning algorithms. Below is the exhaustive mathematical and operational documentation for each model.
+## 5. Core Predictive Modules (The 4 Machine Learning Models)
+
+AgroIntel deploys four distinct supervised Machine Learning algorithms alongside live APMC market data integration. Below is the exhaustive mathematical and operational documentation for each predictive model.
+
+> **Note on Decommissioning Legacy Crop Price Prediction:** In prior iterations, a static decision tree model was utilized for crop price estimation (`preprocessed2.csv` / `filetest2.pkl`). Due to static price distortion across districts, this was permanently decommissioned and replaced by **Live Mandi Prices** (Section 6), which ingests real-time official wholesale APMC commodity rates from Agmarknet (`data.gov.in`) with live 646-district fallback. Any legacy URL requests to `/farmer/crop_prediction` seamlessly redirect with HTTP 302 to the Crop Recommendation portal.
 
 ---
 
@@ -236,6 +238,7 @@ $$\vec{x} = [N, P, K, \text{Temperature}, \text{Humidity}, \text{pH}, \text{Rain
 - **PyArrow Compatibility:** Columns are converted to contiguous NumPy arrays via `.to_numpy(dtype=float)` before passing to `train_test_split`, preventing the fatal `TypeError: only integer scalar arrays can be converted to a scalar index` seen in newer Pandas/Scikit-Learn environments.
 - **District Auto-Prefill:** An integrated button calls `/api/weather/city/<district>` to auto-populate live local temperature and humidity.
 - **Soil Presets:** One-click presets (Paddy Rice, Maize Loam, Cotton Alluvial, Sugarcane, Coffee & Spice) initialize baseline N:P:K and pH values.
+- **Multilingual Crop Script Display:** Recommendations dynamically display native crop names in Kannada (e.g., ಭತ್ತ) and Hindi (e.g., चावल / धान) based on user locale selection.
 
 ---
 
@@ -262,34 +265,13 @@ $$\min_{j, t} \left[ \frac{N_L}{N_m} I_G(D_L) + \frac{N_R}{N_m} I_G(D_R) \right]
 Predictions assign the majority fertilizer label of the corresponding leaf node.
 
 #### Operational Workflow
-1. Farmer selects soil and crop type from dropdowns.
+1. Farmer selects soil and crop type from dropdowns (with localized crop labels).
 2. Soil moisture can be auto-derived from live meteorological radar (recent precipitation $>5\text{mm} \implies 75\%$, $>0\text{mm} \implies 55\%$, dry $\implies 35\%$).
 3. Decision tree traverses encoded vectors and displays the target fertilizer formulation accompanied by an explanatory nutrient deficit breakdown.
 
 ---
 
-### Module 3: Crop Price & Demand Predictor (Custom Decision Tree)
-
-| Parameter | Specification |
-|---|---|
-| **Portal Endpoint** | `GET /farmer/crop_prediction` & `POST /farmer/crop_prediction` |
-| **Model Serialization** | Pre-trained Serialized Model (`filetest2.pkl`, ~380 KB) |
-| **Execution Script** | `farmer/ML/crop_prediction/ZDecision_Tree_Model_Call.py` |
-| **Training Dataset** | `farmer/ML/crop_prediction/preprocessed2.csv` (11.55 MB) |
-| **Input Vector** | `[State_Name, District_Name, Season]` |
-| **Output Format** | Top 5 Recommended Crops with Demand Probabilities (%) |
-
-#### Execution Architecture
-1. **Cascading Dropdowns:** The frontend uses `state_district_crops_dropdown.js` (44 KB) containing all 33 Indian states and 646 districts.
-2. **Subprocess Traversal:** The Flask route invokes `ZDecision_Tree_Model_Call.py` via Python subprocess. The script loads `filetest2.pkl`, which implements custom `Question`, `Decision_Node`, and `Leaf` classes to traverse categorical branch conditions.
-3. **Probability Calculation:**
-   $$\text{Prob}(c) = \frac{\text{Count}(c)}{\sum_{i} \text{Count}(i)} \times 100\%$$
-4. **Subprocess Timeout & Fallback:** If the subprocess exceeds 15 seconds or encounters an OS-level file lock, the route catches `subprocess.TimeoutExpired` and returns a deterministic, regional seasonal fallback profile (e.g., Kharif season $\implies$ Rice, Maize, Cotton, Bajra, Groundnut).
-5. **Sample Trajectory Disclosure:** To maintain absolute academic transparency, the historical price comparison table includes a prominent sample disclosure banner clarifying that tabulated numbers represent historical APMC baselines, while the top prediction cards represent the live model output.
-
----
-
-### Module 4: Crop Yield Forecast Engine (Random Forest Regressor)
+### Module 3: Crop Yield Forecast Engine (Random Forest Regressor)
 
 | Parameter | Specification |
 |---|---|
@@ -310,7 +292,7 @@ Predictions assign the majority fertilizer label of the corresponding leaf node.
 
 ---
 
-### Module 5: Rainfall Estimation & Monsoon Modeler (IMD Historical Time-Series Regressor)
+### Module 4: Rainfall Estimation & Monsoon Modeler (IMD Historical Time-Series Regressor)
 
 | Parameter | Specification |
 |---|---|
@@ -701,16 +683,16 @@ http://127.0.0.1:5000
 ### Pre-Seeded Evaluation Accounts
 | Portal | Login URL | Username / Email | Password | Role & Permissions |
 |---|---|---|---|---|
-| **Farmer Portal** | `http://127.0.0.1:5000/login/farmer` | `farmer@agrointel.com` | `Demo@2026!` | Access to all 5 ML tools, Live Weather, and Mandi Prices |
+| **Farmer Portal** | `http://127.0.0.1:5000/login/farmer` | `farmer@agrointel.com` | `Demo@2026!` | Access to all 4 ML tools, Live Weather Radar, and Live Mandi Prices |
 | **Admin Portal** | `http://127.0.0.1:5000/login/admin` | `admin` | `Demo@2026!` | View registered farmers, review contact messages, delete records |
 
 ### Running the Automated Test Suites
-AgroIntel includes three automated verification suites:
+AgroIntel includes five automated verification suites covering security, data feeds, ML ground truth, and accessibility:
 
 ```bash
 # 1. Access Control & Security Regression Suite
 python test_access_control.py
-# Asserts that all 9 portal routes 302-redirect unauthenticated users and API routes return 401.
+# Asserts that all portal routes 302-redirect unauthenticated users and API routes return 401.
 
 # 2. Market Prices & 646 District Disambiguation Suite
 python test_market_prices.py
@@ -720,72 +702,77 @@ python test_market_prices.py
 python test_weather_resolution.py
 # Asserts that Mysore, Hassan, Bangalore, etc., resolve to exact coordinates without municipal corporation artifacts.
 
-# 4. ML Services & Regional Crop Differentiation Suite
+# 4. ML Services & Agronomic Ground Truth Suite
 python test_ml_services.py
-# Asserts that all 5 ML models execute with agronomic ground truth, distinct regional/seasonal crops, dynamic APMC pricing, and in-process Decision Tree inference.
+# Asserts that all 4 ML models execute with agronomic ground truth, valid NPK boundaries, and cached pipelines.
+
+# 5. Multilingual Localization, Crop Language Module & Voice Assistant Suite
+python test_multilingual_and_voice.py
+# Asserts multilingual translations (Kannada & Hindi), crop language dictionaries, continuous Web Speech API configuration, and hands-free voice loop.
 ```
 
 ---
 
-## 14. Guide-Recommended Future Architectural Roadmap
+## 14. Multilingual Localization & Hands-Free Voice Assistant Architecture
 
-In consultation with academic project guides and agricultural domain evaluators, the platform architecture includes detailed design roadmaps for two major accessibility expansions:
+To bridge the literacy barrier and support non-English speaking farmers across Karnataka and northern agricultural states, AgroIntel incorporates a production-grade **Multilingual Localization Engine** with a dedicated **Crop Language Module**, paired with a **Hands-Free Speech-to-Intent Voice Assistant**.
 
 ---
 
-### Multilingual Localization System (Kannada, Hindi & English i18n)
-
-Rural Indian farmers predominantly communicate in regional languages. To ensure widespread usability in Karnataka and across northern agricultural belts, a full **Internationalization (i18n)** layer is designed:
+### Multilingual Localization & Crop Language Module (Kannada, Hindi & English)
 
 ```
 AgroIntel/
-├── translations/
-│   ├── kn/LC_MESSAGES/messages.po  # Kannada translations (ಕನ್ನಡ)
-│   ├── hi/LC_MESSAGES/messages.po  # Hindi translations (हिंदी)
-│   └── en/LC_MESSAGES/messages.po  # English master template
-└── assets/js/i18n/
-    ├── kn.json                      # Client-side dropdown terms (e.g., Rice ➔ ಭತ್ತ)
-    ├── hi.json                      # Client-side dropdown terms (e.g., Rice ➔ चावल)
-    └── lang-switch.js               # Dynamic DOM language switcher
+└── assets/
+    └── js/
+        ├── agrointel-i18n.js        # Core translation engine, 40+ crop dictionary, DOM walker
+        └── agrointel-voice.js       # Continuous voice recognition, intent matcher, regional TTS
 ```
 
-#### Key Technical Components
-- **Flask-Babel Integration:** Wraps Jinja2 templates using standard `_('Text')` syntax.
-- **Client-Side Transliteration Dictionary:** Automatically maps dynamic crop and district names:
-  - *Rice* $\implies$ ಭತ್ತ (Kannada) / चावल (Hindi)
-  - *Urea* $\implies$ ಯೂರಿಯಾ (Kannada) / यूरिया (Hindi)
-  - *Mysore* $\implies$ ಮೈಸೂರು (Kannada) / मैसूर (Hindi)
-- **Session State Persistence:** Stores active choice in `session['lang']` and browser `localStorage`.
+#### Dedicated Crop Language Module
+Rural farmers frequently struggle to recognize English names of crops (such as *Paddy/Rice*, *Pigeonpeas*, *Chickpea*, *Cotton*, *Groundnut*). The crop language module permanently solves this:
+- **Comprehensive 40+ Crop Dictionary:** Maintains high-fidelity linguistic mappings across English, Kannada (ಕನ್ನಡ), and Hindi (हिन्दी) including pure phonetic spoken names for natural audio pronunciation.
+  - *Rice / Paddy:* **ಭತ್ತ** (Kannada) / **चावल / धान** (Hindi)
+  - *Chickpea:* **ಕಡಲೆ** (Kannada) / **चना** (Hindi)
+  - *Pigeonpeas:* **ತೊಗರಿ** (Kannada) / **अरहर / तुअर** (Hindi)
+  - *Cotton:* **ಹತ್ತಿ** (Kannada) / **कपास** (Hindi)
+  - *Groundnut:* **ಕಡಲೆಕಾಯಿ** (Kannada) / **मूंगफली** (Hindi)
+  - *Maize:* **ಮೆಕ್ಕೆಜೋಳ** (Kannada) / **मक्का** (Hindi)
+  - *Sugarcane:* **ಕಬ್ಬು** (Kannada) / **गन्ना** (Hindi)
+- **Zero Backend Degradation (Backend Value Preservation):** While `<select>` dropdown text (`option.textContent`) dynamically displays localized regional names, underlying `<option value="...">` attributes remain strictly in English (`Rice`, `Sandy`, `Kharif`). This guarantees that Scikit-Learn pipelines and LabelEncoders never encounter unseen label exceptions.
+- **Dynamic Recommendation Highlighting:** The Crop Recommendation output card renders prominent native script headers (`ಭತ್ತ (Rice)`) alongside contextual agronomic cultivation guidance in the farmer's chosen tongue.
+- **Automatic Language Persistence:** Language choice persists seamlessly across navigation via `localStorage` and synchronized cookie headers.
 
 ---
 
-### Voice-Activated Speech Recognition Assistant (Speech-to-Intent Engine)
-
-To serve illiterate or digitally non-fluent farmers, a hands-free **Speech-to-Intent Voice Assistant** is architected:
+### Continuous Hands-Free Voice Assistant (Speech-to-Intent & TTS Engine)
 
 ```
-[ Farmer Spoken Input ] (e.g., "ನನ್ನ ಜಮೀನಿಗೆ ಯಾವ ಬೆಳೆ ಸೂಕ್ತ?")
-          │
-          ▼
-[ Web Speech API: webkitSpeechRecognition (Language: kn-IN / hi-IN) ]
-          │
-          ▼
-[ Recognized Native Text Transcript ]
-          │
-          ▼
-[ Natural Language Intent Parser & Regex Classifier ]
-          ├── Intent: NAVIGATE ──► "crop recommendation" ──► Redirects to /farmer/crop_recommendation
-          ├── Intent: QUERY    ──► "Bangalore mandi price" ──► Triggers /api/market_prices?city=Bangalore
-          └── Intent: PREDICT  ──► "Rainfall in July"     ──► Auto-submits /farmer/rainfall_prediction
-          │
-          ▼
-[ Web SpeechSynthesis API: Text-to-Speech (TTS Audio Response in Kannada / Hindi) ]
+[ Farmer Spoken Audio (Mic) ]
+           │
+           ▼
+[ Web Speech API: webkitSpeechRecognition (continuous: true) ]
+           │
+           ├── Persistent Keepalive Loop (Gracefully absorbs 'no-speech' pauses)
+           ▼
+[ Real-Time Transcript in kn-IN / hi-IN / en-IN ]
+           │
+           ▼
+[ Regex Intent Classifier & Numerical Field Extractor ]
+           ├── Intent: RECOMMENDATION ──► Navigates & auto-fills N-P-K soil parameters
+           ├── Intent: WEATHER        ──► Triggers /api/weather/city/ with live radar
+           ├── Intent: MANDI_PRICES   ──► Queries APMC rates for mentioned district
+           └── Intent: READ_RESULTS   ──► Speaks active results aloud in native dialect
+           │
+           ▼
+[ Web SpeechSynthesis API (Text-to-Speech) ]
+           └── Native pronunciation using cached browser kn-IN / hi-IN voice engines
 ```
 
-#### Key Technical Components
-- **Client-Side Speech-to-Text (STT):** Uses browser-native Web Speech API with language tags `kn-IN`, `hi-IN`, and `en-IN` (zero third-party API costs).
-- **Offline / Low-Bandwidth Fallback:** Modular architecture allows drop-in integration of lightweight offline models like **Vosk** via a `/api/voice_command` POST endpoint.
-- **Auditory Feedback:** Responses are read back using `window.speechSynthesis` in the farmer's native dialect.
+#### Key Engineering Highlights
+1. **Elimination of the 1-Second Silence Shutdown:** Standard browser speech recognition terminates after 1 second of pause if configured in single-shot mode. AgroIntel configures `recognition.continuous = true` along with an intelligent `shouldBeListening` state keeper in `onend` and `onerror`. Short natural pauses no longer terminate the assistant; it remains active until the user explicitly toggles the microphone off.
+2. **Multi-Dialect Intent Parsing:** Recognizes natural spoken commands in Kannada (e.g., *"ಬೆಳೆ ಶಿಫಾರಸು"*, *"ಹವಾಮಾನ"*, *"ಮಂಡಿ ದರ"*), Hindi (e.g., *"फसल सिफारिश"*, *"मौसम"*, *"मंडी भाव"*), and English.
+3. **Auditory Audio Feedback:** Evaluated outputs (e.g., recommended crops and market prices) are voiced aloud back to the farmer using the browser's native `SpeechSynthesisUtterance` engine configured to the selected regional locale.
 
 ---
 

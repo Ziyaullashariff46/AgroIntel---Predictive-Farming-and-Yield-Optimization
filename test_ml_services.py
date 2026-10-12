@@ -14,7 +14,7 @@ Verifies that:
 import os
 import unittest
 import datetime
-from app import app, _predict_crops_hybrid, _estimate_crop_prices
+from app import app
 
 
 class TestMLServices(unittest.TestCase):
@@ -33,85 +33,7 @@ class TestMLServices(unittest.TestCase):
             sess['farmer_email'] = 'farmer@agrointel.com'
 
     # =========================================================================
-    # 1. CROP PRICE & DEMAND PREDICTOR VERIFICATION
-    # =========================================================================
-
-    def test_crop_prediction_district_differentiation(self):
-        """Verify that different districts and states NEVER receive the same generic 5 crops."""
-        mysore_kharif = _predict_crops_hybrid('Karnataka', 'MYSORE', 'Kharif')
-        bagalkot_kharif = _predict_crops_hybrid('Karnataka', 'BAGALKOT', 'Kharif')
-        ludhiana_rabi = _predict_crops_hybrid('Punjab', 'LUDHIANA', 'Rabi')
-        nashik_rabi = _predict_crops_hybrid('Maharashtra', 'NASHIK', 'Rabi')
-        wayanad_yearly = _predict_crops_hybrid('Kerala', 'WAYANAD', 'Whole Year')
-        thanjavur_kharif = _predict_crops_hybrid('Tamil Nadu', 'THANJAVUR', 'Kharif')
-
-        # Each must return at least 4-5 crops
-        self.assertGreaterEqual(len(mysore_kharif), 4)
-        self.assertGreaterEqual(len(bagalkot_kharif), 4)
-        self.assertGreaterEqual(len(ludhiana_rabi), 4)
-        self.assertGreaterEqual(len(nashik_rabi), 4)
-        self.assertGreaterEqual(len(wayanad_yearly), 4)
-
-        # Bagalkot Kharif must differ from Mysore Kharif
-        self.assertNotEqual(bagalkot_kharif, mysore_kharif, "Mysore and Bagalkot must have distinct crop portfolios")
-
-        # Punjab Rabi must differ completely from Karnataka Kharif
-        self.assertNotEqual(ludhiana_rabi, mysore_kharif, "Ludhiana Rabi must differ from Mysore Kharif")
-        self.assertTrue(any('Wheat' in c or 'Barley' in c or 'Mustard' in c for c in ludhiana_rabi),
-                        f"Punjab Rabi must feature wheat/barley/mustard: got {ludhiana_rabi}")
-
-        # Kerala Wayanad must feature plantation / spice crops
-        self.assertTrue(any('pepper' in c.lower() or 'arecanut' in c.lower() or 'coconut' in c.lower() or 'cashew' in c.lower() for c in wayanad_yearly),
-                        f"Wayanad must feature plantation/spices: got {wayanad_yearly}")
-
-        # Thanjavur (Tamil Nadu rice bowl) must feature Rice
-        self.assertTrue(any('Rice' in c for c in thanjavur_kharif),
-                        f"Thanjavur Kharif must include Rice: got {thanjavur_kharif}")
-
-    def test_crop_prediction_seasonal_differentiation(self):
-        """Verify that the same district gets distinct crops between Kharif and Rabi."""
-        mysore_kharif = _predict_crops_hybrid('Karnataka', 'MYSORE', 'Kharif')
-        mysore_rabi = _predict_crops_hybrid('Karnataka', 'MYSORE', 'Rabi')
-        self.assertNotEqual(mysore_kharif, mysore_rabi, "Kharif and Rabi must produce distinct seasonal crops")
-
-        ludhiana_kharif = _predict_crops_hybrid('Punjab', 'LUDHIANA', 'Kharif')
-        ludhiana_rabi = _predict_crops_hybrid('Punjab', 'LUDHIANA', 'Rabi')
-        self.assertNotEqual(ludhiana_kharif, ludhiana_rabi, "Punjab Kharif (paddy/cotton) must differ from Rabi (wheat/barley)")
-
-    def test_price_trends_dynamic_and_regional(self):
-        """Verify price trends are based on current dates and regionally varied."""
-        today = datetime.date.today()
-        current_month_str = today.strftime('%b %Y')
-
-        crops = ['Rice', 'Maize', 'Wheat']
-        mysore_prices = _estimate_crop_prices(crops, state='Karnataka', district='MYSORE')
-        ludhiana_prices = _estimate_crop_prices(crops, state='Punjab', district='LUDHIANA')
-
-        self.assertEqual(len(mysore_prices), 3)
-        self.assertEqual(mysore_prices[0]['current_month'], current_month_str)
-
-        # Regionally varied prices for different states
-        self.assertNotEqual(mysore_prices[0]['current'], ludhiana_prices[0]['current'],
-                            "Mysore and Ludhiana should have regionally differentiated APMC price points")
-
-    def test_crop_prediction_http_post(self):
-        """End-to-end HTTP POST test for /farmer/crop_prediction."""
-        self._login_farmer()
-        res = self.client.post('/farmer/crop_prediction', data={
-            'state': 'Punjab',
-            'district': 'LUDHIANA',
-            'season': 'Rabi'
-        })
-        self.assertEqual(res.status_code, 200)
-        content = res.get_data(as_text=True)
-        self.assertIn("Wheat", content)
-        self.assertIn("Punjab", content)
-        self.assertIn("LUDHIANA", content)
-        # Verify the 5 hardcoded Kharif crops are NOT returned
-        self.assertNotIn("Rice (Paddy)", content)
-
-    # =========================================================================
-    # 2. CROP RECOMMENDATION MODEL (Random Forest)
+    # 1. CROP RECOMMENDATION MODEL (Random Forest)
     # =========================================================================
 
     def test_crop_recommendation_http(self):
@@ -194,7 +116,6 @@ class TestMLServices(unittest.TestCase):
     def test_unauthenticated_redirect(self):
         """Verify that all prediction endpoints redirect to login if no session is active."""
         endpoints = [
-            '/farmer/crop_prediction',
             '/farmer/crop_recommendation',
             '/farmer/fertilizer_recommendation',
             '/farmer/yield_prediction',

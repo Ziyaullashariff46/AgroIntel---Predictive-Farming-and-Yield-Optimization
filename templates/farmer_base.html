@@ -26,7 +26,7 @@
 
     {# Navigation sections #}
     <nav class="sidebar-nav" aria-label="Prediction Tools">
-      <p class="sidebar-section-label">Prediction Suite</p>
+      <p class="sidebar-section-label" data-i18n="Prediction Suite">Prediction Suite</p>
 
       <a href="{{ url_for('farmer_crop_recommendation') }}"
          class="sidebar-nav-item {% if request.endpoint == 'farmer_crop_recommendation' %}active{% endif %}"
@@ -35,8 +35,8 @@
           <i class="fas fa-seedling" aria-hidden="true"></i>
         </div>
         <div class="sidebar-nav-text">
-          <span class="sidebar-nav-title">Crop Recommendation</span>
-          <span class="sidebar-nav-sub">Best crop for your soil</span>
+          <span class="sidebar-nav-title" data-i18n="Crop Recommendation">Crop Recommendation</span>
+          <span class="sidebar-nav-sub" data-i18n="Best crop for your soil">Best crop for your soil</span>
         </div>
       </a>
 
@@ -47,20 +47,8 @@
           <i class="fas fa-vial" aria-hidden="true"></i>
         </div>
         <div class="sidebar-nav-text">
-          <span class="sidebar-nav-title">Fertilizer Advisory</span>
-          <span class="sidebar-nav-sub">Optimal NPK formula</span>
-        </div>
-      </a>
-
-      <a href="{{ url_for('farmer_crop_prediction') }}"
-         class="sidebar-nav-item {% if request.endpoint == 'farmer_crop_prediction' %}active{% endif %}"
-         aria-label="Crop Price Predictor">
-        <div class="sidebar-nav-icon" style="background: rgba(245,158,11,0.12); color: var(--amber-500);">
-          <i class="fas fa-chart-line" aria-hidden="true"></i>
-        </div>
-        <div class="sidebar-nav-text">
-          <span class="sidebar-nav-title">Crop Price Predictor</span>
-          <span class="sidebar-nav-sub">Market price forecast</span>
+          <span class="sidebar-nav-title" data-i18n="Fertilizer Advisory">Fertilizer Advisory</span>
+          <span class="sidebar-nav-sub" data-i18n="Optimal NPK formula">Optimal NPK formula</span>
         </div>
       </a>
 
@@ -71,8 +59,8 @@
           <i class="fas fa-wheat-awn" aria-hidden="true"></i>
         </div>
         <div class="sidebar-nav-text">
-          <span class="sidebar-nav-title">Yield Harvest Forecast</span>
-          <span class="sidebar-nav-sub">Estimate output in tonnes</span>
+          <span class="sidebar-nav-title" data-i18n="Yield Harvest Forecast">Yield Harvest Forecast</span>
+          <span class="sidebar-nav-sub" data-i18n="Estimate output in tonnes">Estimate output in tonnes</span>
         </div>
       </a>
 
@@ -83,8 +71,8 @@
           <i class="fas fa-cloud-showers-heavy" aria-hidden="true"></i>
         </div>
         <div class="sidebar-nav-text">
-          <span class="sidebar-nav-title">Rainfall Estimation</span>
-          <span class="sidebar-nav-sub">Monthly rain forecast</span>
+          <span class="sidebar-nav-title" data-i18n="Rainfall Estimation">Rainfall Estimation</span>
+          <span class="sidebar-nav-sub" data-i18n="Monthly rain forecast">Monthly rain forecast</span>
         </div>
       </a>
 
@@ -95,12 +83,12 @@
           <i class="fas fa-sun" aria-hidden="true"></i>
         </div>
         <div class="sidebar-nav-text">
-          <span class="sidebar-nav-title">Weather Forecast</span>
-          <span class="sidebar-nav-sub">City weather conditions</span>
+          <span class="sidebar-nav-title" data-i18n="Weather Forecast">Weather Forecast</span>
+          <span class="sidebar-nav-sub" data-i18n="City weather conditions">City weather conditions</span>
         </div>
       </a>
 
-      <p class="sidebar-section-label mt-4">Market Intelligence</p>
+      <p class="sidebar-section-label mt-4" data-i18n="Market Intelligence">Market Intelligence</p>
 
       <a href="{{ url_for('farmer_market_prices') }}"
          class="sidebar-nav-item {% if request.endpoint == 'farmer_market_prices' %}active{% endif %}"
@@ -109,8 +97,8 @@
           <i class="fas fa-indian-rupee-sign" aria-hidden="true"></i>
         </div>
         <div class="sidebar-nav-text">
-          <span class="sidebar-nav-title">Live Mandi Prices</span>
-          <span class="sidebar-nav-sub">Real-time commodity rates</span>
+          <span class="sidebar-nav-title" data-i18n="Live Mandi Prices">Live Mandi Prices</span>
+          <span class="sidebar-nav-sub" data-i18n="Real-time commodity rates">Real-time commodity rates</span>
         </div>
       </a>
     </nav>
@@ -119,7 +107,7 @@
     <div class="sidebar-footer">
       <a href="{{ url_for('logout') }}" class="sidebar-logout" aria-label="Logout">
         <i class="fas fa-power-off" aria-hidden="true"></i>
-        <span>Logout</span>
+        <span data-i18n="Logout">Logout</span>
       </a>
     </div>
   </aside>

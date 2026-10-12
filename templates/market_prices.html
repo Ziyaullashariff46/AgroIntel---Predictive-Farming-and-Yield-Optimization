@@ -336,19 +336,17 @@ function detectMyLocation() {
     const lat = pos.coords.latitude, lon = pos.coords.longitude;
 
     // Reverse geocode to a state + district we actually have data for
-    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`)
+    fetch(`/api/reverse_geocode/${lat}/${lon}`)
       .then(r => r.json())
       .then(geo => {
-        const detectedState = geo.address.state || '';
-        const candidates = [geo.address.state_district, geo.address.county, geo.address.city, geo.address.town]
-          .map(v => (v || '').toUpperCase());
-        const local = (DISTRICTS_BY_STATE[detectedState] || []).find(d => candidates.includes(d));
-        const match = local ? { state: detectedState, district: local } : candidates.map(findDistrictMatch).find(m => m);
+        const detectedState = geo.state || '';
+        const place = (geo.place || '').toUpperCase();
+        const local = (DISTRICTS_BY_STATE[detectedState] || []).find(d => d.toUpperCase().includes(place) || place.includes(d.toUpperCase()));
+        const match = local ? { state: detectedState, district: local } : findDistrictMatch(place);
         if (match) {
           document.getElementById('stateSelect').value = match.state;
           populateDistricts(match.state, match.district);
         } else if (DISTRICTS_BY_STATE[detectedState]) {
-          // Town not in our data: list districts, prompt user — never silently search one
           document.getElementById('stateSelect').value = detectedState;
           populateDistricts(detectedState, '');
         }
@@ -380,7 +378,7 @@ function detectMyLocation() {
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-location-crosshairs"></i> My Location';
     alert('Location access denied. Please search manually.');
-  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+  }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
 }
 
 // Map a city name to a district we have data for (exact → first-word → substring)

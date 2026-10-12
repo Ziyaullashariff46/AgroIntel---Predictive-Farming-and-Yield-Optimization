@@ -7,24 +7,27 @@
   <title>{% block title %}AgroIntel | Intelligent Agriculture Platform{% endblock %}</title>
   <meta name="description" content="AgroIntel — ML-powered smart agriculture platform for crop recommendations, yield forecasting, and live market intelligence.">
 
-  <!-- Prevent theme flash -->
+  <!-- Prevent theme & language flash -->
   <script>
     (function() {
       var t = localStorage.getItem('agrointel-theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
       document.documentElement.setAttribute('data-theme', t);
+      var l = localStorage.getItem('agrointel-lang') || 'en';
+      document.documentElement.setAttribute('lang', l);
     })();
   </script>
 
   <!-- Fonts -->
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Inter:wght@400;500;600;700&family=Noto+Sans+Kannada:wght@400;500;600;700&family=Noto+Sans+Devanagari:wght@400;500;600;700&display=swap" rel="stylesheet">
   <!-- Icons -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
   <!-- Bootstrap -->
   <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@4.6.2/dist/css/bootstrap.min.css">
   <!-- AgroIntel Design System -->
   <link rel="stylesheet" href="{{ url_for('static_assets', path='css/modern-agrointel.css') }}">
+  <link rel="stylesheet" href="{{ url_for('static_assets', path='css/agrointel-multilingual.css') }}">
   {% block extra_head %}{% endblock %}
 </head>
 <body>
@@ -56,6 +59,34 @@
          This sits BEFORE the collapse so it never gets pushed off-screen.
          ════════════════════════════════════════════════════ #}
       <div class="navbar-right-controls d-none d-lg-flex">
+        {# Language Switcher Dropdown — Desktop #}
+        <div class="agrointel-lang-dropdown mr-2" title="Language / ಭಾಷೆ / भाषा">
+          <button type="button" class="agrointel-lang-btn" aria-label="Select Language">
+            <span class="lang-flag"><i class="fas fa-language"></i></span>
+            <span class="agrointel-lang-current-label">🇬🇧 EN</span>
+            <i class="fas fa-chevron-down lang-caret" aria-hidden="true"></i>
+          </button>
+          <div class="agrointel-lang-menu">
+            <button type="button" class="agrointel-lang-item active" data-lang="en">
+              <span>🇬🇧 English</span>
+              <i class="fas fa-check check-icon"></i>
+            </button>
+            <button type="button" class="agrointel-lang-item" data-lang="kn">
+              <span>🇮🇳 ಕನ್ನಡ (Kannada)</span>
+              <i class="fas fa-check check-icon"></i>
+            </button>
+            <button type="button" class="agrointel-lang-item" data-lang="hi">
+              <span>🇮🇳 हिन्दी (Hindi)</span>
+              <i class="fas fa-check check-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        {# Voice Assistant Nav Trigger — Desktop #}
+        <button type="button" class="agrointel-nav-voice-btn mr-2" onclick="window.AgroIntelVoice && window.AgroIntelVoice.toggle()" title="Voice Assistant / ಧ್ವನಿ ಸಹಾಯಕ" aria-label="Voice Assistant">
+          <i class="fas fa-microphone"></i>
+        </button>
+
         {# Theme Toggle — Desktop #}
         <div class="theme-switch-wrapper" title="Toggle Light / Dark Theme">
           <label class="theme-switch-label mb-0" aria-label="Toggle Light/Dark Theme">
@@ -75,10 +106,10 @@
           {# Landing / Public: 3 portal entry buttons #}
           <div class="nav-portal-btns">
             <a href="{{ url_for('login', role='farmer') }}" class="btn-agro-primary btn-sm">
-              <i class="fas fa-tractor" aria-hidden="true"></i> Farmer Portal
+              <i class="fas fa-tractor" aria-hidden="true"></i> <span data-i18n="Farmer Portal">Farmer Portal</span>
             </a>
             <a href="{{ url_for('login', role='admin') }}" class="btn-agro-admin btn-sm">
-              <i class="fas fa-user-shield" aria-hidden="true"></i> Admin
+              <i class="fas fa-user-shield" aria-hidden="true"></i> <span data-i18n="Admin">Admin</span>
             </a>
           </div>
 
@@ -94,16 +125,43 @@
           </div>
 
           <a href="{{ url_for('logout') }}" class="btn-logout-bold" title="Logout" aria-label="Logout">
-            <i class="fas fa-power-off" aria-hidden="true"></i> LOGOUT
+            <i class="fas fa-power-off" aria-hidden="true"></i> <span data-i18n="LOGOUT">LOGOUT</span>
           </a>
         {% endif %}
       </div>
 
       {# ════════════════════════════════════════════════════
-         MOBILE: Theme toggle + Logout (if logged in) + Hamburger
-         These 3 items always show in mobile header bar
+         MOBILE: Language + Voice + Theme toggle + Logout (if logged in) + Hamburger
+         These items always show in mobile header bar
          ════════════════════════════════════════════════════ #}
       <div class="navbar-mobile-right d-flex d-lg-none">
+        {# Language Switcher Dropdown — Mobile #}
+        <div class="agrointel-lang-dropdown mr-2">
+          <button type="button" class="agrointel-lang-btn" style="padding: 0.35rem 0.65rem; min-height: 32px; font-size: 0.78rem;" aria-label="Language">
+            <span class="agrointel-lang-current-label">🌐 EN</span>
+            <i class="fas fa-chevron-down lang-caret" style="font-size: 0.65rem;"></i>
+          </button>
+          <div class="agrointel-lang-menu">
+            <button type="button" class="agrointel-lang-item active" data-lang="en">
+              <span>🇬🇧 English</span>
+              <i class="fas fa-check check-icon"></i>
+            </button>
+            <button type="button" class="agrointel-lang-item" data-lang="kn">
+              <span>🇮🇳 ಕನ್ನಡ</span>
+              <i class="fas fa-check check-icon"></i>
+            </button>
+            <button type="button" class="agrointel-lang-item" data-lang="hi">
+              <span>🇮🇳 हिन्दी</span>
+              <i class="fas fa-check check-icon"></i>
+            </button>
+          </div>
+        </div>
+
+        {# Voice Assistant Nav Trigger — Mobile #}
+        <button type="button" class="agrointel-nav-voice-btn mr-2" style="width: 32px; height: 32px; font-size: 0.82rem;" onclick="window.AgroIntelVoice && window.AgroIntelVoice.toggle()" aria-label="Voice Assistant">
+          <i class="fas fa-microphone"></i>
+        </button>
+
         {# Theme Toggle — Mobile #}
         <div class="theme-switch-wrapper mr-2">
           <label class="theme-switch-label mb-0" aria-label="Toggle theme">
@@ -121,7 +179,7 @@
           <a href="{{ url_for('logout') }}" class="btn-logout-bold mr-2"
              style="min-width: 90px !important; padding: 0.45rem 0.9rem !important; font-size: 0.76rem !important;"
              aria-label="Logout">
-            <i class="fas fa-power-off" aria-hidden="true"></i> LOGOUT
+            <i class="fas fa-power-off" aria-hidden="true"></i> <span data-i18n="LOGOUT">LOGOUT</span>
           </a>
         {% endif %}
 
@@ -299,6 +357,10 @@
       });
     });
   </script>
+
+  {# ── Multilingual & Voice Assistant Scripts ── #}
+  <script src="{{ url_for('static_assets', path='js/agrointel-i18n.js') }}"></script>
+  <script src="{{ url_for('static_assets', path='js/agrointel-voice.js') }}"></script>
 
   {% block extra_scripts %}{% endblock %}
 </body>

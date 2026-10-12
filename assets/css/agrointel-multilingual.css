@@ -1,0 +1,559 @@
+/* ═══════════════════════════════════════════════════════════════════
+   AgroIntel Multilingual & Voice Assistant Styling
+   Kannada (ಕನ್ನಡ) • Hindi (हिन्दी) • English
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* Font Family adjustments for Kannada & Devanagari */
+:root[lang="kn"], [lang="kn"] {
+  --font-display: 'Noto Sans Kannada', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Noto Sans Kannada', 'Inter', system-ui, sans-serif;
+}
+
+:root[lang="hi"], [lang="hi"] {
+  --font-display: 'Noto Sans Devanagari', 'Plus Jakarta Sans', system-ui, sans-serif;
+  --font-body: 'Noto Sans Devanagari', 'Inter', system-ui, sans-serif;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   1. Language Switcher Dropdown (Navbar)
+   ─────────────────────────────────────────────────────────────────── */
+.agrointel-lang-dropdown {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+}
+
+.agrointel-lang-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.45rem 0.85rem;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  min-height: 38px;
+  line-height: 1;
+}
+
+.agrointel-lang-btn:hover,
+.agrointel-lang-btn:focus-visible {
+  background: var(--bg-elevated);
+  border-color: var(--emerald-500);
+  color: var(--emerald-400);
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.15);
+}
+
+.agrointel-lang-btn .lang-flag {
+  font-size: 0.95rem;
+  line-height: 1;
+}
+
+.agrointel-lang-btn .lang-caret {
+  font-size: 0.7rem;
+  opacity: 0.7;
+  transition: transform 0.2s ease;
+}
+
+.agrointel-lang-dropdown.open .lang-caret {
+  transform: rotate(180deg);
+}
+
+.agrointel-lang-menu {
+  position: absolute;
+  top: calc(100% + 8px);
+  right: 0;
+  min-width: 175px;
+  background: var(--bg-surface);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border: 1px solid var(--border-normal);
+  border-radius: var(--r-md);
+  box-shadow: var(--shadow-lg), 0 10px 30px rgba(0, 0, 0, 0.35);
+  padding: 0.35rem;
+  z-index: 1050;
+  display: none;
+  flex-direction: column;
+  gap: 0.2rem;
+  animation: agrointelFadeDown 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+}
+
+.agrointel-lang-dropdown.open .agrointel-lang-menu {
+  display: flex;
+}
+
+@keyframes agrointelFadeDown {
+  from {
+    opacity: 0;
+    transform: translateY(-6px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.agrointel-lang-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  padding: 0.5rem 0.8rem;
+  font-size: 0.84rem;
+  font-weight: 600;
+  color: var(--text-secondary);
+  background: transparent;
+  border: none;
+  border-radius: var(--r-sm);
+  cursor: pointer;
+  width: 100%;
+  text-align: left;
+  transition: all 0.15s ease;
+}
+
+.agrointel-lang-item:hover,
+.agrointel-lang-item:focus {
+  background: var(--bg-elevated);
+  color: var(--emerald-400);
+}
+
+.agrointel-lang-item.active {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--emerald-500);
+  font-weight: 700;
+}
+
+.agrointel-lang-item .check-icon {
+  font-size: 0.72rem;
+  opacity: 0;
+}
+
+.agrointel-lang-item.active .check-icon {
+  opacity: 1;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   2. Floating Voice Assistant Button (FAB)
+   ─────────────────────────────────────────────────────────────────── */
+.agrointel-voice-fab {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  z-index: 1030;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.75rem 1.25rem 0.75rem 1rem;
+  background: linear-gradient(135deg, #10b981 0%, #059669 50%, #06b6d4 100%);
+  color: #ffffff !important;
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: var(--r-full);
+  box-shadow: 0 8px 24px rgba(16, 185, 129, 0.35), 0 2px 8px rgba(0, 0, 0, 0.2);
+  cursor: pointer;
+  font-weight: 700;
+  font-size: 0.88rem;
+  letter-spacing: 0.01em;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  user-select: none;
+}
+
+.agrointel-voice-fab:hover {
+  transform: translateY(-3px) scale(1.02);
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.5), 0 4px 12px rgba(0, 0, 0, 0.25);
+  filter: brightness(1.05);
+}
+
+.agrointel-voice-fab:active {
+  transform: translateY(0) scale(0.98);
+}
+
+.agrointel-voice-fab .fab-mic-icon {
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.2);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.95rem;
+  flex-shrink: 0;
+  transition: background 0.2s ease;
+}
+
+.agrointel-voice-fab.listening {
+  background: linear-gradient(135deg, #ef4444 0%, #dc2626 50%, #f59e0b 100%);
+  box-shadow: 0 8px 28px rgba(239, 68, 68, 0.45);
+  animation: fabPulse 1.6s infinite ease-in-out;
+}
+
+.agrointel-voice-fab.listening .fab-mic-icon {
+  background: rgba(255, 255, 255, 0.3);
+  animation: micRotate 1.2s infinite alternate ease-in-out;
+}
+
+@keyframes fabPulse {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+  70% { box-shadow: 0 0 0 16px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+@keyframes micRotate {
+  0% { transform: scale(0.95); }
+  100% { transform: scale(1.15); }
+}
+
+/* Navbar Voice Icon Button */
+.agrointel-nav-voice-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--emerald-400);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 0.95rem;
+}
+
+.agrointel-nav-voice-btn:hover {
+  background: var(--bg-elevated);
+  border-color: var(--emerald-500);
+  transform: translateY(-1px);
+  color: var(--emerald-500);
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.2);
+}
+
+.agrointel-nav-voice-btn.listening {
+  color: #ef4444;
+  border-color: #ef4444;
+  background: rgba(239, 68, 68, 0.1);
+  animation: fabPulse 1.5s infinite;
+}
+
+/* ───────────────────────────────────────────────────────────────────
+   3. Voice Assistant Modal / Bottom Panel
+   ─────────────────────────────────────────────────────────────────── */
+.agrointel-voice-modal-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background: rgba(5, 15, 11, 0.65);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  z-index: 1060;
+  display: none;
+  opacity: 0;
+  transition: opacity 0.25s ease;
+}
+
+.agrointel-voice-modal-backdrop.active {
+  display: block;
+  opacity: 1;
+}
+
+.agrointel-voice-panel {
+  position: fixed;
+  bottom: 24px;
+  right: 24px;
+  width: min(440px, calc(100vw - 32px));
+  max-height: 85vh;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-normal);
+  border-radius: var(--r-xl);
+  box-shadow: 0 20px 48px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(16, 185, 129, 0.15);
+  z-index: 1070;
+  display: none;
+  flex-direction: column;
+  overflow: hidden;
+  transform: translateY(20px) scale(0.96);
+  opacity: 0;
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.agrointel-voice-panel.active {
+  display: flex;
+  transform: translateY(0) scale(1);
+  opacity: 1;
+}
+
+/* Panel Header */
+.voice-panel-header {
+  padding: 1rem 1.25rem;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid var(--border-subtle);
+  background: rgba(16, 185, 129, 0.05);
+}
+
+.voice-panel-title {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.voice-panel-lang-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.2rem 0.55rem;
+  border-radius: var(--r-full);
+  background: rgba(6, 182, 212, 0.15);
+  color: var(--cyan-400);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+}
+
+.voice-panel-close {
+  background: transparent;
+  border: none;
+  color: var(--text-muted);
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.15s ease;
+}
+
+.voice-panel-close:hover {
+  background: var(--bg-elevated);
+  color: var(--text-primary);
+}
+
+/* Panel Body */
+.voice-panel-body {
+  padding: 1.25rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  overflow-y: auto;
+  max-height: calc(85vh - 70px);
+}
+
+/* Visualizer Wave & Big Mic Button */
+.voice-visualizer-wrap {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin: 0.75rem 0 1rem;
+}
+
+.voice-main-mic-btn {
+  width: 76px;
+  height: 76px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, var(--emerald-500), var(--emerald-600));
+  border: 4px solid rgba(16, 185, 129, 0.25);
+  color: #ffffff;
+  font-size: 1.75rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 10px 25px rgba(16, 185, 129, 0.35);
+  transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+  position: relative;
+}
+
+.voice-main-mic-btn:hover {
+  transform: scale(1.06);
+  box-shadow: 0 12px 30px rgba(16, 185, 129, 0.5);
+}
+
+.voice-main-mic-btn.active {
+  background: linear-gradient(135deg, #ef4444, #dc2626);
+  border-color: rgba(239, 68, 68, 0.35);
+  box-shadow: 0 10px 30px rgba(239, 68, 68, 0.5);
+  animation: micRipples 1.8s infinite;
+}
+
+@keyframes micRipples {
+  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.6); }
+  70% { box-shadow: 0 0 0 22px rgba(239, 68, 68, 0); }
+  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+}
+
+/* Audio Waveform Bars */
+.voice-wave-bars {
+  display: flex;
+  align-items: center;
+  gap: 5px;
+  height: 28px;
+  margin-top: 1rem;
+}
+
+.voice-wave-bars .bar {
+  width: 4px;
+  height: 6px;
+  border-radius: 2px;
+  background: var(--text-muted);
+  opacity: 0.4;
+  transition: height 0.15s ease, background 0.15s ease;
+}
+
+.voice-wave-bars.active .bar {
+  background: var(--emerald-400);
+  opacity: 1;
+  animation: soundBarPulse 1s ease-in-out infinite alternate;
+}
+
+.voice-wave-bars.active .bar:nth-child(1) { animation-delay: 0.1s; }
+.voice-wave-bars.active .bar:nth-child(2) { animation-delay: 0.3s; }
+.voice-wave-bars.active .bar:nth-child(3) { animation-delay: 0.5s; }
+.voice-wave-bars.active .bar:nth-child(4) { animation-delay: 0.2s; }
+.voice-wave-bars.active .bar:nth-child(5) { animation-delay: 0.4s; }
+
+@keyframes soundBarPulse {
+  0% { height: 6px; }
+  100% { height: 26px; }
+}
+
+/* Status & Live Transcript */
+.voice-status-text {
+  font-weight: 700;
+  font-size: 0.95rem;
+  color: var(--text-primary);
+  margin-top: 0.5rem;
+  margin-bottom: 0.25rem;
+  text-align: center;
+}
+
+.voice-status-hint {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.85rem;
+  text-align: center;
+}
+
+.voice-transcript-bubble {
+  width: 100%;
+  padding: 0.75rem 1rem;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  font-size: 0.86rem;
+  color: var(--text-secondary);
+  min-height: 44px;
+  margin-bottom: 1rem;
+  line-height: 1.5;
+  display: flex;
+  align-items: center;
+}
+
+.voice-transcript-bubble.highlight {
+  border-color: var(--emerald-500);
+  background: rgba(16, 185, 129, 0.08);
+  color: var(--emerald-400);
+  font-weight: 600;
+}
+
+/* Quick commands chips */
+.voice-commands-section {
+  width: 100%;
+  background: var(--bg-input);
+  border: 1px solid var(--border-subtle);
+  border-radius: var(--r-md);
+  padding: 0.85rem;
+  margin-bottom: 0.85rem;
+}
+
+.voice-commands-title {
+  font-size: 0.76rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: var(--text-muted);
+  margin-bottom: 0.5rem;
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+}
+
+.voice-chips-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+
+.voice-cmd-chip {
+  padding: 0.25rem 0.6rem;
+  font-size: 0.74rem;
+  font-weight: 600;
+  border-radius: var(--r-sm);
+  background: var(--bg-surface);
+  border: 1px solid var(--border-subtle);
+  color: var(--text-secondary);
+  cursor: pointer;
+  transition: all 0.15s ease;
+}
+
+.voice-cmd-chip:hover {
+  background: rgba(16, 185, 129, 0.12);
+  color: var(--emerald-400);
+  border-color: var(--emerald-500);
+}
+
+/* Read Aloud Button in Result Cards */
+.btn-agro-speak {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  padding: 0.4rem 0.85rem;
+  font-size: 0.8rem;
+  font-weight: 700;
+  border-radius: var(--r-full);
+  background: rgba(6, 182, 212, 0.14);
+  color: var(--cyan-400);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  user-select: none;
+  margin-top: 0.5rem;
+}
+
+.btn-agro-speak:hover {
+  background: rgba(6, 182, 212, 0.25);
+  color: #ffffff;
+  border-color: var(--cyan-500);
+  transform: translateY(-1px);
+}
+
+.btn-agro-speak.speaking {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+  border-color: rgba(239, 68, 68, 0.4);
+  animation: fabPulse 1.5s infinite;
+}
+
+/* Mobile Adjustments */
+@media (max-width: 575.98px) {
+  .agrointel-voice-fab {
+    bottom: 16px;
+    right: 16px;
+    padding: 0.65rem 1rem 0.65rem 0.85rem;
+    font-size: 0.82rem;
+  }
+  
+  .agrointel-voice-panel {
+    bottom: 12px;
+    right: 12px;
+    width: calc(100vw - 24px);
+  }
+}

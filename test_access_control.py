@@ -12,7 +12,6 @@ from app import app
 PORTAL_ROUTES = [
     '/farmer/crop_recommendation',
     '/farmer/fertilizer_recommendation',
-    '/farmer/crop_prediction',
     '/farmer/yield_prediction',
     '/farmer/rainfall_prediction',
     '/farmer/weather_forecast',

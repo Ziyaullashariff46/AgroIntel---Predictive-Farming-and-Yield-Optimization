@@ -295,7 +295,7 @@ function detectPriceLocation() {
       alert('Location access denied. Please fill state and district manually.');
       document.getElementById('locStatusTitle').textContent = 'Live Location Auto-Detect';
     },
-    { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 }
   );
 }
 

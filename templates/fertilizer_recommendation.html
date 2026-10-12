@@ -110,9 +110,12 @@
           <option value="">Select a state first…</option>
         </select>
       </div>
-      <div class="col-md-4 d-flex align-items-end">
-        <button type="button" class="btn-agro-secondary w-100" id="weatherPrefillBtn" onclick="prefillWeather()" style="min-height: 48px;">
-          <i class="fas fa-cloud-sun"></i> Fetch District Weather
+      <div class="col-md-4 d-flex align-items-end" style="gap: 0.5rem;">
+        <button type="button" class="btn-agro-secondary" id="weatherPrefillBtn" onclick="prefillWeather()" style="flex: 1; min-height: 48px;">
+          <i class="fas fa-cloud-sun"></i> Fetch Weather
+        </button>
+        <button type="button" class="btn-agro-primary" id="locDetectBtn" onclick="detectLiveWeatherFert()" style="min-height: 48px;" title="Detect My Live Location">
+          <i class="fas fa-crosshairs"></i> My Location
         </button>
       </div>
     </div>
@@ -215,6 +218,7 @@ function onLocStateChange() {
 
 // Fill the climate inputs from live district weather (Open-Meteo, free)
 function prefillWeather() {
+  const state = document.getElementById('stateSelect').value;
   const district = document.getElementById('districtSelect').value;
   const btn = document.getElementById('weatherPrefillBtn');
   const note = document.getElementById('weatherPrefillNote');
@@ -224,11 +228,14 @@ function prefillWeather() {
   }
   btn.disabled = true;
   btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Fetching…';
-  fetch(`/api/weather/city/${encodeURIComponent(district)}`)
+  let url = `/api/weather/city/${encodeURIComponent(district)}`;
+  if (state) url += `?state=${encodeURIComponent(state)}`;
+
+  fetch(url)
     .then(r => r.json())
     .then(data => {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-cloud-sun"></i> Fetch District Weather';
+      btn.innerHTML = '<i class="fas fa-cloud-sun"></i> Fetch Weather';
       if (data.error || !data.current) {
         note.textContent = 'Weather unavailable right now — enter values manually.';
         return;
@@ -242,9 +249,60 @@ function prefillWeather() {
     })
     .catch(() => {
       btn.disabled = false;
-      btn.innerHTML = '<i class="fas fa-cloud-sun"></i> Fetch District Weather';
+      btn.innerHTML = '<i class="fas fa-cloud-sun"></i> Fetch Weather';
       note.textContent = 'Weather unavailable right now — enter values manually.';
     });
+}
+
+// Auto-detect GPS location and prefill climate metrics directly
+function detectLiveWeatherFert() {
+  const btn = document.getElementById('locDetectBtn');
+  const note = document.getElementById('weatherPrefillNote');
+  if (!navigator.geolocation) {
+    note.textContent = 'Geolocation is not supported by this browser.';
+    return;
+  }
+  btn.disabled = true;
+  btn.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+  note.textContent = 'Acquiring GPS location...';
+
+  navigator.geolocation.getCurrentPosition(function(pos) {
+    const lat = pos.coords.latitude.toFixed(5);
+    const lon = pos.coords.longitude.toFixed(5);
+    note.textContent = 'Loading live weather for your coordinates...';
+
+    fetch(`/api/weather/coords/${lat}/${lon}`)
+      .then(r => r.json())
+      .then(data => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-crosshairs"></i> My Location';
+        if (data.error || !data.current) {
+          note.textContent = 'Weather unavailable for this location — enter values manually.';
+          return;
+        }
+        const cur = data.current;
+        const rain = (data.forecast && data.forecast[0]) ? (data.forecast[0].rain_mm || 0) : 0;
+        const soilMoisture = rain > 5 ? 75 : rain > 0 ? 55 : 35;
+        document.getElementById('tFert').value = cur.temp;
+        document.getElementById('hFert').value = cur.humidity;
+        document.getElementById('smFert').value = soilMoisture;
+        note.textContent = `📍 ${cur.city}: ${cur.temp}°C, ${cur.humidity}% humidity.`;
+
+        if (cur.state && DISTRICTS_BY_STATE[cur.state]) {
+          document.getElementById('stateSelect').value = cur.state;
+          populateDistricts(cur.state);
+        }
+      })
+      .catch(() => {
+        btn.disabled = false;
+        btn.innerHTML = '<i class="fas fa-crosshairs"></i> My Location';
+        note.textContent = 'Unable to fetch weather for coordinates.';
+      });
+  }, function(err) {
+    btn.disabled = false;
+    btn.innerHTML = '<i class="fas fa-crosshairs"></i> My Location';
+    note.textContent = 'Location access denied or unavailable. Please pick a state and district manually.';
+  }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
 }
 
 // Auto-load a default region so the dropdown is instantly usable

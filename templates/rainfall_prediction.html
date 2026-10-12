@@ -267,16 +267,16 @@ function detectLocation() {
     document.getElementById('month').value = curMonth;
 
     // Reverse geocode to guess state
-    fetch(`https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&accept-language=en`)
+    fetch(`/api/reverse_geocode/${lat}/${lon}`)
       .then(r => r.json())
       .then(geo => {
-        const state = (geo.address && geo.address.state) ? geo.address.state.toLowerCase() : '';
+        const state = (geo.state) ? geo.state.toLowerCase() : '';
         const zone = ZONE_MAP[state];
         if (zone) {
           document.getElementById('region').value = zone;
           sub.textContent = `Zone: ${zone} | Month: ${curMonth}`;
         } else {
-          sub.textContent = `State: ${geo.address ? geo.address.state : 'Unknown'} — select zone manually`;
+          sub.textContent = `State: ${geo.state || 'Unknown'} — select zone manually`;
         }
       }).catch(() => { sub.textContent = 'Could not determine state — select zone manually'; });
 
@@ -316,7 +316,7 @@ function detectLocation() {
     sub.textContent = 'Please select a zone manually';
     btn.disabled = false;
     btn.innerHTML = '<i class="fas fa-crosshairs"></i> Detect';
-  }, { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 });
+  }, { enableHighAccuracy: false, timeout: 8000, maximumAge: 300000 });
 }
 
 // Auto-detect on page load

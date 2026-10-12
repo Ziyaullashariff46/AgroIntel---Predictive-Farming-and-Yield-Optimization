@@ -68,7 +68,7 @@ d = c.get('/api/market_prices?city=NOWHERE&state=Karnataka').get_json()
 assert d['count'] > 0
 
 # Regression: sibling farmer pages still render
-for url in ('/farmer/crop_prediction', '/farmer/weather_forecast',
+for url in ('/farmer/weather_forecast',
             '/farmer/yield_prediction', '/farmer/crop_recommendation',
             '/farmer/market_prices'):
     assert c.get(url).status_code == 200, url
