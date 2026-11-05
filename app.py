@@ -15,45 +15,54 @@ import bcrypt
 import secrets
 import hmac
 import time
+from datetime import timedelta
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 from dotenv import load_dotenv
 
-load_dotenv()
+# Explicitly load .env from BASE_DIR so it works regardless of caller working directory
+dotenv_path = os.path.join(BASE_DIR, '.env')
+if os.path.exists(dotenv_path):
+    load_dotenv(dotenv_path)
+else:
+    load_dotenv()
 
 app = Flask(__name__, template_folder='templates')
 
-# Session cookie hardening: HTTPS-only and cross-site-request-proof.
-# (HttpOnly is already Flask's default; these two close the deploy gaps.)
+# Session cookie hardening & persistence
 app.config.update(
     SESSION_COOKIE_SECURE=bool(os.getenv('FLASK_ENV') == 'production' or os.getenv('VERCEL')),
+    SESSION_COOKIE_HTTPONLY=True,
     SESSION_COOKIE_SAMESITE='Lax',
+    PERMANENT_SESSION_LIFETIME=timedelta(days=7),
 )
 
 # ═══════════════════════════════════════════════════════════════
-# SESSION SECRET — never fall back to a literal committed to the repo.
-# The whole access-control guard below rests on session cookies being
-# unforgeable; a published default key would let anyone mint an admin
-# cookie. Fail loudly outside serverless; on Vercel fall back to a per-boot
-# random key (still unforgeable) with a boot warning.
+# SESSION SECRET — Stable, unforgeable key across server restarts
 # ═══════════════════════════════════════════════════════════════
 app.secret_key = os.getenv('FLASK_SECRET_KEY')
 if not app.secret_key:
-    if os.getenv('FLASK_ENV') == 'production' and not os.getenv('VERCEL'):
-        raise RuntimeError(
-            'FLASK_SECRET_KEY is not set. Set it as an environment variable '
-            'before deploying — without it, session cookies can be forged.'
-        )
-    # Local dev and first-boot serverless: random per-process key. Sessions
-    # reset on restart, which is fine — cookies stay unforgeable either way.
-    app.secret_key = os.urandom(32)
-    if os.getenv('VERCEL'):
-        print('WARNING: FLASK_SECRET_KEY not set; using a per-boot random key. '
-              'Set it in Vercel -> Settings -> Environment Variables.',
-              file=sys.stderr)
+    # Use or create a persistent local secret key file so restarts don't invalidate user sessions
+    secret_file = os.path.join(BASE_DIR, '.flask_secret')
+    if os.path.exists(secret_file):
+        try:
+            with open(secret_file, 'r', encoding='utf-8') as f:
+                app.secret_key = f.read().strip()
+        except Exception:
+            pass
+    if not app.secret_key:
+        new_secret = secrets.token_hex(32)
+        try:
+            with open(secret_file, 'w', encoding='utf-8') as f:
+                f.write(new_secret)
+            app.secret_key = new_secret
+        except Exception:
+            app.secret_key = new_secret
 
 # ═══════════════════════════════════════════════════════════════
 # RATE LIMITER — Prevents brute-force login attacks
-# 5 login attempts per 15 minutes per IP address (in-memory, demo-safe)
+# In-memory store, suitable for single-process demo
 # ═══════════════════════════════════════════════════════════════
 limiter = Limiter(
     get_remote_address,
@@ -61,8 +70,6 @@ limiter = Limiter(
     default_limits=[],          # No global limit — only applied where decorated
     storage_uri="memory://",    # In-memory store, suitable for single-process demo
 )
-
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 
 # ═══════════════════════════════════════════════════════════════
 # DATABASE — path is overridable so a deploy can point at a mounted
@@ -465,18 +472,22 @@ def check_password(plain, hashed):
         pass
     return plain == hashed
 
-# CSRF PROTECTION
+# CSRF PROTECTION & SESSION LIFECYCLE
 
 @app.before_request
 def csrf_protect():
+    session.permanent = True
     if app.config.get("TESTING") and not app.config.get("WTF_CSRF_ENABLED", True):
         return None
     if request.method in ("POST", "PUT", "DELETE"):
         token = session.get("csrf_token")
         form_token = request.form.get("csrf_token", "")
-        if not token or not hmac.compare_digest(token, form_token):
-            flash("Session expired or invalid request. Please try again.", "error")
-            return redirect(request.referrer or url_for("index"))
+        if not token or not form_token or not hmac.compare_digest(token, form_token):
+            # Refresh token in session so the redirected page has a fresh valid token immediately
+            session["csrf_token"] = secrets.token_hex(32)
+            flash("Your session expired due to inactivity or a server restart. A fresh session has been loaded — please try again.", "warning")
+            target = request.referrer or request.path or url_for("index")
+            return redirect(target)
 
 def generate_csrf_token():
     if "csrf_token" not in session:
@@ -484,6 +495,15 @@ def generate_csrf_token():
     return session["csrf_token"]
 
 app.jinja_env.globals["csrf_token"] = generate_csrf_token
+
+@app.after_request
+def add_cache_control_headers(response):
+    """Prevent browsers from caching authentication pages with stale CSRF tokens."""
+    if request.path.startswith('/login') or request.path.startswith('/register'):
+        response.headers['Cache-Control'] = 'no-cache, no-store, must-revalidate, max-age=0'
+        response.headers['Pragma'] = 'no-cache'
+        response.headers['Expires'] = '0'
+    return response
 
 # NOMINATIM RATE LIMITER
 _last_nominatim_call = 0.0
@@ -660,22 +680,26 @@ def contact():
 
 # ═══════════════════════════════════════════════════════════════
 # Auth Routes: Login
-# Rate-limited: 5 POST attempts per 15 minutes per IP address
+# Rate-limited: 15 POST attempts per 15 minutes per IP address
 # ═══════════════════════════════════════════════════════════════
 @app.route('/login/<role>', methods=['GET', 'POST'])
-@limiter.limit("5 per 15 minutes", methods=["POST"])
+@limiter.limit("15 per 15 minutes", methods=["POST"])
 def login(role):
     if role == 'customer':
         flash('The buyer marketplace has been retired. Redirecting to Farmer Portal.', 'info')
         return redirect(url_for('login', role='farmer'))
 
     if request.method == 'POST':
-        email = request.form.get('email', '').strip()
+        login_input = request.form.get('email', '').strip()
         password = request.form.get('password', '')
 
         conn = get_db()
         if role == 'farmer':
-            user = conn.execute('SELECT * FROM farmerlogin WHERE email = ?', (email,)).fetchone()
+            # Case-insensitive email, mobile phone number, or farmer name matching
+            user = conn.execute(
+                'SELECT * FROM farmerlogin WHERE LOWER(email) = LOWER(?) OR phone_no = ? OR LOWER(farmer_name) = LOWER(?)',
+                (login_input, login_input, login_input)
+            ).fetchone()
             conn.close()
             if user and check_password(password, user['password']):
                 session['user_type'] = 'farmer'
@@ -685,7 +709,8 @@ def login(role):
                 flash(f"Welcome back, {user['farmer_name']}!", 'success')
                 return redirect(url_for('farmer_crop_recommendation'))
         elif role == 'admin':
-            user = conn.execute('SELECT * FROM admin WHERE admin_name = ?', (email,)).fetchone()
+            # Case-insensitive admin username matching
+            user = conn.execute('SELECT * FROM admin WHERE LOWER(admin_name) = LOWER(?)', (login_input,)).fetchone()
             conn.close()
             if user and check_password(password, user['admin_password']):
                 session['user_type'] = 'admin'
@@ -696,7 +721,7 @@ def login(role):
         else:
             conn.close()
 
-        flash('Invalid credentials. Please try again.', 'error')
+        flash('Invalid credentials. Please check your email/username and password.', 'error')
     return render_template('login.html', role=role)
 
 
@@ -706,14 +731,14 @@ def login(role):
 # defaults only — not required from the user (data minimisation)
 # ═══════════════════════════════════════════════════════════════
 @app.route('/register/<role>', methods=['GET', 'POST'])
-@limiter.limit("10 per hour", methods=["POST"])
+@limiter.limit("20 per hour", methods=["POST"])
 def register(role):
     if role == 'customer':
         return redirect(url_for('register', role='farmer'))
 
     if request.method == 'POST':
         name     = request.form.get('name', '').strip()
-        email    = request.form.get('email', '').strip()
+        email    = request.form.get('email', '').strip().lower()
         phone    = request.form.get('phone', '').strip()
         password = request.form.get('password', '')
         confirm  = request.form.get('confirm_password', '')
@@ -737,8 +762,8 @@ def register(role):
 
         conn = get_db()
         if role == 'farmer':
-            # Check duplicate email
-            existing = conn.execute('SELECT 1 FROM farmerlogin WHERE email = ?', (email,)).fetchone()
+            # Check duplicate email (case-insensitive)
+            existing = conn.execute('SELECT 1 FROM farmerlogin WHERE LOWER(email) = LOWER(?)', (email,)).fetchone()
             if existing:
                 conn.close()
                 flash('An account with this email already exists. Please log in.', 'error')
