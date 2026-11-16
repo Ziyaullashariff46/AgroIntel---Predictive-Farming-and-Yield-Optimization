@@ -729,9 +729,14 @@ def require_login():
     This runs BEFORE every route handler, so no individual check is needed.
     """
     path = request.path
-    if path.startswith('/api/'):
-        # JSON endpoints back the farmer pages only — return 401, not a redirect,
-        # so fetch() callers get a parseable error instead of a login page.
+    # Protected JSON endpoints that spend external quota and require authentication
+    PROTECTED_API_PREFIXES = (
+        '/api/weather/',
+        '/api/nearby_cities/',
+        '/api/reverse_geocode/',
+        '/api/market_prices',
+    )
+    if any(path.startswith(prefix) for prefix in PROTECTED_API_PREFIXES):
         if session.get('user_type') not in ('farmer', 'admin'):
             return jsonify({'error': 'Authentication required'}), 401
     elif path.startswith('/farmer/'):
@@ -748,6 +753,11 @@ def require_login():
 @app.route('/assets/<path:path>')
 def static_assets(path):
     return send_from_directory(os.path.join(BASE_DIR, 'assets'), path)
+
+# Vercel serverless function fallback route
+@app.route('/api/index')
+def vercel_entrypoint():
+    return redirect(url_for('index'))
 
 # Main Home Page
 @app.route('/')
