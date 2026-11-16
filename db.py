@@ -11,12 +11,31 @@ import urllib.parse
 import ssl
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.getenv('DB_PATH', os.path.join(BASE_DIR, 'agrointel.db'))
 DATABASE_URL = os.getenv('DATABASE_URL')
 
 
 def is_postgres():
     return bool(DATABASE_URL and (DATABASE_URL.startswith('postgresql://') or DATABASE_URL.startswith('postgres://')))
+
+
+def get_db_file():
+    """Return appropriate SQLite database path, copying to /tmp for Vercel ephemeral write access."""
+    if os.getenv('DB_PATH'):
+        return os.getenv('DB_PATH')
+    if os.getenv('VERCEL') and not is_postgres():
+        tmp_db = os.path.join('/tmp', 'agrointel.db')
+        bundled_db = os.path.join(BASE_DIR, 'agrointel.db')
+        if not os.path.exists(tmp_db) and os.path.exists(bundled_db):
+            try:
+                import shutil
+                shutil.copyfile(bundled_db, tmp_db)
+            except Exception:
+                pass
+        return tmp_db
+    return os.path.join(BASE_DIR, 'agrointel.db')
+
+
+DB_FILE = get_db_file()
 
 
 class PostgresRow(dict):
@@ -128,7 +147,7 @@ def get_db():
             file=sys.stderr
         )
 
-    conn = sqlite3.connect(DB_FILE)
+    conn = sqlite3.connect(get_db_file())
     conn.row_factory = sqlite3.Row
     return conn
 
@@ -189,4 +208,4 @@ def ensure_db():
             conn.cursor().executescript(schema)
             conn.commit()
         conn.close()
-        return DB_FILE
+        return get_db_file()

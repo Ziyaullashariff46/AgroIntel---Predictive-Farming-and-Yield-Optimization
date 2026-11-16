@@ -36,5 +36,7 @@ jobs:
           python seed_sample_users.py
 
       - name: Run test suite with pytest
+        env:
+          FLASK_SECRET_KEY: test_secret_key_ci_environment_random_token_12345
         run: |
           pytest tests/ -v

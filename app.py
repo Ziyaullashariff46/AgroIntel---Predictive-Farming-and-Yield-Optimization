@@ -41,18 +41,32 @@ app.config.update(
 # ═══════════════════════════════════════════════════════════════
 # SESSION SECRET — Stable, unforgeable key across server restarts
 # ═══════════════════════════════════════════════════════════════
-# Fail-fast security check: Never run in production/Vercel with missing or placeholder keys
+# Fail-fast security check: Never run in production/Vercel with known placeholder keys
+flask_secret = os.getenv('FLASK_SECRET_KEY')
+
+if flask_secret and flask_secret.strip() in ('agrointel_production_secret_key_2026_xyz', 'agrointel_secret_key_2026', 'change_this_in_production'):
+    raise RuntimeError(
+        "CRITICAL SECURITY CONFIGURATION ERROR: The example placeholder key "
+        f"'{flask_secret}' cannot be used in production or Vercel. "
+        "Set FLASK_SECRET_KEY to a secure random string (e.g., generated with: python -c \"import secrets; print(secrets.token_hex(32))\")."
+    )
+
 if os.getenv('VERCEL') or os.getenv('FLASK_ENV') == 'production':
-    app.secret_key = os.getenv('FLASK_SECRET_KEY')
-    if not app.secret_key or app.secret_key.strip() == 'agrointel_production_secret_key_2026_xyz':
-        raise RuntimeError(
-            "CRITICAL SECURITY CONFIGURATION ERROR: FLASK_SECRET_KEY environment variable "
-            "must be set to a secure, randomly generated string in production/Vercel deployment. "
-            "Do not use default or example keys."
+    if flask_secret:
+        app.secret_key = flask_secret.strip()
+    else:
+        # Generate an ephemeral cryptographically secure 256-bit token so Vercel boots safely
+        app.secret_key = secrets.token_hex(32)
+        print(
+            "NOTICE: FLASK_SECRET_KEY environment variable is not set in Vercel settings. "
+            "A secure random 256-bit key has been generated for this serverless instance. "
+            "For session continuity across cold starts, configure FLASK_SECRET_KEY in Vercel settings.",
+            file=sys.stderr
         )
 else:
-    app.secret_key = os.getenv('FLASK_SECRET_KEY')
-    if not app.secret_key or app.secret_key.strip() == 'agrointel_production_secret_key_2026_xyz':
+    if flask_secret:
+        app.secret_key = flask_secret.strip()
+    else:
         # Use or create a persistent local secret key file so restarts don't invalidate user sessions
         secret_file = os.path.join(BASE_DIR, '.flask_secret')
         if os.path.exists(secret_file):
@@ -61,7 +75,7 @@ else:
                     app.secret_key = f.read().strip()
             except Exception:
                 pass
-        if not app.secret_key or app.secret_key.strip() == 'agrointel_production_secret_key_2026_xyz':
+        if not app.secret_key:
             new_secret = secrets.token_hex(32)
             try:
                 with open(secret_file, 'w', encoding='utf-8') as f:
