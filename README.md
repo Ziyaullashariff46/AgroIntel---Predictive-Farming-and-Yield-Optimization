@@ -66,9 +66,9 @@
 
 **AgroIntel** is an end-to-end agricultural decision-support web platform engineered to bridge the critical information gap faced by smallholder and commercial farmers in India. Traditional farming practices often rely on intuition, unverified historical practices, or fragmented advice, leading to sub-optimal crop selection, excessive or improper chemical fertilizer usage, unanticipated climate crop damage, and exploitation by middlemen in produce marketing.
 
-AgroIntel synthesizes **four dedicated, supervised Machine Learning (ML) models** trained on empirical agricultural datasets alongside **real-time government APMC market feeds and meteorological APIs**. The platform operates completely deterministically and transparently without relying on non-deterministic generative models or hallucinating chatbot wrappers. Every recommendation is traceable to physical soil parameters (Nitrogen, Phosphorus, Potassium, pH), historical regional production datasets (Karnataka state records), 115 years of meteorological subdivisions records from the India Meteorological Department (IMD), live weather metrics from Open-Meteo, and live wholesale APMC mandi rates from Agmarknet (Ministry of Agriculture, Government of India).
+AgroIntel synthesizes **three dedicated, supervised Machine Learning (ML) models** trained on empirical agricultural datasets alongside a **115-year historical climatological baseline engine, real-time government APMC market feeds, and meteorological APIs**. The platform operates completely deterministically and transparently without relying on non-deterministic generative models or hallucinating chatbot wrappers. Every recommendation is traceable to physical soil parameters (Nitrogen, Phosphorus, Potassium, pH), historical regional production datasets (Karnataka state records), 115 years of meteorological subdivisions records from the India Meteorological Department (IMD), live weather metrics from Open-Meteo, and live wholesale APMC mandi rates from Agmarknet (Ministry of Agriculture, Government of India).
 
-Built using **Python 3**, **Flask**, **Scikit-Learn**, **Pandas**, **NumPy**, and **SQLite**, AgroIntel features a responsive glassmorphic frontend optimized for mobile and desktop screens, fortified by enterprise-grade access control, CSRF tokens, rate limiting, and salted password hashing.
+Built using **Python 3**, **Flask**, **Scikit-Learn**, **Pandas**, **NumPy**, and **PostgreSQL / SQLite**, AgroIntel features a responsive glassmorphic frontend optimized for mobile and desktop screens, fortified by multi-layered access control, CSRF tokens, composite account/IP rate limiting, and salted password hashing.
 
 ---
 
@@ -89,17 +89,17 @@ AgroIntel resolves these challenges by providing a consolidated, web-based singl
 ## 3. Project Objectives & Scope
 
 ### Primary Objectives
-- **Soil-Specific Crop Selection:** Train and deploy a high-accuracy Random Forest Classifier capable of evaluating 7 agro-climatic parameters to recommend the single most suitable crop among 22 distinct categories.
-- **Nutrient-Targeted Fertilizer Advisory:** Develop a Decision Tree Classifier that takes soil macro-nutrients, soil moisture, and current crop type into account to recommend precise commercial fertilizer formulations.
-- **Historical Yield Forecasting:** Construct an ensemble Random Forest Regressor trained on regional multi-year production data to forecast crop harvest output in tonnes based on cultivated acreage.
-- **Precipitation & Monsoon Estimation:** Implement a historical time-series regression module utilizing 114+ years (1901–2015) of IMD subdivision records to establish expected monthly rainfall baselines.
-- **Live Market & Environmental Ingestion:** Integrate live APMC mandi wholesale rates via the Government of India Open Government Data platform (`data.gov.in`) and 7-day live weather radar via Open-Meteo.
-- **Robust Access Security & Usability:** Protect farmer data using session-level route authorization, bcrypt hashing, rate limiting, and a responsive dual-theme user interface.
+- **Soil-Specific Crop Selection:** Train and deploy an ensemble Random Forest Classifier evaluating 7 agro-climatic parameters to recommend the most suitable crop with class probabilities and out-of-range warnings.
+- **Nutrient-Targeted Fertilizer Advisory:** Develop a Decision Tree Classifier that takes soil macro-nutrients, soil moisture, and current crop type into account to recommend targeted commercial fertilizer categories.
+- **Historical Yield Forecasting:** Construct an ensemble Random Forest Regressor trained on regional multi-year production data to forecast crop harvest output based on cultivated acreage.
+- **Precipitation & Climatological Estimation:** Implement a historical baseline module utilizing 115 years (1901–2015) of IMD subdivision records to establish expected monthly rainfall averages.
+- **Live Market & Environmental Ingestion:** Integrate live APMC mandi wholesale rates via the Government of India Open Government Data platform (`data.gov.in`) with transparent benchmark snapshot labeling and 7-day live weather radar via Open-Meteo.
+- **Robust Access Security & Usability:** Protect farmer data using session-level route authorization, bcrypt hashing, composite rate limiting, and a responsive dual-theme user interface.
 
 ### Project Scope
 - **Target Audience:** Farmers, agricultural extension officers, researchers, and APMC market analysts.
 - **Geographical Focus:** National coverage across all 33 Indian states and 646 districts, with specialized localized granularity and coordinates for all 30 districts of Karnataka.
-- **Deployment Profile:** Standalone Flask web application requiring zero commercial cloud licenses, functioning out-of-the-box in local, networked, or serverless production environments.
+- **Deployment Profile:** Flask web application supporting both local zero-configuration SQLite for academic demonstration and hosted PostgreSQL (Neon, Supabase) for serverless cloud environments.
 
 ---
 
@@ -195,13 +195,11 @@ Farmer ─────────────────► [ 1.0 Authenticati
 
 ---
 
-## 5. Core Predictive Modules (The 5 Machine Learning Models)
+## 5. Core Predictive Modules (3 Machine Learning Models & 1 Historical Climatology Engine)
 
-## 5. Core Predictive Modules (The 4 Machine Learning Models)
+AgroIntel deploys three distinct supervised Machine Learning algorithms alongside a 115-year historical climatological baseline engine and live APMC market data integration. Below is the exhaustive mathematical and operational documentation for each predictive module.
 
-AgroIntel deploys four distinct supervised Machine Learning algorithms alongside live APMC market data integration. Below is the exhaustive mathematical and operational documentation for each predictive model.
-
-> **Note on Decommissioning Legacy Crop Price Prediction:** In prior iterations, a static decision tree model was utilized for crop price estimation (`preprocessed2.csv` / `filetest2.pkl`). Due to static price distortion across districts, this was permanently decommissioned and replaced by **Live Mandi Prices** (Section 6), which ingests real-time official wholesale APMC commodity rates from Agmarknet (`data.gov.in`) with live 646-district fallback. Any legacy URL requests to `/farmer/crop_prediction` seamlessly redirect with HTTP 302 to the Crop Recommendation portal.
+> **In-Process Decision Tree & Legacy Route Support:** The regional seasonal decision tree (`filetest2.pkl`) runs directly in-process (~5ms latency) without spawning external subprocesses, ensuring compatibility with serverless environments. If a queried district is not present in the historical decision tree, a curated seasonal basket is served and transparently labeled as a reference fallback (`is_fallback: True`).
 
 ---
 
@@ -211,12 +209,13 @@ AgroIntel deploys four distinct supervised Machine Learning algorithms alongside
 |---|---|
 | **Portal Endpoint** | `GET /farmer/crop_recommendation` & `POST /farmer/crop_recommendation` |
 | **Algorithm Type** | Supervised Ensemble Classification — Random Forest Classifier |
-| **Number of Estimators** | 100 Decision Trees |
+| **Number of Estimators** | 100 Decision Trees (Serialized offline as `crop_model.joblib`) |
 | **Splitting Criterion** | Information Gain via Entropy: $H(S) = -\sum_{i=1}^{c} p_i \log_2(p_i)$ |
-| **Training Dataset** | `farmer/ML/crop_recommendation/Crop_recommendation.csv` (146 KB) |
+| **Training Dataset** | Atharva Inamdar agricultural dataset (`Crop_recommendation.csv`, 146 KB, 2,200 rows) |
 | **Dataset Dimensions** | 2,200 instances $\times$ 8 attributes |
 | **Train / Test Split** | 80% Training (1,760 samples), 20% Testing (440 samples) |
-| **Validation Metric** | Test Accuracy: **99.32%** |
+| **Validation Metric** | Holdout Test Accuracy: **99.32%** |
+| **Accuracy Scope Note** | The 99.32% accuracy indicates mathematical separability on synthetic/augmented feature clusters under stratified split conditions, rather than multi-season open field trials. In real agricultural deployment, micro-drainage and seed health also govern crop success. |
 | **Target Classes (22)** | *Rice, Maize, Chickpea, Kidneybeans, Pigeonpeas, Mothbeans, Mungbean, Blackgram, Lentil, Pomegranate, Banana, Mango, Grapes, Watermelon, Muskmelon, Apple, Orange, Papaya, Coconut, Cotton, Jute, Coffee* |
 
 #### Mathematical Foundation
@@ -224,21 +223,16 @@ The Random Forest Classifier builds an ensemble of $B = 100$ decorrelated decisi
 $$\hat{C}_{\text{rf}}(x) = \text{majority vote}\left\{ \hat{C}_b(x) \right\}_{b=1}^{B}$$
 At each candidate split, a random subset of $m = \lfloor \sqrt{p} \rfloor = \lfloor \sqrt{7} \rfloor = 2$ features is considered, ensuring that individual dominant features (like Nitrogen or Rainfall) do not force identical tree structures, thereby dramatically reducing variance without increasing bias.
 
-#### Input Feature Vector
+#### Input Feature Vector & Domain Sanity Checks
 $$\vec{x} = [N, P, K, \text{Temperature}, \text{Humidity}, \text{pH}, \text{Rainfall}]$$
 - **$N$ (Nitrogen):** Ratio of Nitrogen content in soil ($0 - 140\text{ kg/ha}$).
 - **$P$ (Phosphorus):** Ratio of Phosphorus content in soil ($5 - 145\text{ kg/ha}$).
 - **$K$ (Potassium):** Ratio of Potassium content in soil ($5 - 205\text{ kg/ha}$).
-- **$\text{Temperature}$:** Ambient air temperature ($8.8^\circ\text{C} - 43.7^\circ\text{C}$).
+- **$\text{Temperature}$:** Ambient air temperature ($8.8^\circ\text{C} - 43.7^\circ\text{C}$). Input warnings trigger if outside 8–45 °C.
 - **$\text{Humidity}$:** Relative air humidity ($14.3\% - 99.9\%$).
-- **$\text{pH}$:** Soil acidity/alkalinity measure ($3.5 - 9.9$).
-- **$\text{Rainfall}$:** Seasonal rainfall amount ($20.2 - 298.6\text{ mm}$).
-
-#### Implementation Details & Fixes
-- **PyArrow Compatibility:** Columns are converted to contiguous NumPy arrays via `.to_numpy(dtype=float)` before passing to `train_test_split`, preventing the fatal `TypeError: only integer scalar arrays can be converted to a scalar index` seen in newer Pandas/Scikit-Learn environments.
-- **District Auto-Prefill:** An integrated button calls `/api/weather/city/<district>` to auto-populate live local temperature and humidity.
-- **Soil Presets:** One-click presets (Paddy Rice, Maize Loam, Cotton Alluvial, Sugarcane, Coffee & Spice) initialize baseline N:P:K and pH values.
-- **Multilingual Crop Script Display:** Recommendations dynamically display native crop names in Kannada (e.g., ಭತ್ತ) and Hindi (e.g., चावल / धान) based on user locale selection.
+- **$\text{pH}$:** Soil acidity/alkalinity measure ($3.5 - 9.9$). Input warnings trigger if outside 3.5–9.5.
+- **$\text{Rainfall}$:** Rainfall amount ($20.2 - 298.6\text{ mm}$). Input warnings trigger if outside 20–300 mm (e.g. heavy monsoonal totals).
+- **Class Probabilities:** Outputs top-3 candidate crops with individual class probabilities using Scikit-Learn `predict_proba`.
 
 ---
 
@@ -252,6 +246,7 @@ $$\vec{x} = [N, P, K, \text{Temperature}, \text{Humidity}, \text{pH}, \text{Rain
 | **Training Dataset** | `farmer/ML/fertilizer_recommendation/fertilizer_recommendation.csv` (3.8 KB) |
 | **Dataset Dimensions** | 99 instances $\times$ 9 attributes |
 | **Target Classes (7)** | *Urea, DAP, 14-35-14, 28-28, 17-17-17, 20-20, 10-26-26* |
+| **Scope Disclosure** | Recommends commercial fertilizer classifications/categories rather than continuous volumetric dosage (kg/hectare). |
 
 #### Feature Space & Encodings
 - **Categorical Encoders:** Uses Scikit-Learn `LabelEncoder` for:
@@ -259,15 +254,10 @@ $$\vec{x} = [N, P, K, \text{Temperature}, \text{Humidity}, \text{pH}, \text{Rain
   - **Crop Type (11 classes):** Maize, Sugarcane, Cotton, Tobacco, Paddy, Barley, Wheat, Millets, Oil seeds, Pulses, Ground Nuts.
 - **Numerical Inputs:** Temperature, Humidity, Soil Moisture ($0 - 100\%$), Nitrogen, Potassium, Phosphorous.
 
-#### Mathematical Foundation
-The CART algorithm performs recursive binary splitting to partition the feature space into homogeneous rectangular regions $R_m$. The split at node $m$ for feature $j$ and threshold $t$ minimizes weighted child impurity:
-$$\min_{j, t} \left[ \frac{N_L}{N_m} I_G(D_L) + \frac{N_R}{N_m} I_G(D_R) \right]$$
-Predictions assign the majority fertilizer label of the corresponding leaf node.
-
 #### Operational Workflow
 1. Farmer selects soil and crop type from dropdowns (with localized crop labels).
-2. Soil moisture can be auto-derived from live meteorological radar (recent precipitation $>5\text{mm} \implies 75\%$, $>0\text{mm} \implies 55\%$, dry $\implies 35\%$).
-3. Decision tree traverses encoded vectors and displays the target fertilizer formulation accompanied by an explanatory nutrient deficit breakdown.
+2. Soil moisture can be entered directly from soil probe readings or estimated as a proxy from recent precipitation ($>5\text{mm} \implies 75\%$, $>0\text{mm} \implies 55\%$, dry $\implies 35\%$).
+3. Decision tree traverses encoded vectors and displays the target commercial fertilizer classification.
 
 ---
 
@@ -277,27 +267,25 @@ Predictions assign the majority fertilizer label of the corresponding leaf node.
 |---|---|
 | **Portal Endpoint** | `GET /farmer/yield_prediction` & `POST /farmer/yield_prediction` |
 | **Algorithm Type** | Supervised Ensemble Regression — Random Forest Regressor |
-| **Number of Estimators** | 50 Regression Trees |
-| **Splitting Criterion** | Mean Squared Error (MSE): $\text{MSE} = \frac{1}{n} \sum_{i=1}^{n} (y_i - \bar{y})^2$ |
-| **Training Dataset** | `farmer/ML/yield_prediction/crop_production_karnataka.csv` (1.12 MB) |
-| **Target Variable** | Total Production in Tonnes |
-| **Unit Conversion** | Inputs accepted in Acres; converted via $\text{Hectares} = \text{Acres} \times 0.404686$ |
-
-#### One-Hot Encoding & Pipeline Design
-1. **Handling Missing Values:** Rows where `Production` is NaN or negative are dropped during initialization.
-2. **Feature Transformation:** Categorical columns (`State_Name`, `District_Name`, `Season`, `Crop`) are encoded via `OneHotEncoder(handle_unknown='ignore')`.
-3. **Feature Stacking:** The sparse one-hot matrix is combined with the continuous `Area` feature using `np.hstack`:
-   $$X_{\text{final}} = \begin{bmatrix} X_{\text{categorical\_ohe}} & \vec{v}_{\text{area}} \end{bmatrix}$$
-4. **In-Memory Model Caching:** To avoid reading a 1.12 MB CSV on every web hit, the trained `(model, ohe, categorical_cols)` tuple is cached in memory (`_YIELD_MODEL_CACHE`) after the first fit, reducing inference latency from 1,200ms to under 8ms.
+| **Number of Estimators** | 40 Regression Trees (Serialized offline as `yield_model.joblib`, 1.7 MB compressed) |
+| **Evaluation Metrics** | Test $R^2 \approx \mathbf{0.9805}$, Mean Absolute Error (MAE) $\approx \mathbf{9,444\text{ t}}$ |
+| **Training Dataset** | Karnataka Department of Agriculture & DES records (`crop_production_karnataka.csv`, 21,122 rows) |
+| **Target Units** | Metric Tonnes for grain/pulse crops; **Thousand Nuts** for Coconut (per official DES standards) |
+| **Regional Boundary** | Trained specifically on Karnataka historical district production data; non-Karnataka selections display informational baseline warnings. |
+| **Extrapolation Limits** | Decision tree ensembles cannot extrapolate beyond the maximum training domain; acreages $>10,000\text{ ha}$ display an extrapolation alert. |
 
 ---
 
-### Module 4: Rainfall Estimation & Monsoon Modeler (IMD Historical Time-Series Regressor)
+### Module 4: Historical Average Rainfall Engine (IMD 115-Year Climatology)
 
 | Parameter | Specification |
 |---|---|
 | **Portal Endpoint** | `GET /farmer/rainfall_prediction` & `POST /farmer/rainfall_prediction` |
 | **Dataset Source** | India Meteorological Department (IMD) 115-Year Archive (1901–2015) |
+| **Dataset File** | `farmer/ML/rainfall_prediction/rainfall_in_india_1901-2015.csv` (515 KB) |
+| **Geographic Divisions** | 36 Meteorological Subdivisions across India |
+| **Temporal Granularity** | Monthly precipitation records across 114 complete years |
+| **Methodology** | Climatological historical monthly baseline average (statistical mean across 115 years, not ML regression) |
 | **Dataset File** | `farmer/ML/rainfall_prediction/rainfall_in_india_1901-2015.csv` (515 KB) |
 | **Geographic Divisions** | 36 Meteorological Subdivisions across India |
 | **Temporal Granularity** | Monthly precipitation records across 114 complete years |
@@ -335,7 +323,7 @@ AgroIntel combines offline machine learning intelligence with real-time external
 
 ### Live Weather Radar & Environmental Monitoring (Open-Meteo Integration)
 
-- **Provider:** Open-Meteo Free Meteorological API (No API key expiration barriers, zero commercial limits for public data).
+- **Provider:** Open-Meteo Open Weather API (Non-commercial open data license under CC BY 4.0; generous rate ceiling of up to 10,000 daily API calls for non-commercial educational/academic usage).
 - **Endpoint:** `https://api.open-meteo.com/v1/forecast`
 - **Parameters Queried:**
   - `current=temperature_2m,relative_humidity_2m,apparent_temperature,pressure_msl,weather_code,wind_speed_10m,is_day`
@@ -358,7 +346,7 @@ AgroIntel combines offline machine learning intelligence with real-time external
   1. Requests attempt district-level filtering: `?filters[district]={district}&api-key={KEY}`.
   2. If the live national upstream times out or returns 0 arrivals, the query falls back to state filtering.
   3. If the network is entirely offline, the system seamlessly serves the **Curated Dynamic District Mandi Profile Database** (`_find_district_crops` & `data/mandi_snapshot.csv`).
-- **Data Integrity & Real Variety Names:** Commercial crop records use legitimate agricultural varieties (e.g., *Tomato: PKM-1 Hybrid*, *Onion: Bellary Red / Nasik Red*, *Potato: Kufri Jyoti*, *Rice: Sona Masuri / Pusa Basmati 1121*, *Cotton: Shankar-6*) with Min, Max, and Modal rates in ₹/Quintal ($1\text{ Quintal} = 100\text{ kg}$).
+- **Data Integrity & Real Variety Names:** Commercial crop records use legitimate agricultural varieties (e.g., *Tomato: PKM-1 Hybrid*, *Onion: Bellary Red / Nasik Red*, *Potato: Kufri Jyoti*, *Rice: Sona Masuri / Pusa Basmati 1121*, *Cotton: Shankar-6*) with Min, Max, and Modal rates in ₹/Quintal ($1\text{ Quintal} = 100\text{ kg}$). Fallback snapshot records are transparently marked with benchmark labels (`Snapshot Benchmark (March 2026)`), never masquerading as live intraday ticks.
 
 ---
 
@@ -368,7 +356,7 @@ A key engineering problem solved in AgroIntel was location ambiguity (e.g., glob
 
 #### Multi-Tiered Geocoding Pipeline (`geocode_indian_location`)
 1. **Tier 1 — Curated District Database:** In-memory dictionary covering all **30 Karnataka districts** and 60+ major Indian hubs with exact municipal headquarters coordinates and Kannada/English aliases (e.g., Mysore $\leftrightarrow$ Mysuru, Belgaum $\leftrightarrow$ Belagavi, Shimoga $\leftrightarrow$ Shivamogga).
-2. **Tier 2 — OpenStreetMap Nominatim Search:** Queries `https://nominatim.openstreetmap.org/search?q={name}, {state}, India&format=json` with in-memory caching (`_GEO_CACHE`).
+2. **Tier 2 — OpenStreetMap Nominatim Search:** Queries `https://nominatim.openstreetmap.org/search?q={name}, {state}, India&format=json` with in-memory caching (`_GEO_CACHE`). Complies with OpenStreetMap Nominatim Usage Policy by including an explicit academic User-Agent header (`AgroIntel-Academic-Platform/2.0`) and enforcing a minimum $1.1\text{ s}$ throttle interval between successive calls.
 3. **Tier 3 — Open-Meteo Restricted Search:** Queries with `country_code=IN` to prevent overseas homonyms.
 4. **Label Preservation:** The clean requested label (e.g., `Mysuru (Mysore), Karnataka`) is passed as `override_label` to weather endpoints, preventing reverse geocoding from overwriting verified district names with municipal corporation jargon.
 5. **Haversine Distance Calculation:** The `/api/nearby_cities/<lat>/<lon>` route computes spherical distances using the Haversine equation to suggest the 6 closest market towns:
@@ -657,10 +645,22 @@ pip install -r requirements.txt
 ### Step 4: Configure Environment Variables
 Create or verify the `.env` file in the project root:
 ```env
-FLASK_SECRET_KEY=agrointel_production_secret_key_2026_xyz
+# Cryptographically random secret key (e.g., generated with: python -c "import secrets; print(secrets.token_hex(32))")
+FLASK_SECRET_KEY=generate_your_own_secure_random_key_here
+
+# Optional hosted database for cloud/serverless deployments (Neon, Supabase, Turso)
+# Leave empty or omit for local SQLite evaluation (agrointel.db)
+DATABASE_URL=postgresql://user:password@ep-host.neon.tech/agrointel?sslmode=require
+
+# Optional Redis/Upstash connection for serverless rate limiting
+# Leave empty or omit for in-memory rate limiting in local development
+REDIS_URL=redis://default:token@host.upstash.io:6379
+
+# Optional external API keys
 OPENWEATHER_API_KEY=your_optional_openweather_key
 DATA_GOV_API_KEY=your_optional_datagov_key
 ```
+> **Security Note:** In production mode (`FLASK_ENV=production`), AgroIntel enforces fail-fast startup and will abort if `FLASK_SECRET_KEY` is missing or uses a known placeholder value.
 > **Note:** The platform automatically uses the free **Open-Meteo API** and the **Curated APMC Mandi Engine** even if external API keys are omitted.
 
 ### Step 5: Initialize the Database & Seed Demo Accounts
@@ -806,21 +806,21 @@ This section provides clear, technically sound answers to the most common questi
 > We resolved this by building a curated Indian District Geo-Engine in `app.py` covering all 30 Karnataka districts with exact municipal headquarters coordinates (`12.305°N, 76.655°E` for Mysore), reordering the reverse geocoding priority to favor `city` and `town`, and passing an `override_label` to preserve explicit user selections.
 
 #### Q6: Why choose SQLite over MySQL or PostgreSQL for this project?
-> **Answer:** SQLite is serverless, zero-configuration, and self-contained within `agrointel.db`. This makes the project portable for viva demonstrations and grading without requiring external database servers (like XAMPP or MySQL daemon). To make it production-ready, we configured `INTEGER PRIMARY KEY` for automatic rowid generation and implemented automated seed migration in `init_db.py`.
+> **Answer:** AgroIntel employs a hybrid database architecture via a unified database abstraction layer (`db.py`). For offline viva evaluations and academic grading, SQLite provides zero-configuration, self-contained portability within `agrointel.db` without requiring database daemons. For serverless and cloud deployments (e.g., Vercel, AWS Lambda, Render) where the filesystem is ephemeral and read-only, AgroIntel seamlessly connects to hosted PostgreSQL (Neon, Supabase, Turso) using pure-Python `pg8000` whenever the `DATABASE_URL` environment variable is defined.
 
 #### Q7: What security measures prevent unauthorized access to farmer predictive tools?
-> **Answer:** We implemented a centralized `@app.before_request` hook in Flask that inspects the request path before executing any route controller. Any hit to `/farmer/*` without `session['user_type'] == 'farmer'` is immediately issued a 302 redirect to the login page, and `/api/*` endpoints return a 401 Unauthorized status. Additionally, login attempts are rate-limited to 5 per 15 minutes via `Flask-Limiter`, passwords use bcrypt salting, and form submissions validate HMAC CSRF tokens.
+> **Answer:** We implemented a centralized `@app.before_request` access control hook in Flask that validates user sessions before any route controller executes (`/farmer/*` requires farmer session, `/admin/*` requires admin). Sensitive authentication endpoints enforce composite account-and-IP rate limiting (`Flask-Limiter` with optional Redis/Upstash backend) to prevent village or campus NAT lockouts. In production, the app fails fast if a cryptographically secure `FLASK_SECRET_KEY` is not provisioned, session cookies enforce `HttpOnly`, `SameSite=Lax`, and `Secure` flags, public admin self-registration is blocked, passwords use bcrypt salting with cost factor 12, all SQL queries use parameterized queries, and a timed HMAC-signed password reset flow allows secure credential recovery without exposing plaintext tokens. Data collection complies with India's Digital Personal Data Protection (DPDP) Act, 2023 with mandatory consent on registration and an explicit `/privacy` audit.
 
 ---
 
 ## 16. Academic References & Dataset Acknowledgments
 
-1. **Crop Recommendation Dataset:** Curated agricultural research dataset containing 2,200 instances across 22 crops, compiled from the Indian Council of Agricultural Research (ICAR) and agricultural university trial data.
-2. **Fertilizer Advisory Dataset:** Soil-nutrient-to-fertilizer agronomic mapping compiled from public agricultural extension publications.
+1. **Crop Recommendation Dataset:** Atharva Inamdar / Kaggle Agricultural Crop Recommendation Dataset (2,200 instances across 22 crops, built with augmented agronomic research data). *Note:* Evaluated on synthetic/augmented clusters; test accuracy ($99.32\%$) reflects multi-parameter cluster separability rather than multi-season open-field trials.
+2. **Fertilizer Advisory Dataset:** Categorical soil-nutrient-to-fertilizer classification dataset (99 instances across 7 commercial fertilizers) compiled from public agronomic extension literature.
 3. **IMD Rainfall Dataset (1901–2015):** Open Government Data (OGD) platform, India Meteorological Department (IMD), Ministry of Earth Sciences, Government of India.
 4. **Karnataka Crop Production Dataset:** Directorate of Economics and Statistics, Department of Agriculture and Farmers Welfare, Government of Karnataka.
 5. **Agmarknet Mandi Rates:** Agricultural Marketing Information Network (Agmarknet), Directorate of Marketing & Inspection (DMI), Ministry of Agriculture and Farmers Welfare, Government of India (`data.gov.in`).
-6. **Open-Meteo Weather API:** Open-source weather API powered by national weather service forecast models (DWD, NOAA, ECMWF).
+6. **Open-Meteo Weather API:** Open-source weather API powered by national weather service forecast models (DWD, NOAA, ECMWF) under CC BY 4.0.
 7. **OpenStreetMap Nominatim:** OpenStreetMap Foundation community geocoding database under the Open Database License (ODbL).
 
 ---

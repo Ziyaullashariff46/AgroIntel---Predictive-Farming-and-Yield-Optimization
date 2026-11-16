@@ -8,10 +8,10 @@
     Meteorological Analysis Engine
   </div>
   <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 1.65rem; margin-bottom: 0.35rem; color: var(--text-primary);">
-    Rainfall Estimation
+    Historical Average Rainfall (Climatology)
   </h2>
   <p style="color: var(--text-muted); font-size: 0.9rem; margin: 0;">
-    Predict monthly rainfall for any Indian meteorological subdivision using 115 years of IMD historical data.
+    Monthly precipitation averages (1901–2015 baseline) for all 36 Indian meteorological subdivisions published by the India Meteorological Department (IMD).
   </p>
 </div>
 
@@ -203,11 +203,11 @@
     <div class="col-md-6">
       <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md); height: 100%;">
         <h6 style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cyan-500); margin-bottom: 0.75rem;">
-          <i class="fas fa-microchip"></i> ML Model Used
+          <i class="fas fa-chart-area"></i> Climatology Engine & Data Source
         </h6>
         <p style="font-size: 0.88rem; color: var(--text-secondary); line-height: 1.7; margin: 0;">
-          <strong>Subdivisional Rainfall Regressor</strong> trained on the <strong>IMD 115-Year Dataset (1901–2015)</strong>.
-          Uses historical time-series analysis of 36 meteorological subdivisions across India with monthly resolution.
+          <strong>Historical Subdivision Climatology</strong> computed from the official <strong>IMD 115-Year Dataset (1901–2015)</strong>.
+          Provides long-term observational monthly baselines across 36 meteorological subdivisions. Note: Reflects climatological historical mean rather than predictive regression, capturing empirical seasonal rainfall patterns.
         </p>
       </div>
     </div>

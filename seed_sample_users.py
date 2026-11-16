@@ -1,29 +1,32 @@
-import sqlite3
 import bcrypt
 import os
-
-DB_FILE = os.path.join(os.path.dirname(__file__), 'agrointel.db')
+import db
 
 def seed_users():
-    conn = sqlite3.connect(DB_FILE)
-    cursor = conn.cursor()
+    db.ensure_db()
+    conn = db.get_db()
 
     # Ensure Admin Account exists
-    cursor.execute("SELECT * FROM admin WHERE admin_name = 'admin'")
-    if not cursor.fetchone():
-        cursor.execute("INSERT INTO admin (admin_id, admin_name, admin_password) VALUES (1, 'admin', '$2b$12$Qmr0bYXJomXoiMBgVdQ77OM0wOPqVRGoRPnSc.Ve7aTyMCTqS8SJW')")
+    admin = conn.execute("SELECT * FROM admin WHERE admin_name = ?", ('admin',)).fetchone()
+    if not admin:
+        conn.execute(
+            "INSERT INTO admin (admin_id, admin_name, admin_password) VALUES (?, ?, ?)",
+            (1, 'admin', '$2b$12$Qmr0bYXJomXoiMBgVdQ77OM0wOPqVRGoRPnSc.Ve7aTyMCTqS8SJW')
+        )
 
     # Seed Farmer Account
-    cursor.execute("SELECT * FROM farmerlogin WHERE email = 'farmer@agrointel.com'")
-    if not cursor.fetchone():
-        cursor.execute("""
-            INSERT INTO farmerlogin (farmer_id, farmer_name, password, email, phone_no, F_gender, F_birthday, F_State, F_District, F_Location, otp)
-            VALUES (100, 'Sample Farmer', '$2b$12$Qmr0bYXJomXoiMBgVdQ77OM0wOPqVRGoRPnSc.Ve7aTyMCTqS8SJW', 'farmer@agrointel.com', '9876543210', 'Male', '1995-05-15', 'Karnataka', 'Udupi', 'Bantakal', 0)
-        """)
+    farmer = conn.execute("SELECT * FROM farmerlogin WHERE email = ?", ('farmer@agrointel.com',)).fetchone()
+    if not farmer:
+        conn.execute("""
+            INSERT INTO farmerlogin (farmer_id, farmer_name, password, email, phone_no, F_State, F_District, F_Location)
+            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+        """, (100, 'Sample Farmer', '$2b$12$Qmr0bYXJomXoiMBgVdQ77OM0wOPqVRGoRPnSc.Ve7aTyMCTqS8SJW', 'farmer@agrointel.com', '9876543210', 'Karnataka', 'Udupi', 'Bantakal'))
 
     # Rotate any legacy account still holding the dictionary-word password
-    cursor.execute("UPDATE farmerlogin SET password = '$2b$12$Qmr0bYXJomXoiMBgVdQ77OM0wOPqVRGoRPnSc.Ve7aTyMCTqS8SJW' WHERE password = 'password'")
-    cursor.execute("UPDATE admin SET admin_password = '$2b$12$Qmr0bYXJomXoiMBgVdQ77OM0wOPqVRGoRPnSc.Ve7aTyMCTqS8SJW' WHERE admin_password = 'password'")
+    conn.execute("UPDATE farmerlogin SET password = ? WHERE password = ?",
+                 ('$2b$12$Qmr0bYXJomXoiMBgVdQ77OM0wOPqVRGoRPnSc.Ve7aTyMCTqS8SJW', 'password'))
+    conn.execute("UPDATE admin SET admin_password = ? WHERE admin_password = ?",
+                 ('$2b$12$Qmr0bYXJomXoiMBgVdQ77OM0wOPqVRGoRPnSc.Ve7aTyMCTqS8SJW', 'password'))
 
     conn.commit()
     conn.close()

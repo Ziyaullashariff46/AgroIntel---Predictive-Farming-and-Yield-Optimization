@@ -1,0 +1,109 @@
+{% extends 'base.html' %}
+{% block title %}Privacy Policy & Data Protection | AgroIntel{% endblock %}
+
+{% block content %}
+<div class="container py-5" style="max-width: 860px;">
+  <div class="glass-card p-4 p-md-5">
+
+    <div class="mb-4">
+      <div class="badge-agro badge-agro-emerald mb-2">
+        <i class="fas fa-shield-halved"></i> Statutory Compliance
+      </div>
+      <h1 style="font-family: var(--font-display); font-weight: 800; font-size: 2.1rem; color: var(--text-primary); margin-bottom: 0.5rem;">
+        Privacy Policy &amp; Data Protection
+      </h1>
+      <p style="color: var(--text-muted); font-size: 0.9rem;">
+        Last Updated: November 2026 • In alignment with India's <strong>Digital Personal Data Protection (DPDP) Act, 2023</strong>.
+      </p>
+    </div>
+
+    <hr style="border-color: var(--border-subtle); margin-bottom: 2rem;">
+
+    <div class="policy-section mb-4">
+      <h4 style="font-weight: 700; color: var(--emerald-500); font-size: 1.15rem;">
+        1. Overview &amp; Data Fiduciary Identity
+      </h4>
+      <p style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem;">
+        AgroIntel is an educational and academic smart agriculture platform developed to empower Indian farmers with data-driven agronomic guidance. This Privacy Policy outlines how AgroIntel acts as a Data Fiduciary, detailing the collection, processing, storage, and protection of personal data in strict compliance with the Digital Personal Data Protection (DPDP) Act, 2023.
+      </p>
+    </div>
+
+    <div class="policy-section mb-4">
+      <h4 style="font-weight: 700; color: var(--emerald-500); font-size: 1.15rem;">
+        2. Personal Data We Collect
+      </h4>
+      <p style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem;">
+        We collect only the minimum necessary data required to deliver tailored agricultural insights (Data Minimisation principle):
+      </p>
+      <ul style="color: var(--text-secondary); line-height: 1.8; font-size: 0.92rem;">
+        <li><strong>Account Identifiers:</strong> Farmer Name, Email Address, and 10-digit Mobile Phone Number (for account authentication and access control).</li>
+        <li><strong>Agronomic &amp; Geographical Inputs:</strong> State, District, and field acreage (used to condition regional crop yield and mandi price queries).</li>
+        <li><strong>Location Coordinates (Optional):</strong> Latitude and longitude when you explicitly click "Auto-Detect Location" or "My Location" to fetch local weather telemetry.</li>
+        <li><strong>Security &amp; Session Tokens:</strong> Cryptographically salted password hashes (bcrypt), session cookies, and HMAC CSRF protection tokens.</li>
+      </ul>
+      <div class="alert alert-info" style="background: rgba(6,182,212,0.1); border: 1px solid var(--border-glass); border-radius: var(--r-md); color: var(--text-secondary); font-size: 0.88rem;">
+        <i class="fas fa-info-circle" style="color: var(--cyan-500); margin-right: 6px;"></i>
+        <strong>Data Minimisation Note:</strong> AgroIntel does not collect biometric data, Aadhaar numbers, land ownership deeds, financial bank account credentials, or unnecessary demographic markers (such as gender or date of birth).
+      </div>
+    </div>
+
+    <div class="policy-section mb-4">
+      <h4 style="font-weight: 700; color: var(--emerald-500); font-size: 1.15rem;">
+        3. Third-Party Integrations &amp; External Telemetry
+      </h4>
+      <p style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem;">
+        Unlike generic cloud tools that claim "zero external data transfer", AgroIntel provides complete technical transparency regarding external service requests:
+      </p>
+      <ul style="color: var(--text-secondary); line-height: 1.8; font-size: 0.92rem;">
+        <li><strong>Open-Meteo Weather API:</strong> Fetches temperature, relative humidity, and precipitation forecasts. Open-Meteo is a non-commercial open-access weather API licensed under CC BY 4.0. No user names or phone numbers are ever sent to Open-Meteo; only numerical GPS coordinates are transmitted.</li>
+        <li><strong>OpenStreetMap Nominatim:</strong> Reverse geocodes coordinates to administrative district names under Nominatim's strict usage policy (max 1 request/second with an identifying application user-agent header).</li>
+        <li><strong>Open Government Data (OGD) Agmarknet:</strong> Queries official wholesale APMC commodity arrival rates from the Ministry of Agriculture and Farmers Welfare (<code>data.gov.in</code>). Queries are filtered strictly by public district names.</li>
+        <li><strong>Local In-Process Machine Learning:</strong> Crop recommendation, fertilizer advisory, and yield forecasting algorithms run entirely in-process on the application server. Your soil metrics (N, P, K, pH) are evaluated in memory and never shared with external AI vendors.</li>
+      </ul>
+    </div>
+
+    <div class="policy-section mb-4">
+      <h4 style="font-weight: 700; color: var(--emerald-500); font-size: 1.15rem;">
+        4. Farmer Rights under DPDP Act 2023
+      </h4>
+      <p style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem;">
+        Under Chapter III of the Digital Personal Data Protection Act, 2023, you hold the following statutory rights:
+      </p>
+      <ul style="color: var(--text-secondary); line-height: 1.8; font-size: 0.92rem;">
+        <li><strong>Right to Access:</strong> View all account records, profile details, and selling history stored under your farmer ID.</li>
+        <li><strong>Right to Correction &amp; Erasure:</strong> Request the correction of inaccurate personal data or complete deletion of your farmer account and profile records.</li>
+        <li><strong>Right to Grievance Redressal:</strong> Submit inquiries or concerns regarding personal data handling to our designated Grievance Officer.</li>
+      </ul>
+    </div>
+
+    <div class="policy-section mb-4">
+      <h4 style="font-weight: 700; color: var(--emerald-500); font-size: 1.15rem;">
+        5. Data Retention &amp; Security Measures
+      </h4>
+      <p style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem;">
+        Passwords are encrypted using <strong>bcrypt</strong> with individual 12-round salt sequences. Web communications use HTTP-only, SameSite-hardened session cookies to defend against Cross-Site Scripting (XSS) and Cross-Site Request Forgery (CSRF). Session tokens automatically expire after inactivity.
+      </p>
+    </div>
+
+    <div class="policy-section mb-2">
+      <h4 style="font-weight: 700; color: var(--emerald-500); font-size: 1.15rem;">
+        6. Contact &amp; Grievance Officer
+      </h4>
+      <p style="color: var(--text-secondary); line-height: 1.8; font-size: 0.95rem;">
+        For inquiries regarding this privacy policy or to request data erasure under the DPDP Act, contact:
+        <br>
+        <strong>Data Grievance Officer:</strong> Academic Project Coordinator<br>
+        <strong>Email:</strong> <code>grievance@agrointel.local</code> / <code>privacy@agrointel.local</code><br>
+        <strong>Portal Contact Desk:</strong> <a href="{{ url_for('contact') }}" class="text-emerald font-weight-bold">Contact Support Page</a>
+      </p>
+    </div>
+
+    <div class="text-center mt-5">
+      <a href="{{ url_for('index') }}" class="btn-agro-secondary">
+        <i class="fas fa-arrow-left"></i> Return to Homepage
+      </a>
+    </div>
+
+  </div>
+</div>
+{% endblock %}

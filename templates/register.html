@@ -72,8 +72,16 @@
           </div>
         </div>
 
+        <!-- DPDP Consent Checkbox -->
+        <div class="form-group form-check mb-4" style="padding-left: 1.5rem;">
+          <input type="checkbox" class="form-check-input" id="dpdpConsent" name="consent" required checked style="cursor: pointer;">
+          <label class="form-check-label small text-muted" for="dpdpConsent" style="cursor: pointer; line-height: 1.5;">
+            I consent to the collection and processing of my contact and regional farming metrics in accordance with the <a href="{{ url_for('privacy') }}" target="_blank" class="text-emerald font-weight-bold">AgroIntel Privacy Policy</a> under India's Digital Personal Data Protection (DPDP) Act, 2023.
+          </label>
+        </div>
+
         <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold fs-6">
-          Create {{ role|capitalize }} Account <i class="fas fa-check-circle ml-2"></i>
+          Create Farmer Account <i class="fas fa-check-circle ml-2"></i>
         </button>
       </form>
 
