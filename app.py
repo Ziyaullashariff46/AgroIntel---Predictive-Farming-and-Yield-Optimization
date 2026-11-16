@@ -754,11 +754,6 @@ def require_login():
 def static_assets(path):
     return send_from_directory(os.path.join(BASE_DIR, 'assets'), path)
 
-# Vercel serverless function fallback route
-@app.route('/api/index')
-def vercel_entrypoint():
-    return redirect(url_for('index'))
-
 # Main Home Page
 @app.route('/')
 def index():
