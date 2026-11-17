@@ -503,10 +503,11 @@
   font-size: clamp(2rem, 8vw, 3rem) !important;
 }
 
-/* Table responsive — prevent overflow */
+/* Table responsive — allow horizontal scrolling while containing boundaries */
 .farmer-main-content .table-responsive {
   border-radius: 10px;
-  overflow: hidden;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
 }
 .farmer-main-content table {
   font-size: clamp(0.75rem, 2vw, 0.85rem);

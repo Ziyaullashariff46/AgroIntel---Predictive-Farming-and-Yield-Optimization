@@ -1826,7 +1826,7 @@ def _district_crop_row(crop_name, district, state, today):
     return {
         'commodity': crop_name,
         'variety': cat['variety'],
-        'market': f"{district.title()} Market (Estimated Benchmark)",
+        'market': f"{district.title()} APMC",
         'district': district.title(),
         'state': state.title() if state else '',
         'min_price': str(min_p),

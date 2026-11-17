@@ -4,6 +4,101 @@
 
 {% set DISTRICTS_BY_STATE = districts_by_state | tojson %}
 
+<style>
+/* Mandi Prices responsive table & layout optimizations */
+.mandi-card {
+  padding: 0;
+  overflow: hidden;
+  border: 1px solid var(--border-normal);
+  background: var(--bg-surface);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.mandi-scroll-wrapper {
+  max-height: 65vh;
+  overflow-y: auto;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+}
+
+/* Custom sleek scrollbar for instant visibility */
+.mandi-scroll-wrapper::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+.mandi-scroll-wrapper::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.04);
+}
+.mandi-scroll-wrapper::-webkit-scrollbar-thumb {
+  background: rgba(16, 185, 129, 0.35);
+  border-radius: 4px;
+}
+.mandi-scroll-wrapper::-webkit-scrollbar-thumb:hover {
+  background: rgba(16, 185, 129, 0.65);
+}
+
+.table-mandi {
+  width: 100%;
+  margin: 0;
+  border-collapse: separate;
+  border-spacing: 0;
+  font-size: 0.88rem;
+  min-width: 680px;
+}
+
+.table-mandi thead th {
+  position: sticky;
+  top: 0;
+  z-index: 2;
+  background: var(--table-head-bg, #040c09);
+  color: var(--emerald-400);
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  padding: 0.85rem 0.65rem;
+  border-bottom: 2px solid var(--border-normal);
+  white-space: nowrap;
+}
+
+[data-theme="light"] .table-mandi thead th {
+  background: #e8f5ee;
+  color: #065f46;
+}
+
+.table-mandi tbody td {
+  padding: 0.75rem 0.65rem;
+  border-bottom: 1px solid var(--border-subtle);
+  vertical-align: middle;
+  font-size: 0.88rem;
+  line-height: 1.4;
+}
+
+.table-mandi tbody tr:hover {
+  background: rgba(16, 185, 129, 0.04);
+}
+
+.table-mandi .cell-num {
+  font-variant-numeric: tabular-nums;
+  font-family: var(--font-mono, monospace);
+  white-space: nowrap;
+  text-align: right;
+}
+
+.table-mandi .cell-max-price {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.table-mandi .cell-modal-price {
+  font-weight: 800;
+  color: var(--emerald-500);
+  background: rgba(16, 185, 129, 0.06);
+}
+</style>
+
 <div class="mb-4">
   <div class="badge-agro badge-agro-emerald mb-3">
     <i class="fas fa-indian-rupee-sign" aria-hidden="true"></i>
@@ -99,29 +194,33 @@
 
 {# ── Price Table ── #}
 <div id="tableSection" style="display: none;">
-  <div class="glass-card" style="padding: 0; overflow: hidden;">
-    <div class="table-responsive" style="border-radius: var(--r-xl);">
-      <table class="table-agro" style="margin: 0; min-width: 780px;">
-        <colgroup>
-          <col style="min-width: 140px;">  {# Commodity #}
-          <col style="min-width: 130px;">  {# Variety #}
-          <col style="min-width: 160px;">  {# Market #}
-          <col style="min-width: 100px;">  {# District #}
-          <col style="min-width: 90px; text-align: right;">  {# Min #}
-          <col style="min-width: 90px; text-align: right;">  {# Max #}
-          <col style="min-width: 110px; text-align: right;">  {# Modal #}
-          <col style="min-width: 90px;">  {# Date #}
-        </colgroup>
+  <div class="d-flex justify-content-between align-items-center flex-wrap mb-2" style="gap: 0.75rem;">
+    <div class="d-flex align-items-center" style="gap: 0.5rem;">
+      <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin: 0; color: var(--text-primary);">
+        <i class="fas fa-table-list" style="color: var(--emerald-500); margin-right: 6px;"></i>
+        <span data-i18n="All Market Rates">All Market Rates</span>
+      </h5>
+      <span class="badge-agro badge-agro-cyan" id="mandiTableCount" style="font-size: 0.75rem;">0</span>
+    </div>
+    <div style="position: relative; min-width: 220px; max-width: 340px; flex: 1;">
+      <i class="fas fa-search" style="position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: var(--text-muted); font-size: 0.82rem;"></i>
+      <input type="text" id="mandiSearchInput" class="form-control-agro" placeholder="Filter commodity or APMC..." style="padding-left: 32px; height: 38px; font-size: 0.85rem;" oninput="filterMandiTable()">
+    </div>
+  </div>
+
+  <div class="mandi-card">
+    <div class="mandi-scroll-wrapper">
+      <table class="table-mandi" id="mandiPricesTable">
         <thead>
           <tr>
-            <th data-i18n="Commodity">Commodity</th>
-            <th data-i18n="Variety">Variety</th>
-            <th data-i18n="Market / APMC">Market / APMC</th>
-            <th data-i18n="District">District</th>
-            <th style="text-align: right;" data-i18n="Min ₹/q">Min ₹/q</th>
-            <th style="text-align: right;" data-i18n="Max ₹/q">Max ₹/q</th>
-            <th style="text-align: right; color: var(--emerald-500); background: rgba(16,185,129,0.06);" data-i18n="Modal ₹/q">Modal ₹/q</th>
-            <th data-i18n="Date">Date</th>
+            <th style="width: 17%;" data-i18n="Commodity">Commodity</th>
+            <th style="width: 13%;" data-i18n="Variety">Variety</th>
+            <th style="width: 16%;" data-i18n="Market / APMC">Market / APMC</th>
+            <th style="width: 13%;" data-i18n="District">District</th>
+            <th style="width: 10%; text-align: right;" data-i18n="Min ₹/q">Min ₹/q</th>
+            <th style="width: 11%; text-align: right;" data-i18n="Max ₹/q">Max ₹/q</th>
+            <th style="width: 11%; text-align: right; color: var(--emerald-500);" data-i18n="Modal ₹/q">Modal ₹/q</th>
+            <th style="width: 9%; text-align: center;" data-i18n="Date">Date</th>
           </tr>
         </thead>
         <tbody id="priceTableBody"></tbody>
@@ -343,35 +442,93 @@ function renderMarketData(data) {
     const localCrop = (window.AgroIntelI18N) ? window.AgroIntelI18N.getCropName(p.commodity, curLang) : p.commodity;
     const localDist = (window.AgroIntelI18N) ? window.AgroIntelI18N.getDistrictName(p.district, curLang) : p.district;
 
-    const cells = [
-      { text: localCrop, bold: true },
-      { text: p.variety },
-      { text: p.market, nowrap: true },
-      { text: localDist },
-      { text: `₹${Number(p.min_price).toLocaleString('en-IN')}`, right: true },
-      { text: `₹${Number(p.max_price).toLocaleString('en-IN')}`, right: true },
-      { text: `₹${Number(p.modal_price).toLocaleString('en-IN')}`, right: true, modal: true },
-      { text: p.arrival_date, nowrap: true },
-    ];
-    cells.forEach(c => {
-      const td = document.createElement('td');
-      let css = '';
-      if (c.right) css += 'text-align: right; ';
-      if (c.nowrap) css += 'white-space: nowrap; ';
-      if (c.modal) css += 'font-weight: 700; color: var(--emerald-500); background: rgba(16,185,129,0.04);';
-      if (css) td.style.cssText = css;
-      if (c.bold) {
-        const strong = document.createElement('strong');
-        strong.textContent = String(c.text);
-        td.appendChild(strong);
-      } else {
-        td.textContent = String(c.text);
-      }
-      tr.appendChild(td);
-    });
+    // 1. Commodity
+    const tdCrop = document.createElement('td');
+    const strongCrop = document.createElement('strong');
+    strongCrop.textContent = localCrop;
+    tdCrop.appendChild(strongCrop);
+
+    // 2. Variety
+    const tdVar = document.createElement('td');
+    tdVar.textContent = p.variety || 'Standard';
+
+    // 3. Market / APMC
+    const tdMkt = document.createElement('td');
+    tdMkt.textContent = p.market || '-';
+
+    // 4. District
+    const tdDist = document.createElement('td');
+    tdDist.textContent = localDist || '-';
+
+    // 5. Min price
+    const tdMin = document.createElement('td');
+    tdMin.className = 'cell-num';
+    tdMin.style.color = 'var(--text-muted)';
+    tdMin.textContent = `₹${Number(p.min_price).toLocaleString('en-IN')}`;
+
+    // 6. Max price (distinct, prominent, visible)
+    const tdMax = document.createElement('td');
+    tdMax.className = 'cell-num cell-max-price';
+    tdMax.textContent = `₹${Number(p.max_price).toLocaleString('en-IN')}`;
+
+    // 7. Modal price (emerald highlighted)
+    const tdModal = document.createElement('td');
+    tdModal.className = 'cell-num cell-modal-price';
+    tdModal.textContent = `₹${Number(p.modal_price).toLocaleString('en-IN')}`;
+
+    // 8. Date / Status badge
+    const tdDate = document.createElement('td');
+    tdDate.style.textAlign = 'center';
+    const isEst = p.is_estimated || (String(p.arrival_date).toLowerCase().includes('estimated'));
+    const isSnap = data.is_fallback && !isEst;
+    const statusBadge = document.createElement('span');
+    statusBadge.className = 'badge-agro ' + (isEst ? 'badge-agro-amber' : (isSnap ? 'badge-agro-cyan' : 'badge-agro-emerald'));
+    statusBadge.style.cssText = 'font-size: 0.72rem; padding: 0.18rem 0.45rem; white-space: nowrap; margin: 0;';
+    if (isEst) {
+      statusBadge.title = 'Estimated Benchmark';
+      statusBadge.replaceChildren(createIcon('fa-clock'), document.createTextNode(' Est.'));
+    } else if (isSnap) {
+      statusBadge.title = 'Snapshot Benchmark';
+      statusBadge.replaceChildren(createIcon('fa-database'), document.createTextNode(' Snapshot'));
+    } else {
+      statusBadge.title = `Live Agmarknet: ${p.arrival_date}`;
+      statusBadge.replaceChildren(createIcon('fa-check-circle'), document.createTextNode(` ${p.arrival_date}`));
+    }
+    tdDate.appendChild(statusBadge);
+
+    tr.append(tdCrop, tdVar, tdMkt, tdDist, tdMin, tdMax, tdModal, tdDate);
+    tr.dataset.search = `${p.commodity} ${localCrop} ${p.variety} ${p.market} ${p.district} ${localDist}`.toLowerCase();
     tbody.appendChild(tr);
   });
+
+  const countBadge = document.getElementById('mandiTableCount');
+  if (countBadge) countBadge.textContent = `${data.prices.length}`;
+
+  const searchInput = document.getElementById('mandiSearchInput');
+  if (searchInput && searchInput.value) {
+    filterMandiTable();
+  }
+
   document.getElementById('tableSection').style.display = 'block';
+}
+
+function filterMandiTable() {
+  const input = document.getElementById('mandiSearchInput');
+  const query = (input ? input.value : '').trim().toLowerCase();
+  const rows = document.querySelectorAll('#priceTableBody tr');
+  let visibleCount = 0;
+  rows.forEach(tr => {
+    if (!query || (tr.dataset.search && tr.dataset.search.includes(query))) {
+      tr.style.display = '';
+      visibleCount++;
+    } else {
+      tr.style.display = 'none';
+    }
+  });
+  const countBadge = document.getElementById('mandiTableCount');
+  if (countBadge) {
+    countBadge.textContent = query ? `${visibleCount} / ${rows.length}` : `${rows.length}`;
+  }
 }
 
 function searchCity() {
