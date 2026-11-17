@@ -49,6 +49,10 @@ html[lang="kn"], html[lang="kn"] body, [lang="kn"] {
   line-height: 1;
 }
 
+.agrointel-lang-btn * {
+  pointer-events: none;
+}
+
 .agrointel-lang-btn:hover,
 .agrointel-lang-btn:focus-visible {
   background: var(--bg-elevated);
@@ -77,23 +81,32 @@ html[lang="kn"], html[lang="kn"] body, [lang="kn"] {
   position: absolute;
   top: calc(100% + 8px);
   right: 0;
-  min-width: 175px;
-  background: var(--bg-surface);
+  min-width: 180px;
+  background: var(--bg-surface, #0c1c14);
   backdrop-filter: blur(20px);
   -webkit-backdrop-filter: blur(20px);
   border: 1px solid var(--border-normal);
   border-radius: var(--r-md);
-  box-shadow: var(--shadow-lg), 0 10px 30px rgba(0, 0, 0, 0.35);
-  padding: 0.35rem;
-  z-index: 1050;
+  box-shadow: var(--shadow-lg), 0 10px 30px rgba(0, 0, 0, 0.45);
+  padding: 0.4rem;
+  z-index: 9999 !important;
   display: none;
   flex-direction: column;
-  gap: 0.2rem;
+  gap: 0.25rem;
   animation: agrointelFadeDown 0.18s cubic-bezier(0.16, 1, 0.3, 1) forwards;
 }
 
+[data-theme="light"] .agrointel-lang-menu {
+  background: #ffffff !important;
+  border-color: rgba(16, 100, 70, 0.25) !important;
+  box-shadow: 0 10px 30px rgba(0, 40, 25, 0.15), var(--shadow-lg) !important;
+}
+
 .agrointel-lang-dropdown.open .agrointel-lang-menu {
-  display: flex;
+  display: flex !important;
+  visibility: visible !important;
+  opacity: 1 !important;
+  pointer-events: auto !important;
 }
 
 @keyframes agrointelFadeDown {
@@ -112,7 +125,7 @@ html[lang="kn"], html[lang="kn"] body, [lang="kn"] {
   align-items: center;
   justify-content: space-between;
   gap: 0.6rem;
-  padding: 0.5rem 0.8rem;
+  padding: 0.55rem 0.85rem;
   font-size: 0.84rem;
   font-weight: 600;
   color: var(--text-secondary);
@@ -123,6 +136,10 @@ html[lang="kn"], html[lang="kn"] body, [lang="kn"] {
   width: 100%;
   text-align: left;
   transition: all 0.15s ease;
+}
+
+.agrointel-lang-item * {
+  pointer-events: none;
 }
 
 .agrointel-lang-item:hover,

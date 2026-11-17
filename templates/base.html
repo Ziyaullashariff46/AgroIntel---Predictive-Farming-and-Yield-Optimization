@@ -7,7 +7,7 @@
   <title>{% block title %}AgroIntel | Intelligent Agriculture Platform{% endblock %}</title>
   <meta name="description" content="AgroIntel — ML-powered smart agriculture platform for crop recommendations, yield forecasting, and live market intelligence.">
 
-  <!-- Prevent theme & language flash -->
+  <!-- Prevent theme & language flash & setup language functions -->
   <script>
     (function() {
       var t = localStorage.getItem('agrointel-theme') || (window.matchMedia('(prefers-color-scheme: light)').matches ? 'light' : 'dark');
@@ -15,6 +15,63 @@
       var l = localStorage.getItem('agrointel-lang') || 'en';
       document.documentElement.setAttribute('lang', l);
     })();
+
+    window.toggleAgroIntelLang = function(e) {
+      if (e) {
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+      }
+      var btn = (e && (e.currentTarget || e.target)) ? (e.currentTarget || e.target).closest('.agrointel-lang-btn') : null;
+      var dd = btn ? btn.closest('.agrointel-lang-dropdown') : document.querySelector('.agrointel-lang-dropdown');
+      if (!dd) return;
+      var isOpen = dd.classList.contains('open');
+      document.querySelectorAll('.agrointel-lang-dropdown').forEach(function(d) {
+        d.classList.remove('open');
+      });
+      if (!isOpen) {
+        dd.classList.add('open');
+      }
+    };
+
+    window.setAgroIntelLang = function(lang, e) {
+      if (e) {
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+      }
+      document.querySelectorAll('.agrointel-lang-dropdown').forEach(function(d) {
+        d.classList.remove('open');
+      });
+      if (window.AgroIntelI18N && typeof window.AgroIntelI18N.setLanguage === 'function') {
+        window.AgroIntelI18N.setLanguage(lang);
+      } else {
+        localStorage.setItem('agrointel-lang', lang);
+        document.documentElement.setAttribute('lang', lang);
+        var labelMap = { 'en': '🇬🇧 EN', 'kn': '🇮🇳 ಕನ್ನಡ', 'hi': '🇮🇳 हिन्दी' };
+        document.querySelectorAll('.agrointel-lang-current-label').forEach(function(el) {
+          el.textContent = labelMap[lang] || '🇬🇧 EN';
+        });
+        document.querySelectorAll('.agrointel-lang-item').forEach(function(el) {
+          if (el.getAttribute('data-lang') === lang) el.classList.add('active');
+          else el.classList.remove('active');
+        });
+      }
+    };
+
+    document.addEventListener('click', function(e) {
+      if (!e.target.closest('.agrointel-lang-dropdown')) {
+        document.querySelectorAll('.agrointel-lang-dropdown').forEach(function(d) {
+          d.classList.remove('open');
+        });
+      }
+    });
+
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.agrointel-lang-dropdown').forEach(function(d) {
+          d.classList.remove('open');
+        });
+      }
+    });
   </script>
 
   <!-- Fonts -->
@@ -61,21 +118,21 @@
       <div class="navbar-right-controls d-none d-lg-flex">
         {# Language Switcher Dropdown — Desktop #}
         <div class="agrointel-lang-dropdown mr-2" title="Language / ಭಾಷೆ / भाषा">
-          <button type="button" class="agrointel-lang-btn" aria-label="Select Language" onclick="this.closest('.agrointel-lang-dropdown').classList.toggle('open')">
+          <button type="button" class="agrointel-lang-btn" aria-label="Select Language" onclick="window.toggleAgroIntelLang(event)">
             <span class="lang-flag"><i class="fas fa-language"></i></span>
             <span class="agrointel-lang-current-label">🇬🇧 EN</span>
             <i class="fas fa-chevron-down lang-caret" aria-hidden="true"></i>
           </button>
           <div class="agrointel-lang-menu">
-            <button type="button" class="agrointel-lang-item active" data-lang="en" onclick="window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('en')">
+            <button type="button" class="agrointel-lang-item active" data-lang="en" onclick="window.setAgroIntelLang('en', event); window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('en');">
               <span>🇬🇧 English</span>
               <i class="fas fa-check check-icon"></i>
             </button>
-            <button type="button" class="agrointel-lang-item" data-lang="kn" onclick="window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('kn')">
+            <button type="button" class="agrointel-lang-item" data-lang="kn" onclick="window.setAgroIntelLang('kn', event); window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('kn');">
               <span>🇮🇳 ಕನ್ನಡ (Kannada)</span>
               <i class="fas fa-check check-icon"></i>
             </button>
-            <button type="button" class="agrointel-lang-item" data-lang="hi" onclick="window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('hi')">
+            <button type="button" class="agrointel-lang-item" data-lang="hi" onclick="window.setAgroIntelLang('hi', event); window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('hi');">
               <span>🇮🇳 हिन्दी (Hindi)</span>
               <i class="fas fa-check check-icon"></i>
             </button>
@@ -133,20 +190,20 @@
       <div class="navbar-mobile-right d-flex d-lg-none">
         {# Language Switcher Dropdown — Mobile #}
         <div class="agrointel-lang-dropdown mr-2">
-          <button type="button" class="agrointel-lang-btn" style="padding: 0.35rem 0.65rem; min-height: 32px; font-size: 0.78rem;" aria-label="Language" onclick="this.closest('.agrointel-lang-dropdown').classList.toggle('open')">
+          <button type="button" class="agrointel-lang-btn" style="padding: 0.35rem 0.65rem; min-height: 32px; font-size: 0.78rem;" aria-label="Language" onclick="window.toggleAgroIntelLang(event)">
             <span class="agrointel-lang-current-label">🌐 EN</span>
             <i class="fas fa-chevron-down lang-caret" style="font-size: 0.65rem;"></i>
           </button>
           <div class="agrointel-lang-menu">
-            <button type="button" class="agrointel-lang-item active" data-lang="en" onclick="window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('en')">
+            <button type="button" class="agrointel-lang-item active" data-lang="en" onclick="window.setAgroIntelLang('en', event); window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('en');">
               <span>🇬🇧 English</span>
               <i class="fas fa-check check-icon"></i>
             </button>
-            <button type="button" class="agrointel-lang-item" data-lang="kn" onclick="window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('kn')">
+            <button type="button" class="agrointel-lang-item" data-lang="kn" onclick="window.setAgroIntelLang('kn', event); window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('kn');">
               <span>🇮🇳 ಕನ್ನಡ</span>
               <i class="fas fa-check check-icon"></i>
             </button>
-            <button type="button" class="agrointel-lang-item" data-lang="hi" onclick="window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('hi')">
+            <button type="button" class="agrointel-lang-item" data-lang="hi" onclick="window.setAgroIntelLang('hi', event); window.AgroIntelI18N && window.AgroIntelI18N.setLanguage('hi');">
               <span>🇮🇳 हिन्दी</span>
               <i class="fas fa-check check-icon"></i>
             </button>

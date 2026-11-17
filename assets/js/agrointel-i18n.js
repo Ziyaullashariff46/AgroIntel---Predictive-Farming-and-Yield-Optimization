@@ -1209,6 +1209,11 @@
     localStorage.setItem('agrointel-lang', lang);
     document.documentElement.setAttribute('lang', lang);
 
+    // Close any open language dropdowns
+    document.querySelectorAll('.agrointel-lang-dropdown').forEach(d => {
+      d.classList.remove('open');
+    });
+
     // Update active checkmarks in language dropdown
     document.querySelectorAll('.agrointel-lang-item').forEach(el => {
       if (el.getAttribute('data-lang') === lang) {
@@ -1243,33 +1248,46 @@
   function applyTranslationsToDOM() {
     // 1. Elements with data-i18n
     document.querySelectorAll('[data-i18n]').forEach(el => {
+      if (el.closest('.agrointel-lang-dropdown')) return;
       const key = el.getAttribute('data-i18n');
       if (key && TRANSLATIONS[key]) {
-        el.textContent = t(key);
+        if (el.children.length === 0) {
+          el.textContent = t(key);
+        } else {
+          let replaced = false;
+          Array.from(el.childNodes).forEach(node => {
+            if (node.nodeType === Node.TEXT_NODE && node.textContent.trim()) {
+              node.textContent = ' ' + t(key) + ' ';
+              replaced = true;
+            }
+          });
+          if (!replaced) el.textContent = t(key);
+        }
       }
     });
 
     // 2. Sidebar titles & subtitles
-    document.querySelectorAll('.sidebar-nav-title').forEach(el => {
-      const orig = el.getAttribute('data-original-text') || el.textContent.trim();
-      if (!el.getAttribute('data-original-text')) el.setAttribute('data-original-text', orig);
-      if (TRANSLATIONS[orig]) el.textContent = t(orig);
-    });
-
-    document.querySelectorAll('.sidebar-nav-sub').forEach(el => {
-      const orig = el.getAttribute('data-original-text') || el.textContent.trim();
-      if (!el.getAttribute('data-original-text')) el.setAttribute('data-original-text', orig);
-      if (TRANSLATIONS[orig]) el.textContent = t(orig);
+    document.querySelectorAll('.sidebar-nav-title, .sidebar-nav-sub').forEach(el => {
+      if (!el.getAttribute('data-original-text')) {
+        el.setAttribute('data-original-text', el.textContent.trim());
+      }
+      const orig = el.getAttribute('data-original-text');
+      if (orig && TRANSLATIONS[orig]) {
+        el.textContent = t(orig);
+      }
     });
 
     // 3. Form labels
     document.querySelectorAll('label').forEach(label => {
+      if (label.closest('.agrointel-lang-dropdown')) return;
       Array.from(label.childNodes).forEach(node => {
         if (node.nodeType === Node.TEXT_NODE) {
           const rawText = node.textContent.trim();
-          if (rawText && TRANSLATIONS[rawText]) {
-            if (!label.getAttribute('data-orig-label')) label.setAttribute('data-orig-label', rawText);
-            node.textContent = ' ' + t(label.getAttribute('data-orig-label')) + ' ';
+          if (!node._origText && rawText && TRANSLATIONS[rawText]) {
+            node._origText = rawText;
+          }
+          if (node._origText && TRANSLATIONS[node._origText]) {
+            node.textContent = ' ' + t(node._origText) + ' ';
           }
         }
       });
@@ -1277,12 +1295,15 @@
 
     // 4. Buttons (preserves Font Awesome icons)
     document.querySelectorAll('button[type="submit"], .btn-agro-primary, .btn-agro-secondary, .soil-preset-btn').forEach(btn => {
+      if (btn.closest('.agrointel-lang-dropdown')) return;
       Array.from(btn.childNodes).forEach(node => {
         if (node.nodeType === Node.TEXT_NODE) {
           const rawText = node.textContent.trim();
-          if (rawText && TRANSLATIONS[rawText]) {
-            if (!btn.getAttribute('data-orig-btn')) btn.setAttribute('data-orig-btn', rawText);
-            node.textContent = ' ' + t(btn.getAttribute('data-orig-btn')) + ' ';
+          if (!node._origText && rawText && TRANSLATIONS[rawText]) {
+            node._origText = rawText;
+          }
+          if (node._origText && TRANSLATIONS[node._origText]) {
+            node.textContent = ' ' + t(node._origText) + ' ';
           }
         }
       });
@@ -1357,20 +1378,26 @@
       }
     });
 
-    // 7. General Headings, Paragraphs, Links, Table Headers, Spans, and List Items
-    document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, th, td, li, .badge-agro, a.nav-link, a.nav-link-custom').forEach(el => {
+    // 7. General Headings, Paragraphs, Links, Table Headers, Spans, Alerts, Badges
+    document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, th, td, li, .badge-agro, a.nav-link, a.nav-link-custom, .alert, small, .card-title, .metric-label, .stat-label, .card-header, span:not([class*="fa"]):not(.lang-flag):not(.check-icon):not(.badge-agro)').forEach(el => {
       if (el.hasAttribute('data-i18n')) return;
+      if (el.closest('.agrointel-lang-dropdown')) return;
       Array.from(el.childNodes).forEach(node => {
         if (node.nodeType === Node.TEXT_NODE) {
           const rawText = node.textContent.trim();
           if (!rawText) return;
-          if (!node._origText) {
+          if (!node._origText && TRANSLATIONS[rawText]) {
             node._origText = rawText;
           }
-          const orig = node._origText;
-          if (TRANSLATIONS[orig]) {
-            const translated = (currentLang === 'en') ? orig : t(orig, currentLang);
-            node.textContent = node.textContent.replace(rawText, translated);
+          if (node._origText && TRANSLATIONS[node._origText]) {
+            const currentRendered = node._currentText || node._origText;
+            const translated = (currentLang === 'en') ? node._origText : t(node._origText, currentLang);
+            if (node.textContent.includes(currentRendered)) {
+              node.textContent = node.textContent.replace(currentRendered, translated);
+            } else {
+              node.textContent = translated;
+            }
+            node._currentText = translated;
           }
         }
       });
@@ -1382,7 +1409,7 @@
         inp.setAttribute('data-orig-ph', inp.placeholder.trim());
       }
       const origPh = inp.getAttribute('data-orig-ph');
-      if (TRANSLATIONS[origPh]) {
+      if (origPh && TRANSLATIONS[origPh]) {
         inp.placeholder = (currentLang === 'en') ? origPh : t(origPh, currentLang);
       }
     });
@@ -1390,30 +1417,39 @@
 
   // Setup dropdown clicks
   function setupLangDropdown() {
+    window.toggleAgroIntelLang = function(e) {
+      if (e) {
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+      }
+      const btn = (e && (e.currentTarget || e.target)) ? (e.currentTarget || e.target).closest('.agrointel-lang-btn') : null;
+      const dd = btn ? btn.closest('.agrointel-lang-dropdown') : document.querySelector('.agrointel-lang-dropdown');
+      if (!dd) return;
+      const isOpen = dd.classList.contains('open');
+      document.querySelectorAll('.agrointel-lang-dropdown').forEach(d => d.classList.remove('open'));
+      if (!isOpen) dd.classList.add('open');
+    };
+
+    window.setAgroIntelLang = function(lang, e) {
+      if (e) {
+        if (typeof e.stopPropagation === 'function') e.stopPropagation();
+        if (typeof e.preventDefault === 'function') e.preventDefault();
+      }
+      document.querySelectorAll('.agrointel-lang-dropdown').forEach(d => d.classList.remove('open'));
+      setLanguage(lang);
+    };
+
+    // Close on click outside
     document.addEventListener('click', function(e) {
-      const btn = e.target.closest('.agrointel-lang-btn');
-      const dropdown = e.target.closest('.agrointel-lang-dropdown');
-      const allDropdowns = document.querySelectorAll('.agrointel-lang-dropdown');
-
-      if (btn && dropdown) {
-        e.preventDefault();
-        e.stopPropagation();
-        const isOpen = dropdown.classList.contains('open');
-        allDropdowns.forEach(d => d.classList.remove('open'));
-        if (!isOpen) dropdown.classList.add('open');
-        return;
+      if (!e.target.closest('.agrointel-lang-dropdown')) {
+        document.querySelectorAll('.agrointel-lang-dropdown').forEach(d => d.classList.remove('open'));
       }
+    });
 
-      if (e.target.closest('.agrointel-lang-item')) {
-        const item = e.target.closest('.agrointel-lang-item');
-        const lang = item.getAttribute('data-lang');
-        setLanguage(lang);
-        allDropdowns.forEach(d => d.classList.remove('open'));
-        return;
-      }
-
-      if (!dropdown) {
-        allDropdowns.forEach(d => d.classList.remove('open'));
+    // Close on escape key
+    document.addEventListener('keydown', function(e) {
+      if (e.key === 'Escape') {
+        document.querySelectorAll('.agrointel-lang-dropdown').forEach(d => d.classList.remove('open'));
       }
     });
   }
