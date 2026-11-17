@@ -9,10 +9,10 @@
       <!-- Role Selector Tabs -->
       <div class="d-flex rounded-lg p-1.5 mb-4" style="background: var(--bg-input); border: 1px solid var(--border-glass);">
         <a href="{{ url_for('login', role='farmer') }}" class="btn flex-fill text-sm font-weight-bold py-2 px-1 text-center {% if role=='farmer' %}btn-agro-primary{% else %}text-muted{% endif %}" style="min-width: 0;">
-          <i class="fas fa-tractor mr-1"></i> Farmer
+          <i class="fas fa-tractor mr-1"></i> <span data-i18n="Farmer">Farmer</span>
         </a>
         <a href="{{ url_for('login', role='admin') }}" class="btn flex-fill text-sm font-weight-bold py-2 px-1 text-center {% if role=='admin' %}btn-agro-admin{% else %}text-muted{% endif %}" style="min-width: 0;">
-          <i class="fas fa-user-shield mr-1"></i> Admin
+          <i class="fas fa-user-shield mr-1"></i> <span data-i18n="Admin">Admin</span>
         </a>
       </div>
 
@@ -20,15 +20,15 @@
         <div class="bg-gradient-success rounded-circle d-inline-flex align-items-center justify-content-center mb-3" style="width: 56px; height: 56px; background: linear-gradient(135deg, #10b981, #059669);">
           <i class="fas fa-user-lock text-white fs-3"></i>
         </div>
-        <h3 class="text-bright font-weight-bold mb-1">{{ role|capitalize }} Portal Sign In</h3>
-        <p class="text-muted small">Enter your credentials to access your dashboard</p>
+        <h3 class="text-bright font-weight-bold mb-1" data-i18n="{{ role|capitalize }} Portal Sign In">{{ role|capitalize }} Portal Sign In</h3>
+        <p class="text-muted small" data-i18n="Enter your credentials to access your dashboard">Enter your credentials to access your dashboard</p>
       </div>
 
       <!-- Demo Credentials (for reviewer/evaluator access) -->
       <div class="mb-3 p-3 rounded" style="background: rgba(245,158,11,0.08); border: 1px solid rgba(245,158,11,0.25); font-size: 0.82rem;">
         <div class="d-flex align-items-center justify-content-between" style="cursor: pointer;" onclick="document.getElementById('demoCreds').classList.toggle('d-none');">
           <span style="color: var(--amber-500); font-weight: 700;">
-            <i class="fas fa-circle-info mr-1"></i> Demo Credentials (click to show)
+            <i class="fas fa-circle-info mr-1"></i> <span data-i18n="Demo Credentials (click to show)">Demo Credentials (click to show)</span>
           </span>
           <i class="fas fa-chevron-down" style="color: var(--amber-500); font-size: 0.75rem;"></i>
         </div>
@@ -46,12 +46,12 @@
       <form action="{{ url_for('login', role=role) }}" method="POST">
           <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
         <div class="form-group mb-3">
-          <label class="font-weight-bold small text-muted"><i class="fas fa-envelope mr-1 text-emerald"></i> Email / Username</label>
+          <label class="font-weight-bold small text-muted"><i class="fas fa-envelope mr-1 text-emerald"></i> <span data-i18n="Email / Username">Email / Username</span></label>
           <input type="text" name="email" class="form-control form-control-agro" placeholder="Enter email or username" required autocomplete="username">
         </div>
 
         <div class="form-group mb-1">
-          <label class="font-weight-bold small text-muted"><i class="fas fa-lock mr-1 text-emerald"></i> Password</label>
+          <label class="font-weight-bold small text-muted"><i class="fas fa-lock mr-1 text-emerald"></i> <span data-i18n="Password">Password</span></label>
           <div class="position-relative">
             <input type="password" name="password" id="passwordInput" class="form-control form-control-agro pr-5" placeholder="••••••••" required autocomplete="current-password">
             <button type="button" onclick="togglePw()" class="btn p-0 position-absolute" style="right: 12px; top: 50%; transform: translateY(-50%); background: none; border: none; color: var(--text-muted);" aria-label="Show/hide password">
@@ -62,20 +62,20 @@
 
         <!-- Forgot Password -->
         <div class="text-right mb-4">
-          <a href="{{ url_for('forgot_password') }}" class="small text-muted" style="text-decoration: underline;">
+          <a href="{{ url_for('forgot_password') }}" class="small text-muted" style="text-decoration: underline;" data-i18n="Forgot your password? Reset here →">
             Forgot your password? Reset here →
           </a>
         </div>
 
         <button type="submit" class="btn btn-agro-primary w-100 py-3 font-weight-bold fs-6">
-          Sign In to Portal <i class="fas fa-arrow-right ml-2"></i>
+          <span data-i18n="Sign In to Portal">Sign In to Portal</span> <i class="fas fa-arrow-right ml-2"></i>
         </button>
       </form>
 
       {% if role != 'admin' %}
         <div class="mt-4 text-center border-top pt-3" style="border-color: var(--border-glass) !important;">
-          <p class="mb-0 text-muted small">Don't have an account yet? 
-            <a href="{{ url_for('register', role=role) }}" class="font-weight-bold text-emerald">Register {{ role|capitalize }} Account</a>
+          <p class="mb-0 text-muted small"><span data-i18n="Don't have an account yet?">Don't have an account yet?</span> 
+            <a href="{{ url_for('register', role=role) }}" class="font-weight-bold text-emerald" data-i18n="Register Farmer Account">Register Farmer Account</a>
           </p>
         </div>
       {% endif %}

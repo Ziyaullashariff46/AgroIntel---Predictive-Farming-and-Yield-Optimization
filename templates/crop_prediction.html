@@ -81,10 +81,19 @@
       </div>
     </form>
 
+    {% if is_fallback and fallback_reason %}
+    <div class="alert alert-info mt-3 glass-card border-0" style="background: rgba(6, 182, 212, 0.12); border-left: 4px solid var(--cyan-500) !important;">
+      <div class="d-flex align-items-start" style="gap: 0.75rem;">
+        <i class="fas fa-circle-info text-info mt-1"></i>
+        <span style="font-size: 0.85rem; color: var(--text-primary);">{{ fallback_reason }}</span>
+      </div>
+    </div>
+    {% endif %}
+
     {% if result %}
     <div class="mt-4 p-4 rounded animate-fade-in-up" style="background: var(--bg-input); border: 1.5px solid var(--border-normal);">
       <h5 class="mb-4" style="font-weight: 700; color: var(--text-primary);">
-        <i class="fas fa-award" style="color: var(--amber-500);" aria-hidden="true"></i> Predicted High-Yield & Profit Crops
+        <i class="fas fa-award" style="color: var(--amber-500);" aria-hidden="true"></i> Predicted High-Suitability & High-Prevalence Crops
       </h5>
       <div class="row g-3">
         {% if result is string %}
@@ -98,7 +107,7 @@
                 <i class="fas fa-seedling" style="color: #fff; font-size: 1.2rem;" aria-hidden="true"></i>
               </div>
               <h5 class="mb-2" style="font-weight: 700; color: var(--text-primary); text-transform: capitalize;">{{ crop }}</h5>
-              <span class="badge badge-success py-1 px-3" style="font-weight: 700; font-size: 0.78rem;">{{ suitability }} Profit Potential</span>
+              <span class="badge badge-success py-1 px-3" style="font-weight: 700; font-size: 0.78rem;">{{ suitability }} Historical Prevalence</span>
             </div>
           </div>
           {% endfor %}
@@ -109,22 +118,22 @@
   </div>
 
   <!-- ═══════════════════════════════════════════
-       HISTORICAL PRICE & DEMAND FORECAST (LAST 3-4 MONTHS)
+       HISTORICAL PRICE & DEMAND FORECAST
        ═══════════════════════════════════════════ -->
   <div class="glass-card mb-4">
     <div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
       <div>
         <span class="badge-agro badge-agro-amber mb-2"><i class="fas fa-arrow-trend-up"></i> Market Demand Analysis</span>
-        <h5 class="mb-0" style="font-weight: 800; color: var(--text-primary);">Last 3–4 Months Price & Demand Trends</h5>
+        <h5 class="mb-0" style="font-weight: 800; color: var(--text-primary);">Regional APMC & MSP Price Benchmarks</h5>
       </div>
-      <span class="text-muted" style="font-size: 0.8rem;">Historical Trajectory (Indicative)</span>
+      <span class="text-muted" style="font-size: 0.8rem;">Official Mandi & CACP Reference Benchmarks</span>
     </div>
 
     {% if price_data %}
     <div class="d-flex align-items-start gap-2 mb-3 p-3 rounded" style="background: rgba(6,182,212,0.07); border: 1px solid rgba(6,182,212,0.2); font-size: 0.82rem;">
       <i class="fas fa-chart-line mt-1" style="color: var(--cyan-500); flex-shrink: 0;"></i>
       <div>
-        <strong style="color: var(--cyan-500);">{{ state }} — {{ district }}</strong> | {{ season }} Season | Estimated APMC mandi price trajectories for ML-predicted crops in your region.
+        <strong style="color: var(--cyan-500);">{{ state }} — {{ district }}</strong> | {{ season }} Season | Indicative modal mandi rates and MSP benchmarks for recommended crops in your agro-climatic zone.
       </div>
     </div>
 
@@ -133,21 +142,21 @@
         <thead>
           <tr style="border-bottom: 1px solid var(--border-subtle); color: var(--text-muted); text-transform: uppercase; font-size: 0.72rem;">
             <th>Crop Name</th>
-            <th>{{ price_data[0].months[0] }}</th>
-            <th>{{ price_data[0].months[1] }}</th>
-            <th>{{ price_data[0].months[2] }}</th>
-            <th>{{ price_data[0].current_month }}</th>
-            <th>Predicted Demand</th>
+            <th>Regional Prevalence</th>
+            <th>Indicative Modal Rate</th>
+            <th>Benchmark Range</th>
+            <th>Government MSP</th>
+            <th>Market Demand</th>
           </tr>
         </thead>
         <tbody>
           {% for row in price_data %}
           <tr>
             <td><strong style="color: var(--text-primary);">{{ row.name }}</strong></td>
-            <td>{{ row.m3 }} / q</td>
-            <td>{{ row.m2 }} / q</td>
-            <td>{{ row.m1 }} / q</td>
+            <td><span class="badge badge-secondary" style="font-weight: 700;">{{ row.prevalence }}</span></td>
             <td style="color: var(--emerald-500); font-weight: 700;">{{ row.current }} / q</td>
+            <td>{{ row.range }}</td>
+            <td style="color: var(--amber-500);">{{ row.msp }}</td>
             <td><span class="badge {{ row.demand_badge }}">{{ row.demand_label }}</span></td>
           </tr>
           {% endfor %}
@@ -177,11 +186,11 @@
       <div class="col-md-6">
         <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md); height: 100%;">
           <h6 style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--emerald-500); margin-bottom: 0.75rem;">
-            <i class="fas fa-microchip"></i> ML Model Used
+            <i class="fas fa-microchip"></i> Crop Pattern Decision Tree
           </h6>
           <p class="text-muted mb-0" style="font-size: 0.85rem; line-height: 1.6;">
-            <strong>Random Forest Regressor & Decision Tree Classifier</strong><br>
-            Trained on historical APMC mandi trading datasets, district crop production statistics (`crop_production_karnataka.csv`), and state-level price velocity matrices.
+            <strong>Decision Tree Classifier on Historical Crop Records</strong><br>
+            Trained on multi-decade historical district crop statistics (<code>preprocessed2.csv</code>) across 646 Indian districts. Classifies historical crop prevalence shares by State, District, and Season.
           </p>
         </div>
       </div>
@@ -189,12 +198,12 @@
       <div class="col-md-6">
         <div style="padding: 1.25rem; background: var(--bg-input); border: 1px solid var(--border-subtle); border-radius: var(--r-md); height: 100%;">
           <h6 style="font-weight: 700; font-size: 0.82rem; text-transform: uppercase; letter-spacing: 0.04em; color: var(--cyan-500); margin-bottom: 0.75rem;">
-            <i class="fas fa-flask"></i> Estimation Basis
+            <i class="fas fa-coins"></i> Price & Benchmark Basis
           </h6>
           <ul class="text-muted mb-0 pl-3" style="font-size: 0.84rem; line-height: 1.6;">
-            <li><strong>3–4 Month Price Trajectory:</strong> Tracks rate of price acceleration across preceding quarters.</li>
-            <li><strong>District Supply Density:</strong> Evaluates total cultivated area vs estimated APMC arrivals.</li>
-            <li><strong>Consumer Price Index & Inflation:</strong> Adjusts minimum support prices (MSP) against macro market indicators.</li>
+            <li><strong>Official MSP Benchmarks:</strong> Sourced from Commission for Agricultural Costs and Prices (CACP 2024–25 Kharif & Rabi notifications).</li>
+            <li><strong>Indicative Modal APMC Rates:</strong> Aggregated from Agmarknet modal trade benchmarks rather than synthetic price regressions.</li>
+            <li><strong>Regional Prevalence:</strong> Represents the historical proportion of acreage cycles recorded for each crop in the selected district.</li>
           </ul>
         </div>
       </div>

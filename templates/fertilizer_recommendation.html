@@ -83,6 +83,15 @@
       </button>
     </form>
 
+    {% if error_msg %}
+    <div class="alert alert-danger mt-4 glass-card border-0" style="background: rgba(239, 68, 68, 0.12); border-left: 4px solid var(--rose-500) !important;">
+      <div class="d-flex align-items-start" style="gap: 0.75rem;">
+        <i class="fas fa-circle-exclamation text-danger mt-1"></i>
+        <span style="font-size: 0.85rem; color: var(--text-primary);">{{ error_msg }}</span>
+      </div>
+    </div>
+    {% endif %}
+
     {% if result %}
     <div class="mt-4 result-card-glow text-center animate-fade-in-up" style="background: linear-gradient(135deg, rgba(6,182,212,0.16) 0%, rgba(139,92,246,0.28) 100%); border-color: var(--cyan-500);">
       <span class="badge-agro badge-agro-cyan mb-3"><i class="fas fa-circle-check" aria-hidden="true"></i> Fertilizer Category Ready</span>
@@ -240,12 +249,13 @@ function prefillWeather() {
         note.textContent = 'Weather unavailable right now — enter values manually.';
         return;
       }
-      const rain = (data.forecast && data.forecast[0]) ? (data.forecast[0].rain_mm || 0) : 0;
-      const soilMoisture = rain > 5 ? 75 : rain > 0 ? 55 : 35;
       document.getElementById('tFert').value = data.current.temp;
       document.getElementById('hFert').value = data.current.humidity;
-      document.getElementById('smFert').value = soilMoisture;
-      note.textContent = `Loaded live weather for ${data.current.city}: ${data.current.temp}°C, ${data.current.humidity}% humidity.`;
+      if (data.is_fallback) {
+        note.innerHTML = `<span class="badge badge-warning text-dark"><i class="fas fa-triangle-exclamation"></i> Offline Climate Baseline</span> Loaded regional baseline for ${data.current.city}: ${data.current.temp}°C, ${data.current.humidity}% humidity. (Soil moisture requires physical soil test).`;
+      } else {
+        note.textContent = `Loaded live weather for ${data.current.city}: ${data.current.temp}°C, ${data.current.humidity}% humidity. (Soil moisture requires physical soil test).`;
+      }
     })
     .catch(() => {
       btn.disabled = false;
@@ -281,12 +291,13 @@ function detectLiveWeatherFert() {
           return;
         }
         const cur = data.current;
-        const rain = (data.forecast && data.forecast[0]) ? (data.forecast[0].rain_mm || 0) : 0;
-        const soilMoisture = rain > 5 ? 75 : rain > 0 ? 55 : 35;
         document.getElementById('tFert').value = cur.temp;
         document.getElementById('hFert').value = cur.humidity;
-        document.getElementById('smFert').value = soilMoisture;
-        note.textContent = `📍 ${cur.city}: ${cur.temp}°C, ${cur.humidity}% humidity.`;
+        if (data.is_fallback) {
+          note.innerHTML = `<span class="badge badge-warning text-dark"><i class="fas fa-triangle-exclamation"></i> Offline Climate Baseline</span> Loaded regional baseline for ${cur.city}: ${cur.temp}°C, ${cur.humidity}% humidity.`;
+        } else {
+          note.textContent = `📍 ${cur.city}: ${cur.temp}°C, ${cur.humidity}% humidity. (Soil moisture requires physical soil test).`;
+        }
 
         if (cur.state && DISTRICTS_BY_STATE[cur.state]) {
           document.getElementById('stateSelect').value = cur.state;

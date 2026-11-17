@@ -168,18 +168,41 @@
 {% if result is number %}
 <div class="result-card-glow" style="margin-top: 2rem; text-align: center;">
   <p style="font-size: 0.82rem; font-weight: 600; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cyan-500); margin-bottom: 0.5rem;">
-    <i class="fas fa-chart-area"></i> Historical Monthly Average (IMD 1901–2015)
+    <i class="fas fa-chart-area"></i> Climatology Baseline (IMD 1901–2015)
   </p>
   <h2 style="font-family: var(--font-display); font-weight: 800; font-size: 2.8rem; margin: 0.25rem 0;
              background: linear-gradient(135deg, var(--cyan-400), var(--emerald-500)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">
     {{ result }} <span style="font-size: 1.2rem;">mm</span>
   </h2>
   <p style="color: var(--text-muted); font-size: 0.88rem; margin-top: 0.5rem;">
-    Expected rainfall for <strong style="color: var(--text-primary);">{{ request.form.get('region', 'Selected Zone') }}</strong>
+    Historical monthly precipitation baseline for <strong style="color: var(--text-primary);">{{ request.form.get('region', 'Selected Zone') }}</strong>
     in <strong style="color: var(--text-primary);">{{ request.form.get('month', 'Selected Month') }}</strong>
   </p>
+
+  {# ── Statistical Distribution Grid ── #}
+  <div class="row g-2 mt-3 justify-content-center" style="max-width: 600px; margin-left: auto; margin-right: auto;">
+    <div class="col-4">
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-md); padding: 0.65rem 0.5rem;">
+        <p style="font-size: 0.72rem; color: var(--text-muted); margin: 0; text-transform: uppercase;">Spread (Std Dev)</p>
+        <p style="font-size: 1rem; font-weight: 700; color: var(--cyan-500); margin: 0.15rem 0 0;">± {{ std_dev if std_dev is not none else '--' }} mm</p>
+      </div>
+    </div>
+    <div class="col-4">
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-md); padding: 0.65rem 0.5rem;">
+        <p style="font-size: 0.72rem; color: var(--text-muted); margin: 0; text-transform: uppercase;">Observed Range</p>
+        <p style="font-size: 1rem; font-weight: 700; color: var(--emerald-500); margin: 0.15rem 0 0;">{{ min_val if min_val is not none else '--' }} – {{ max_val if max_val is not none else '--' }} mm</p>
+      </div>
+    </div>
+    <div class="col-4">
+      <div style="background: var(--bg-surface); border: 1px solid var(--border-subtle); border-radius: var(--r-md); padding: 0.65rem 0.5rem;">
+        <p style="font-size: 0.72rem; color: var(--text-muted); margin: 0; text-transform: uppercase;">Historical Record</p>
+        <p style="font-size: 1rem; font-weight: 700; color: var(--amber-500); margin: 0.15rem 0 0;">{{ years_count or 115 }} Years</p>
+      </div>
+    </div>
+  </div>
+
   {% set r_val = result|float %}
-  <div style="margin-top: 1rem;">
+  <div style="margin-top: 1.25rem;">
     {% if r_val > 300 %}
       <span class="badge-agro badge-agro-cyan"><i class="fas fa-water"></i> Very Heavy Rainfall Zone</span>
     {% elif r_val > 150 %}

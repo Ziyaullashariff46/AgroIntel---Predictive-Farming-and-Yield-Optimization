@@ -1,6 +1,7 @@
 import pytest
 import re
 import uuid
+import secrets
 from app import app, get_db
 
 @pytest.fixture
@@ -82,7 +83,7 @@ def test_sample_admin_login(client):
 def test_registered_farmer_registration_and_login(client):
     """Test registering a new farmer and immediately logging in with the new account."""
     unique_email = f"farmer_{uuid.uuid4().hex[:6]}@example.com"
-    phone = "9123456789"
+    phone = f"9{secrets.randbelow(900000000) + 100000000}"
     password = "MySecurePassword2026!"
 
     # 1. Register

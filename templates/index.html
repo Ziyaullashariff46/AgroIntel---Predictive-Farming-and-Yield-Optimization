@@ -273,15 +273,15 @@
 
     <div class="hero-eyebrow">
       <i class="fas fa-leaf" aria-hidden="true"></i>
-      Next-Gen Smart Agriculture Platform
+      <span data-i18n="Next-Gen Smart Agriculture Platform">Next-Gen Smart Agriculture Platform</span>
     </div>
 
     <h1 id="hero-heading" class="hero-headline">
-      Grow Smarter with<br>
-      <span class="gradient-text">Data-Driven Farming</span>
+      <span data-i18n="Grow Smarter with">Grow Smarter with</span><br>
+      <span class="gradient-text" data-i18n="Data-Driven Farming">Data-Driven Farming</span>
     </h1>
 
-    <p class="hero-sub">
+    <p class="hero-sub" data-i18n="AgroIntel brings together machine-learning models and real agricultural data so Indian farmers can choose the right crop, predict yields, optimize yields, and make data-driven farming decisions.">
       AgroIntel brings together machine-learning models and real agricultural data so Indian
       farmers can choose the right crop, predict yields, optimize yields, and make data-driven farming decisions.
     </p>
@@ -291,12 +291,12 @@
       <a href="{{ url_for('login', role='farmer') }}"
          class="btn-agro-primary"
          aria-label="Login to the Farmer Portal">
-        <i class="fas fa-tractor" aria-hidden="true"></i> Farmer Portal
+        <i class="fas fa-tractor" aria-hidden="true"></i> <span data-i18n="Farmer Portal">Farmer Portal</span>
       </a>
       <a href="{{ url_for('login', role='admin') }}"
          class="btn-agro-admin"
          aria-label="Login to the Admin Portal">
-        <i class="fas fa-user-shield" aria-hidden="true"></i> Admin Portal
+        <i class="fas fa-user-shield" aria-hidden="true"></i> <span data-i18n="Admin Portal">Admin Portal</span>
       </a>
     </div>
 
@@ -304,19 +304,19 @@
     <div class="hero-stats" aria-label="Platform statistics">
       <div class="stat-item">
         <h3 class="gradient-text">3</h3>
-        <p>Trained ML Models</p>
+        <p data-i18n="Trained ML Models">Trained ML Models</p>
       </div>
       <div class="stat-item">
         <h3 style="color: var(--amber-500);">22</h3>
-        <p>Crop Types</p>
+        <p data-i18n="Crop Types">Crop Types</p>
       </div>
       <div class="stat-item">
         <h3 style="color: var(--cyan-500);">Agmarknet</h3>
-        <p>Mandi Rates</p>
+        <p data-i18n="Mandi Rates">Mandi Rates</p>
       </div>
       <div class="stat-item">
         <h3 class="gradient-text">115-yr</h3>
-        <p>IMD Climatology</p>
+        <p data-i18n="IMD Climatology">IMD Climatology</p>
       </div>
     </div>
 
@@ -332,10 +332,10 @@
 
     <div class="text-center mb-5">
       <div class="section-label">
-        <i class="fas fa-brain" aria-hidden="true"></i> Platform Capabilities
+        <i class="fas fa-brain" aria-hidden="true"></i> <span data-i18n="Platform Capabilities">Platform Capabilities</span>
       </div>
-      <h2 id="features-heading" class="section-headline">What AgroIntel Can Do</h2>
-      <p style="color: var(--text-muted); max-width: 520px; margin: 0 auto; font-size: 0.95rem; line-height: 1.7;">
+      <h2 id="features-heading" class="section-headline" data-i18n="What AgroIntel Can Do">What AgroIntel Can Do</h2>
+      <p style="color: var(--text-muted); max-width: 520px; margin: 0 auto; font-size: 0.95rem; line-height: 1.7;" data-i18n="One intelligent platform covering everything a modern farmer needs — from soil analysis to market rates.">
         One intelligent platform covering everything a modern farmer needs — from soil analysis to market rates.
       </p>
     </div>
@@ -347,7 +347,7 @@
         <div class="feat-icon" style="background: rgba(16,185,129,0.13); color: var(--emerald-500);">
           <i class="fas fa-seedling" aria-hidden="true"></i>
         </div>
-        <h5>Crop Recommendation</h5>
+        <h5 data-i18n="Crop Recommendation">Crop Recommendation</h5>
         <p>
           Enter your soil's NPK values, temperature, humidity, and rainfall — our Random Forest model
           evaluates candidate crops and reports top recommendations with predictive probabilities.
@@ -359,7 +359,7 @@
         <div class="feat-icon" style="background: rgba(6,182,212,0.13); color: var(--cyan-500);">
           <i class="fas fa-vial" aria-hidden="true"></i>
         </div>
-        <h5>Fertilizer Advisory</h5>
+        <h5 data-i18n="Fertilizer Advisory">Fertilizer Advisory</h5>
         <p>
           Recommends targeted commercial fertilizer categories (e.g., Urea, DAP, 14-35-14) based on your soil nutrient profile and crop type using a trained Decision Tree classifier.
         </p>
@@ -370,7 +370,7 @@
         <div class="feat-icon" style="background: rgba(139,92,246,0.13); color: #8b5cf6;">
           <i class="fas fa-wheat-awn" aria-hidden="true"></i>
         </div>
-        <h5>Yield Forecast</h5>
+        <h5 data-i18n="Yield Forecast">Yield Forecast</h5>
         <p>
           Estimate total harvest yield (in metric tonnes or thousand nuts for coconut) based on cultivated area and historical district production records using Random Forest regression.
         </p>
@@ -381,7 +381,7 @@
         <div class="feat-icon" style="background: rgba(244,63,94,0.13); color: #f43f5e;">
           <i class="fas fa-cloud-showers-heavy" aria-hidden="true"></i>
         </div>
-        <h5>Historical Rainfall (Climatology)</h5>
+        <h5 data-i18n="Historical Rainfall (Climatology)">Historical Rainfall (Climatology)</h5>
         <p>
           Explore 115 years (1901–2015) of official IMD monthly rainfall baselines across all 36 Indian meteorological subdivisions alongside live precipitation radar.
         </p>
@@ -392,7 +392,7 @@
         <div class="feat-icon" style="background: rgba(251,191,36,0.13); color: var(--amber-500);">
           <i class="fas fa-sun" aria-hidden="true"></i>
         </div>
-        <h5>Weather Forecast</h5>
+        <h5 data-i18n="Weather Forecast">Weather Forecast</h5>
         <p>
           Get 7-day weather forecasts, temperature, humidity, and wind conditions for your live location or any Indian city via Open-Meteo.
         </p>
@@ -403,7 +403,7 @@
         <div class="feat-icon" style="background: rgba(16,185,129,0.13); color: var(--emerald-500);">
           <i class="fas fa-indian-rupee-sign" aria-hidden="true"></i>
         </div>
-        <h5>Mandi Market Intelligence</h5>
+        <h5 data-i18n="Mandi Market Intelligence">Mandi Market Intelligence</h5>
         <p>
           Check live government Agmarknet APMC mandi commodity rates with transparent fallback benchmark labeling when upstream servers are unreachable.
         </p>
@@ -424,10 +424,10 @@
       {# Left — Section intro #}
       <div class="col-lg-5">
         <div class="section-label">
-          <i class="fas fa-route" aria-hidden="true"></i> How It Works
+          <i class="fas fa-route" aria-hidden="true"></i> <span data-i18n="How It Works">How It Works</span>
         </div>
-        <h2 id="how-heading" class="section-headline">Simple. Fast. Accurate.</h2>
-        <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 400px; line-height: 1.75; margin: 0;">
+        <h2 id="how-heading" class="section-headline" data-i18n="Simple. Fast. Accurate.">Simple. Fast. Accurate.</h2>
+        <p style="color: var(--text-muted); font-size: 0.95rem; max-width: 400px; line-height: 1.75; margin: 0;" data-i18n="Getting started takes under a minute. Register your farmer account and access agricultural advisory tools right away.">
           Getting started takes under a minute. Register your farmer account and access agricultural advisory tools right away.
         </p>
       </div>
@@ -443,7 +443,7 @@
               <div class="step-connector mt-2"></div>
             </div>
             <div class="pb-4">
-              <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; color: var(--text-primary);">
+              <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; color: var(--text-primary);" data-i18n="Create Your Farmer Account">
                 Create Your Farmer Account
               </h5>
               <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; margin: 0;">
@@ -459,7 +459,7 @@
               <div class="step-connector mt-2"></div>
             </div>
             <div class="pb-4">
-              <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; color: var(--text-primary);">
+              <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; color: var(--text-primary);" data-i18n="Input Your Farm Data">
                 Input Your Farm Data
               </h5>
               <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; margin: 0;">
@@ -474,7 +474,7 @@
               <div class="step-number" aria-hidden="true">3</div>
             </div>
             <div>
-              <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; color: var(--text-primary);">
+              <h5 style="font-family: var(--font-display); font-weight: 700; font-size: 1rem; margin-bottom: 0.4rem; color: var(--text-primary);" data-i18n="Get Your Results Instantly">
                 Get Your Results Instantly
               </h5>
               <p style="font-size: 0.875rem; color: var(--text-muted); line-height: 1.7; margin: 0;">

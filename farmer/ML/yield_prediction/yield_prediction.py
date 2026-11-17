@@ -1,69 +1,60 @@
+import os
+import sys
 import pandas as pd
 import numpy as np
-import json
-import sys
+import joblib
 from sklearn.ensemble import RandomForestRegressor
 from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import OneHotEncoder
 
-# Load the dataset
-df = pd.read_csv("ML/yield_prediction/crop_production_karnataka.csv")
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+CSV_PATH = os.path.join(BASE_DIR, "crop_production_karnataka.csv")
+MODEL_PATH = os.path.join(BASE_DIR, "yield_model.joblib")
 
-# Drop the Crop_Year column
-df = df.drop(['Crop_Year'], axis=1)
+def train_and_save():
+    df = pd.read_csv(CSV_PATH)
+    cat_cols = ['State_Name', 'District_Name', 'Season', 'Crop']
+    for col in cat_cols:
+        df[col] = df[col].astype(str).str.strip()
 
-# Separate the features and target variables
-X = df.drop(['Production'], axis=1)
-y = df['Production']
+    valid = df[(df['Area'] > 0) & (df['Production'].notna()) & (df['Production'] >= 0)].copy()
+    valid['Yield_Per_Ha'] = valid['Production'] / valid['Area']
 
-# Split the data into training and testing sets
-X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+    X = valid[cat_cols]
+    y = valid['Yield_Per_Ha']
 
-# Categorical columns for one-hot encoding
-categorical_cols = ['State_Name', 'District_Name', 'Season', 'Crop']
+    ohe = OneHotEncoder(handle_unknown='ignore', sparse_output=False)
+    X_ohe = ohe.fit_transform(X)
 
-# One-hot encode the categorical columns
-ohe = OneHotEncoder(handle_unknown='ignore')
-ohe.fit(X_train[categorical_cols])
+    model = RandomForestRegressor(n_estimators=60, max_depth=16, min_samples_leaf=2, random_state=42, n_jobs=-1)
+    model.fit(X_ohe, y)
 
-# Convert categorical columns to one-hot encoding
-X_train_categorical = ohe.transform(X_train[categorical_cols])
-X_test_categorical = ohe.transform(X_test[categorical_cols])
+    joblib.dump((model, ohe, cat_cols), MODEL_PATH, compress=3)
+    return model, ohe, cat_cols
 
-# Combine the one-hot encoded categorical columns and numerical columns
-X_train_final = np.hstack((X_train_categorical.toarray(), X_train.drop(categorical_cols, axis=1)))
-X_test_final = np.hstack((X_test_categorical.toarray(), X_test.drop(categorical_cols, axis=1)))
+def predict(state, district, season, crop, area_acres):
+    if not os.path.exists(MODEL_PATH):
+        model, ohe, cat_cols = train_and_save()
+    else:
+        model, ohe, cat_cols = joblib.load(MODEL_PATH)
 
-# Train the model
-model = RandomForestRegressor(n_estimators=100, random_state=42)
-model.fit(X_train_final, y_train)
+    area_ha = float(area_acres) * 0.4047
+    inp = pd.DataFrame([[state.strip(), district.strip(), season.strip(), crop.strip()]], columns=cat_cols)
+    feat = ohe.transform(inp)
+    if hasattr(feat, 'toarray'):
+        feat = feat.toarray()
+    yield_per_ha = float(model.predict(feat)[0])
+    total_yield = round(yield_per_ha * area_ha, 2)
+    return total_yield
 
-# Get the input parameters as command line arguments
-Jstate = sys.argv[1]
-Jdistrict = sys.argv[2]
-Jseason = sys.argv[3]
-Jcrops = sys.argv[4]
-Jarea = sys.argv[5]
-
-    
-#Get the user inputs and store them in a numpy array  - ans is 427.64
-#user_input = np.array([['Karnataka', 'BAGALKOT', 'Kharif', 'Rice', 197]])
-
-user_input = np.array([[Jstate,Jdistrict,Jseason,Jcrops,Jarea]])
-
-
-# Convert the categorical columns to one-hot encoding
-user_input_categorical = ohe.transform(user_input[:, :4])
-
-# Combine the one-hot encoded categorical columns and numerical columns
-user_input_final = np.hstack((user_input_categorical.toarray(), user_input[:, 4:].astype(float)))
-
-# Make the prediction
-prediction = model.predict(user_input_final)
-
-# Return the prediction as a string
-
-print(str(prediction[0]))
-
-
-
+if __name__ == '__main__':
+    if len(sys.argv) >= 6:
+        Jstate = sys.argv[1]
+        Jdistrict = sys.argv[2]
+        Jseason = sys.argv[3]
+        Jcrops = sys.argv[4]
+        Jarea = sys.argv[5]
+        print(predict(Jstate, Jdistrict, Jseason, Jcrops, Jarea))
+    else:
+        train_and_save()
+        print("Model trained and saved to", MODEL_PATH)

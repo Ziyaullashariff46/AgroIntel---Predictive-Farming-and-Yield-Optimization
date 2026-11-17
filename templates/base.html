@@ -263,7 +263,7 @@
           <div class="alert alert-{% if category == 'success' %}success{% elif category == 'error' %}danger{% else %}info{% endif %} glass-card border-0 alert-dismissible fade show" role="alert">
             <div class="d-flex align-items-center">
               <i class="fas fa-circle-info mr-3" aria-hidden="true"></i>
-              <span>{{ message }}</span>
+              <span data-i18n="{{ message }}">{{ message }}</span>
             </div>
             <button type="button" class="close" data-dismiss="alert" aria-label="Close">
               <span aria-hidden="true">&times;</span>

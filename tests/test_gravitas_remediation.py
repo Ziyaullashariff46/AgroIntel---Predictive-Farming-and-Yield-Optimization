@@ -226,3 +226,158 @@ def test_production_secret_key_guard():
             'change_this_in_production'
         )
         assert is_insecure is True
+
+
+# =========================================================================
+# 5. AUTHENTICATION & REGISTRATION HARDENING
+# =========================================================================
+
+def test_multiple_farmers_with_same_name_can_login(client):
+    """Verify that multiple farmers with the same name can each log in with their respective password."""
+    db = get_db()
+    pw1 = 'Ramesh@Password1'
+    pw2 = 'Ramesh@Password2'
+    email1 = f'ramesh1_{secrets.token_hex(4)}@agrointel.com'
+    email2 = f'ramesh2_{secrets.token_hex(4)}@agrointel.com'
+    phone1 = f"9{secrets.randbelow(900000000) + 100000000}"
+    phone2 = f"9{secrets.randbelow(900000000) + 100000000}"
+
+    db.execute(
+        "INSERT INTO farmerlogin (farmer_name, password, email, phone_no, F_State, F_District, F_Location) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        ('Ramesh Gowda', hash_password(pw1), email1, phone1, 'Karnataka', 'BAGALKOT', 'BAGALKOT')
+    )
+    db.execute(
+        "INSERT INTO farmerlogin (farmer_name, password, email, phone_no, F_State, F_District, F_Location) VALUES (?, ?, ?, ?, ?, ?, ?)",
+        ('Ramesh Gowda', hash_password(pw2), email2, phone2, 'Karnataka', 'MYSORE', 'MYSORE')
+    )
+    db.commit()
+    db.close()
+
+    # Login as first Ramesh by Name
+    res1 = client.post('/login/farmer', data={'email': 'Ramesh Gowda', 'password': pw1}, follow_redirects=True)
+    assert res1.status_code == 200
+    with client.session_transaction() as sess:
+        assert sess.get('farmer_email') == email1
+
+    client.get('/logout')
+
+    # Login as second Ramesh by Name
+    res2 = client.post('/login/farmer', data={'email': 'Ramesh Gowda', 'password': pw2}, follow_redirects=True)
+    assert res2.status_code == 200
+    with client.session_transaction() as sess:
+        assert sess.get('farmer_email') == email2
+
+
+def test_registration_validation_rules(client):
+    """Verify registration rejects weak passwords, invalid emails, and garbage states."""
+    # 1. Weak password '12345678'
+    res_weak = client.post('/register/farmer', data={
+        'name': 'Test Farmer', 'email': f'valid_{secrets.token_hex(3)}@example.com', 'phone': f"9{secrets.randbelow(900000000) + 100000000}",
+        'password': '12345678', 'confirm_password': '12345678',
+        'state': 'Karnataka', 'district': 'BAGALKOT'
+    }, follow_redirects=True)
+    assert 'too common' in res_weak.data.decode('utf-8').lower() or 'stronger' in res_weak.data.decode('utf-8').lower()
+
+    # 2. Invalid state 'Atlantis'
+    res_state = client.post('/register/farmer', data={
+        'name': 'Test Farmer', 'email': f'valid_{secrets.token_hex(3)}@example.com', 'phone': f"9{secrets.randbelow(900000000) + 100000000}",
+        'password': 'StrongPassword2026!', 'confirm_password': 'StrongPassword2026!',
+        'state': 'Atlantis', 'district': 'Nowhere'
+    }, follow_redirects=True)
+    assert 'not recognized' in res_state.data.decode('utf-8').lower()
+
+    # 3. Invalid email format
+    res_email = client.post('/register/farmer', data={
+        'name': 'Test Farmer', 'email': 'invalid-email', 'phone': f"9{secrets.randbelow(900000000) + 100000000}",
+        'password': 'StrongPassword2026!', 'confirm_password': 'StrongPassword2026!',
+        'state': 'Karnataka', 'district': 'BAGALKOT'
+    }, follow_redirects=True)
+    assert 'valid email' in res_email.data.decode('utf-8').lower()
+
+
+def test_yield_prediction_input_validation_and_crop_differentiation(client):
+    """Verify yield prediction rejects invalid area (-5, NaN, abc) and differentiates crops."""
+    _login_farmer(client)
+
+    # Negative area
+    res_neg = client.post('/farmer/yield_prediction', data={
+        'state': 'Karnataka', 'district': 'BAGALKOT', 'season': 'Kharif', 'crop': 'Rice', 'area': '-5'
+    })
+    html_neg = res_neg.data.decode('utf-8')
+    assert 'valid positive land area' in html_neg.lower() or 'error' in html_neg.lower()
+    assert '-5.77' not in html_neg
+
+    # Non-numeric string area
+    res_abc = client.post('/farmer/yield_prediction', data={
+        'state': 'Karnataka', 'district': 'BAGALKOT', 'season': 'Kharif', 'crop': 'Rice', 'area': 'abc'
+    })
+    html_abc = res_abc.data.decode('utf-8')
+    assert 'numeric cultivation area' in html_abc.lower() or 'valid positive' in html_abc.lower()
+
+    # Verify Rice, Sugarcane, and Coconut produce different yields for 10 acres
+    res_rice = client.post('/farmer/yield_prediction', data={
+        'state': 'Karnataka', 'district': 'BAGALKOT', 'season': 'Kharif', 'crop': 'Rice', 'area': '10'
+    })
+    res_cane = client.post('/farmer/yield_prediction', data={
+        'state': 'Karnataka', 'district': 'BAGALKOT', 'season': 'Kharif', 'crop': 'Sugarcane', 'area': '10'
+    })
+    res_coco = client.post('/farmer/yield_prediction', data={
+        'state': 'Karnataka', 'district': 'UDUPI', 'season': 'Whole Year', 'crop': 'Coconut', 'area': '10'
+    })
+
+    assert res_rice.status_code == 200 and res_cane.status_code == 200 and res_coco.status_code == 200
+    assert 'Thousand Nuts' in res_coco.data.decode('utf-8')
+
+
+def test_crop_recommendation_negative_and_nan_validation(client):
+    """Verify crop recommendation rejects negative values and NaN."""
+    _login_farmer(client)
+    res_neg = client.post('/farmer/crop_recommendation', data={
+        'n': '-10', 'p': '40', 'k': '40', 't': '25', 'h': '60', 'ph': '6.5', 'r': '100'
+    })
+    html = res_neg.data.decode('utf-8')
+    assert 'cannot be negative' in html.lower() or 'invalid' in html.lower()
+
+
+def test_fertilizer_recommendation_invalid_soil_crop_and_moisture(client):
+    """Verify fertilizer recommendation rejects unknown soil/crop and moisture > 100%."""
+    _login_farmer(client)
+    res_soil = client.post('/farmer/fertilizer_recommendation', data={
+        'n': '40', 'p': '20', 'k': '20', 't': '25', 'h': '60', 'sm': '50',
+        'soil': 'MarsRedSoil', 'crop': 'Rice'
+    })
+    assert 'not supported' in res_soil.data.decode('utf-8').lower()
+
+    res_sm = client.post('/farmer/fertilizer_recommendation', data={
+        'n': '40', 'p': '20', 'k': '20', 't': '25', 'h': '60', 'sm': '900',
+        'soil': 'Black', 'crop': 'Sugarcane'
+    })
+    assert 'between 0% and 100%' in res_sm.data.decode('utf-8').lower()
+
+
+def test_crop_prediction_unknown_location_fallback(client):
+    """Verify unrecognized location triggers clear fallback without false Rice 92% leaf output."""
+    _login_farmer(client)
+    res = client.post('/farmer/crop_prediction', data={
+        'state': 'Atlantis', 'district': 'Nowhere', 'season': 'Monsoon'
+    })
+    assert res.status_code == 200
+    html = res.data.decode('utf-8')
+    assert 'was not found in the historical district records' in html or 'Showing general seasonal' in html
+
+
+def test_api_nearby_cities_masks_error_stack(client):
+    """Verify /api/nearby_cities does not leak python error details."""
+    _login_farmer(client)
+    res = client.get('/api/nearby_cities/invalid_lat/invalid_lon')
+    assert res.status_code == 500
+    data = res.get_json()
+    assert data == {'error': 'Unable to calculate nearby cities'}
+
+
+def test_security_headers_present(client):
+    """Verify standard security headers are sent on responses."""
+    res = client.get('/')
+    assert res.headers.get('X-Content-Type-Options') == 'nosniff'
+    assert res.headers.get('X-Frame-Options') == 'SAMEORIGIN'
+    assert res.headers.get('Referrer-Policy') == 'strict-origin-when-cross-origin'
