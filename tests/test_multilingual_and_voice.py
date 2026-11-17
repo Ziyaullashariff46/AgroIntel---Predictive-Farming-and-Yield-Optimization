@@ -119,5 +119,45 @@ class MultilingualAndLocalizationTestCase(unittest.TestCase):
         r = self.client.get('/farmer/crop_prediction')
         self.assertIn(r.status_code, (200, 302))
 
+    def test_i18n_script_validity_and_translation_coverage(self):
+        """Verify agrointel-i18n.js contains valid syntax and broad UI translation dictionary coverage."""
+        i18n_path = os.path.join(BASE_DIR, 'assets', 'js', 'agrointel-i18n.js')
+        with open(i18n_path, 'r', encoding='utf-8') as f:
+            js_content = f.read()
+
+        # No unescaped single quote syntax errors like "Don't" or "We're"
+        self.assertNotIn("'Don't", js_content)
+        self.assertNotIn("'We're", js_content)
+        self.assertIn('"Don\'t have an account yet?"', js_content)
+        self.assertIn('"We\'re Here to Help"', js_content)
+
+        # Essential UI translation keys must be present in both Kannada & Hindi
+        required_keys = [
+            'Smart Crop Recommendation',
+            'Harvest Yield Prediction',
+            'Fertilizer Advisory System',
+            'Historical Average Rainfall (Climatology)',
+            'Weather Intelligence Hub',
+            'All Market Rates',
+            '115-yr IMD climatology',
+            'Historical Rainfall',
+            'Targeted fertilizer type',
+            'Admin Control',
+            'Privacy Policy & DPDP Notice',
+            'Top-3 Model Candidates (Class Probabilities)',
+            'Total Forecasted Harvest',
+            'Optimal Commercial Treatment',
+        ]
+        for k in required_keys:
+            self.assertIn(f'"{k}"', js_content, f"Missing key in i18n dictionary: {k}")
+
+        # Dropdown handlers on base template
+        r = self.client.get('/')
+        html = r.get_data(as_text=True)
+        self.assertIn('data-lang="kn"', html)
+        self.assertIn('data-lang="hi"', html)
+        self.assertIn('data-lang="en"', html)
+        self.assertIn('AgroIntelI18N.setLanguage', html)
+
 if __name__ == '__main__':
     unittest.main()

@@ -881,7 +881,7 @@
     'Demo Credentials (click to show)': { kn: 'ಡೆಮೊ ರುಜುವಾತುಗಳು (ತೋರಿಸಲು ಕ್ಲಿಕ್ ಮಾಡಿ)', hi: 'डेमो क्रेडेंशियल (दिखाने के लिए क्लिक करें)' },
     'District': { kn: 'ಜಿಲ್ಲೆ (District)', hi: 'ज़िला (District)' },
     'District / City': { kn: 'ಜಿಲ್ಲೆ / ನಗರ', hi: 'ज़िला / शहर' },
-    'Don't have an account yet?': { kn: 'ಇನ್ನೂ ಖಾತೆ ಹೊಂದಿಲ್ಲವೇ?', hi: 'अभी तक खाता नहीं है?' },
+    "Don't have an account yet?": { kn: 'ಇನ್ನೂ ಖಾತೆ ಹೊಂದಿಲ್ಲವೇ?', hi: 'अभी तक खाता नहीं है?' },
     'Email / Username': { kn: 'ಇಮೇಲ್ / ಬಳಕೆದಾರ ಹೆಸರು', hi: 'ईमेल / उपयोगकर्ता नाम' },
     'Email Address': { kn: 'ಇಮೇಲ್ ವಿಳಾಸ', hi: 'ईमेल पता' },
     'Enter your credentials to access your dashboard': { kn: 'ನಿಮ್ಮ ಡ್ಯಾಶ್‌ಬೋರ್ಡ್ ಪ್ರವೇಶಿಸಲು ವಿವರಗಳನ್ನು ನಮೂದಿಸಿ', hi: 'अपने डैशबोर्ड तक पहुँचने के लिए क्रेडेंशियल दर्ज करें' },
@@ -997,7 +997,7 @@
     'Try a different state or district': { kn: 'ಬೇರೆ ರಾಜ್ಯ ಅಥವಾ ಜಿಲ್ಲೆಯನ್ನು ಪ್ರಯತ್ನಿಸಿ', hi: 'कृपया अन्य राज्य या जिला चुनें' },
     'Use 8+ characters with numbers & symbols for a stronger password': { kn: 'ಬಲವಾದ ಪಾಸ್‌ವರ್ಡ್‌ಗಾಗಿ ಸಂಖ್ಯೆಗಳು ಮತ್ತು ಚಿಹ್ನೆಗಳೊಂದಿಗೆ 8+ ಅಕ್ಷರಗಳನ್ನು ಬಳಸಿ', hi: 'मजबूत पासवर्ड के लिए 8+ वर्ण, संख्याएँ और प्रतीक उपयोग करें' },
     'Variety': { kn: 'ತಳಿ / ವಿಧ', hi: 'किस्म / वैरायटी' },
-    'We're Here to Help': { kn: 'ನಾವು ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇವೆ', hi: 'हम सहायता के लिए यहाँ हैं' },
+    "We're Here to Help": { kn: 'ನಾವು ಸಹಾಯ ಮಾಡಲು ಇಲ್ಲಿದ್ದೇವೆ', hi: 'हम सहायता के लिए यहाँ हैं' },
     'Weather Forecast': { kn: 'ಹವಾಮಾನ ಮುನ್ಸೂಚನೆ (Weather Forecast)', hi: 'मौसम पूर्वानुमान (Weather Forecast)' },
     'Welcome Admin!': { kn: 'ನಿರ್ವಾಹಕರಿಗೆ ಸುಸ್ವಾಗತ!', hi: 'व्यवस्थापक का स्वागत है!' },
     'What AgroIntel Can Do': { kn: 'ಅಗ್ರೋಇಂಟೆಲ್ ಏನು ಮಾಡಬಲ್ಲದು', hi: 'एग्रोइंटेल क्या कर सकता है' },
@@ -1009,6 +1009,123 @@
     'Your session expired due to inactivity or a server restart. A fresh session has been loaded — please try again.': { kn: 'ನಿಷ್ಕ್ರಿಯತೆಯಿಂದಾಗಿ ನಿಮ್ಮ ಸೆಷನ್ ಮುಕ್ತಾಯಗೊಂಡಿದೆ. ತಾಜಾ ಸೆಷನ್ ಲೋಡ್ ಮಾಡಲಾಗಿದೆ — ದಯವಿಟ್ಟು ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.', hi: 'निष्क्रियता के कारण आपका सत्र समाप्त हो गया। एक नया सत्र लोड किया गया है - कृपया पुनः प्रयास करें।' },
     'commodities': { kn: 'ಕೃಷಿ ಉತ್ಪನ್ನಗಳು', hi: 'कृषि उत्पाद' },
     'per quintal': { kn: 'ಪ್ರತಿ ಕ್ವಿಂಟಾಲ್‌ಗೆ', hi: 'प्रति क्विंटल' },
+    "10-digit phone number": { kn: "10-ಅಂಕಿಯ ಮೊಬೈಲ್ ಸಂಖ್ಯೆ", hi: "10-अंकीय फ़ोन नंबर" },
+    "115-yr IMD climatology": { kn: "115 ವರ್ಷಗಳ ಐಎಂಡಿ ಹವಾಮಾನ ದತ್ತಾಂಶ", hi: "115 वर्षों का आईएमडी जलवायु डेटा" },
+    "Acre": { kn: "ಎಕರೆ", hi: "एकड़" },
+    "Adjust soil & weather metrics or pick a quick preset to get the highest-yielding crop.": { kn: "ಅತ್ಯಧಿಕ ಇಳುವರಿ ನೀಡುವ ಬೆಳೆಯನ್ನು ಪಡೆಯಲು ಮಣ್ಣು ಮತ್ತು ಹವಾಮಾನ ನಿಯತಾಂಕಗಳನ್ನು ಹೊಂದಿಸಿ.", hi: "अधिकतम उपज वाली फसल पाने के लिए मिट्टी और मौसम के पैरामीटर समायोजित करें।" },
+    "Admin Control": { kn: "ನಿರ್ವಾಹಕ ನಿಯಂತ್ರಣ", hi: "व्यवस्थापक नियंत्रण" },
+    "Admin Portal": { kn: "ನಿರ್ವಾಹಕ ಪೋರ್ಟಲ್", hi: "व्यवस्थापक पोर्टल" },
+    "Admin Portal Sign In": { kn: "ನಿರ್ವಾಹಕ ಪೋರ್ಟಲ್ ಸೈನ್ ಇನ್", hi: "व्यवस्थापक पोर्टल साइन इन" },
+    "All Market Rates": { kn: "ಎಲ್ಲಾ ಮಾರುಕಟ್ಟೆ ದರಗಳು", hi: "सभी मंडी भाव एवं दरें" },
+    "Allow location access for automatic weather data": { kn: "ಸ್ವಯಂಚಾಲಿತ ಹವಾಮಾನಕ್ಕಾಗಿ ಸ್ಥಳ ಪ್ರವೇಶವನ್ನು ಅನುಮತಿಸಿ", hi: "स्वचालित मौसम डेटा के लिए स्थान अनुमति दें" },
+    "An account with this phone number already exists. Please log in.": { kn: "ಈ ಫೋನ್ ಸಂಖ್ಯೆ ಹೊಂದಿರುವ ಖಾತೆ ಈಗಾಗಲೇ ಅಸ್ತಿತ್ವದಲ್ಲಿದೆ. ದಯವಿಟ್ಟು ಲಾಗ್ ಇನ್ ಮಾಡಿ.", hi: "इस फ़ोन नंबर वाला खाता पहले से मौजूद है। कृपया लॉगिन करें।" },
+    "Auto-detects your location. 7-day forecast, nearby cities, and search any location.": { kn: "ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಸ್ವಯಂಚಾಲಿತವಾಗಿ ಪತ್ತೆಹಚ್ಚುತ್ತದೆ. 7 ದಿನಗಳ ಮುನ್ಸೂಚನೆ ಮತ್ತು ಯಾವುದೇ ಸ್ಥಳವನ್ನು ಹುಡುಕಿ.", hi: "आपके स्थान का स्वतः पता लगाता है। 7-दिवसीय पूर्वानुमान, आस-पास के शहर और कोई भी स्थान खोजें।" },
+    "Back to Sign In": { kn: "ಸೈನ್ ಇನ್‌ಗೆ ಹಿಂತಿರುಗಿ", hi: "साइन इन पर वापस जाएं" },
+    "Black Soil": { kn: "ಕಪ್ಪು ಮಣ್ಣು (Black Soil)", hi: "काली मिट्टी (Black Soil)" },
+    "Clayey Soil": { kn: "ಜೇಡಿ ಮಣ್ಣು (Clayey Soil)", hi: "चिकनी मिट्टी (Clayey Soil)" },
+    "Coastal Karnataka": { kn: "ಕರಾವಳಿ ಕರ್ನಾಟಕ", hi: "तटीय कर्नाटक" },
+    "Confirm New Password": { kn: "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್ ದೃಢೀಕರಿಸಿ", hi: "नए पासवर्ड की पुष्टि करें" },
+    "Contact": { kn: "ಸಂಪರ್ಕ", hi: "संपर्क" },
+    "Contact Support": { kn: "ಬೆಂಬಲ ಸಂಪರ್ಕ", hi: "सहायता संपर्क" },
+    "Could not compute fertilizer recommendation. Please verify your inputs and try again.": { kn: "ರಸಗೊಬ್ಬರ ಶಿಫಾರಸು ಲೆಕ್ಕಹಾಕಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ಇನ್‌ಪುಟ್‌ಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.", hi: "उर्वरक सिफारिश की गणना नहीं की जा सकी। कृपया इनपुट सत्यापित करें और पुनः प्रयास करें।" },
+    "Could not compute recommendation. Please check your input values and try again.": { kn: "ಶಿಫಾರಸು ಲೆಕ್ಕಹಾಕಲು ಸಾಧ್ಯವಾಗಲಿಲ್ಲ. ದಯವಿಟ್ಟು ನಿಮ್ಮ ಇನ್‌ಪುಟ್ ಮೌಲ್ಯಗಳನ್ನು ಪರಿಶೀಲಿಸಿ ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ.", hi: "सिफारिश की गणना नहीं की जा सकी। कृपया अपने इनपुट मान जांचें और पुनः प्रयास करें।" },
+    "Cultivation Season": { kn: "ಬೆಳೆ ಹಂಗಾಮು", hi: "खेती का मौसम" },
+    "Detect": { kn: "ಪತ್ತೆಹಚ್ಚಿ", hi: "खोजें" },
+    "Detecting your location...": { kn: "ನಿಮ್ಮ ಸ್ಥಳವನ್ನು ಪತ್ತೆಹಚ್ಚಲಾಗುತ್ತಿದೆ...", hi: "आपके स्थान का पता लगाया जा रहा है..." },
+    "Enter email or username": { kn: "ಇಮೇಲ್ ಅಥವಾ ಬಳಕೆದಾರ ಹೆಸರನ್ನು ನಮೂದಿಸಿ", hi: "ईमेल या उपयोगकर्ता नाम दर्ज करें" },
+    "Estimate expected harvest tonnage from farm land area and local metrics.": { kn: "ಜಮೀನಿನ ವಿಸ್ತೀರ್ಣ ಮತ್ತು ಸ್ಥಳೀಯ ನಿಯತಾಂಕಗಳಿಂದ ನಿರೀಕ್ಷಿತ ಕೊಯ್ಲು ಟನ್‌ಗಳನ್ನು ಅಂದಾಜಿಸಿ.", hi: "कृषि भूमि क्षेत्रफल और स्थानीय मेट्रिक्स से अपेक्षित फसल पैदावार का अनुमान लगाएं।" },
+    "Farmer Portal": { kn: "ರೈತ ಪೋರ್ಟಲ್", hi: "किसान पोर्टल" },
+    "Farmer Portal Sign In": { kn: "ರೈತ ಪೋರ್ಟಲ್ ಸೈನ್ ಇನ್", hi: "किसान पोर्टल साइन इन" },
+    "Farmers": { kn: "ರೈತರು", hi: "किसान" },
+    "Fertilizer Advisory System": { kn: "ರಸಗೊಬ್ಬರ ಸಲಹಾ ವ್ಯವಸ್ಥೆ", hi: "उर्वरक सलाहकार प्रणाली" },
+    "Fertilizer Category Ready": { kn: "ರಸಗೊಬ್ಬರ ವರ್ಗ ಸಿದ್ಧವಾಗಿದೆ", hi: "उर्वरक श्रेणी तैयार है" },
+    "Fertilizer model is currently unavailable.": { kn: "ರಸಗೊಬ್ಬರ ಮಾದರಿ ಪ್ರಸ್ತುತ ಲಭ್ಯವಿಲ್ಲ.", hi: "उर्वरक मॉडल वर्तमान में अनुपलब्ध है।" },
+    "Fetch Weather": { kn: "ಹವಾಮಾನ ಪಡೆಯಿರಿ", hi: "मौसम प्राप्त करें" },
+    "Filter commodity or APMC...": { kn: "ಬೆಳೆ ಅಥವಾ ಮಾರುಕಟ್ಟೆ ಹುಡುಕಿ...", hi: "फसल या मंडी खोजें..." },
+    "Generate Reset Link": { kn: "ಮರುಹೊಂದಿಸುವ ಲಿಂಕ್ ರಚಿಸಿ", hi: "रीसेट लिंक बनाएं" },
+    "Harvest Estimation": { kn: "ಕೊಯ್ಲು ಅಂದಾಜು", hi: "पैदावार का अनुमान" },
+    "Harvest Yield Prediction": { kn: "ಕೊಯ್ಲು ಇಳುವರಿ ಮುನ್ಸೂಚನೆ", hi: "फसल पैदावार का पूर्वानुमान" },
+    "Historical Average Rainfall (Climatology)": { kn: "ಐತಿಹಾಸಿಕ ಸರಾಸರಿ ಮಳೆ (ಹವಾಮಾನ ದತ್ತಾಂಶ)", hi: "ऐतिहासिक औसत वर्षा (जलवायु विज्ञान)" },
+    "Historical Rainfall": { kn: "ಐತಿಹಾಸಿಕ ಸರಾಸರಿ ಮಳೆ", hi: "ऐतिहासिक औसत वर्षा" },
+    "Home": { kn: "ಮುಖಪುಟ", hi: "होम" },
+    "If an account with that email exists, password reset instructions have been generated.": { kn: "ಆ ಇಮೇಲ್ ಹೊಂದಿರುವ ಖಾತೆಯಿದ್ದರೆ, ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸುವ ಸೂಚನೆಗಳನ್ನು ರಚಿಸಲಾಗಿದೆ.", hi: "यदि उस ईमेल वाला खाता मौजूद है, तो पासवर्ड रीसेट निर्देश भेज दिए गए हैं।" },
+    "Kerala": { kn: "ಕೇರಳ", hi: "केरल" },
+    "Kharif (Monsoon)": { kn: "ಖಾರಿಫ್ (ಮುಂಗಾರು)", hi: "खरीफ (मानसून)" },
+    "Konkan & Goa": { kn: "ಕೊಂಕಣ ಮತ್ತು ಗೋವಾ", hi: "कोंकण और गोवा" },
+    "Land Area (Acre)": { kn: "ಜಮೀನಿನ ವಿಸ್ತೀರ್ಣ (ಎಕರೆ)", hi: "जमीन का क्षेत्रफल (एकड़)" },
+    "Live Environmental Radar": { kn: "ಲೈವ್ ಹವಾಮಾನ ರೇಡಾರ್", hi: "लाइव पर्यावरण रडार" },
+    "Loamy Soil": { kn: "ಗೋಡು ಮಣ್ಣು (Loamy Soil)", hi: "दोमट मिट्टी (Loamy Soil)" },
+    "ML Model & Dataset Attribution": { kn: "ML ಮಾದರಿ ಮತ್ತು ದತ್ತಾಂಶ ಮೂಲ", hi: "एमएल मॉडल और डेटासेट स्रोत" },
+    "ML Model Used & Evaluation Metrics": { kn: "ಬಳಸಿದ ML ಮಾದರಿ ಮತ್ತು ಮೌಲ್ಯಮಾಪನ ಮಾನದಂಡಗಳು", hi: "प्रयुक्त एमएल मॉडल और मूल्यांकन मेट्रिक्स" },
+    "Madhya Maharashtra": { kn: "ಮಧ್ಯ ಮಹಾರಾಷ್ಟ್ರ", hi: "मध्य महाराष्ट्र" },
+    "Messages": { kn: "ಸಂದೇಶಗಳು", hi: "संदेश" },
+    "Meteorological Analysis Engine": { kn: "ಹವಾಮಾನ ವಿಶ್ಲೇಷಣಾ ಎಂಜಿನ್", hi: "मौसम विज्ञान विश्लेषण इंजन" },
+    "Min. 8 characters": { kn: "ಕನಿಷ್ಠ 8 ಅಕ್ಷರಗಳು", hi: "कम से कम 8 अक्षर" },
+    "Monthly precipitation averages (1901–2015 baseline) for all 36 Indian meteorological subdivisions published by the India Meteorological Department (IMD).": { kn: "ಭಾರತೀಯ ಹವಾಮಾನ ಇಲಾಖೆ (ಐಎಂಡಿ) ಪ್ರಕಟಿಸಿದ ಎಲ್ಲಾ 36 ಹವಾಮಾನ ಉಪವಿಭಾಗಗಳ ಮಾಸಿಕ ಮಳೆ ಸರಾಸರಿ (1901-2015).", hi: "भारतीय मौसम विज्ञान विभाग (आईएमडी) द्वारा प्रकाशित सभी 36 मौसम विज्ञान उप-मंडलों के लिए मासिक वर्षा औसत (1901-2015)।" },
+    "N. Interior Karnataka": { kn: "ಉತ್ತರ ಒಳನಾಡು ಕರ್ನಾಟಕ", hi: "उत्तर आंतरिक कर्नाटक" },
+    "Nearby Cities": { kn: "ಹತ್ತಿರದ ನಗರಗಳು", hi: "आस-पास के शहर" },
+    "New Password": { kn: "ಹೊಸ ಪಾಸ್‌ವರ್ಡ್", hi: "नया पासवर्ड" },
+    "Nutrient values (N, P, K) cannot be negative.": { kn: "ಪೋಷಕಾಂಶಗಳ ಮೌಲ್ಯಗಳು (N, P, K) ಋಣಾತ್ಮಕವಾಗಿರಬಾರದು.", hi: "पोषक तत्वों के मान (N, P, K) नकारात्मक नहीं हो सकते।" },
+    "Optimal Commercial Treatment": { kn: "ಸೂಕ್ತ ವಾಣಿಜ್ಯ ಗೊಬ್ಬರ", hi: "इष्टतम वाणिज्यिक उपचार" },
+    "Pick your district above to automatically map to the accurate IMD meteorological subdivision below.": { kn: "ನಿಖರವಾದ ಐಎಂಡಿ ಹವಾಮಾನ ಉಪವಿಭಾಗಕ್ಕೆ ಹೊಂದಿಸಲು ನಿಮ್ಮ ಜಿಲ್ಲೆಯನ್ನು ಆಯ್ಕೆಮಾಡಿ.", hi: "सटीक आईएमडी उप-मंडल से मिलान करने के लिए ऊपर अपना ज़िला चुनें।" },
+    "Please enter a message (5–2000 characters).": { kn: "ದಯವಿಟ್ಟು ಸಂದೇಶವನ್ನು ನಮೂದಿಸಿ (5-2000 ಅಕ್ಷರಗಳು).", hi: "कृपया एक संदेश दर्ज करें (5–2000 वर्ण)।" },
+    "Please enter a valid farmer name between 2 and 100 characters.": { kn: "ದಯವಿಟ್ಟು 2 ಮತ್ತು 100 ಅಕ್ಷರಗಳ ನಡುವಿನ ಮಾನ್ಯವಾದ ರೈತರ ಹೆಸರನ್ನು ನಮೂದಿಸಿ.", hi: "कृपया 2 से 100 वर्णों के बीच एक मान्य किसान नाम दर्ज करें।" },
+    "Please enter a valid name (2–100 characters).": { kn: "ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಹೆಸರನ್ನು ನಮೂದಿಸಿ (2-100 ಅಕ್ಷರಗಳು).", hi: "कृपया एक मान्य नाम दर्ज करें (2–100 वर्ण)।" },
+    "Please enter a valid numeric cultivation area.": { kn: "ದಯವಿಟ್ಟು ಮಾನ್ಯವಾದ ಸಂಖ್ಯಾತ್ಮಕ ಕೃಷಿ ವಿಸ್ತೀರ್ಣವನ್ನು ನಮೂದಿಸಿ.", hi: "कृपया एक मान्य संख्यात्मक कृषि क्षेत्र दर्ज करें।" },
+    "Please enter a valid positive land area in acres (e.g. 1 to 10,000).": { kn: "ದಯವಿಟ್ಟು ಎಕರೆಗಳಲ್ಲಿ ಮಾನ್ಯವಾದ ಧನಾತ್ಮಕ ಜಮೀನಿನ ವಿಸ್ತೀರ್ಣವನ್ನು ನಮೂದಿಸಿ (ಉದಾ. 1 ರಿಂದ 10,000).", hi: "कृपया एकड़ में मान्य कृषि भूमि का क्षेत्रफल दर्ज करें (उदा. 1 से 10,000)।" },
+    "Please enter valid numeric values for all soil and environmental inputs.": { kn: "ದಯವಿಟ್ಟು ಎಲ್ಲಾ ಮಣ್ಣು ಮತ್ತು ಪರಿಸರ ವಿವರಗಳಿಗೆ ಮಾನ್ಯವಾದ ಸಂಖ್ಯಾತ್ಮಕ ಮೌಲ್ಯಗಳನ್ನು ನಮೂದಿಸಿ.", hi: "कृपया सभी मिट्टी और पर्यावरणीय इनपुट के लिए मान्य संख्यात्मक मान दर्ज करें।" },
+    "Please fill in all soil nutrient and environmental parameters.": { kn: "ದಯವಿಟ್ಟು ಎಲ್ಲಾ ಮಣ್ಣಿನ ಪೋಷಕಾಂಶ ಮತ್ತು ಪರಿಸರ ನಿಯತಾಂಕಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ.", hi: "कृपया सभी मिट्टी के पोषक तत्व और पर्यावरणीय पैरामीटर भरें।" },
+    "Please fill in all soil, environmental, and nutrient parameters.": { kn: "ದಯವಿಟ್ಟು ಎಲ್ಲಾ ಮಣ್ಣು, ಪರಿಸರ ಮತ್ತು ಪೋಷಕಾಂಶ ನಿಯತಾಂಕಗಳನ್ನು ಭರ್ತಿ ಮಾಡಿ.", hi: "कृपया सभी मिट्टी, पर्यावरण और पोषक तत्व पैरामीटर भरें।" },
+    "Portals": { kn: "ಪೋರ್ಟಲ್‌ಗಳು", hi: "पोर्टल" },
+    "Prediction Suite": { kn: "ಮುನ್ಸೂಚನಾ ಪರಿಕರಗಳು", hi: "पूर्वानुमान सुइट" },
+    "Prediction Tools": { kn: "ಮುನ್ಸೂಚನಾ ಪರಿಕರಗಳು", hi: "पूर्वानुमान टूल्स" },
+    "Privacy Policy & DPDP Notice": { kn: "ಗೌಪ್ಯತೆ ನೀತಿ ಮತ್ತು ಡಿಪಿಡಿಪಿ ಸೂಚನೆ", hi: "गोपनीयता नीति और डीपीडीपी नोटिस" },
+    "Quick Presets": { kn: "ತ್ವರಿತ ಆಯ್ಕೆಗಳು", hi: "त्वरित विकल्प" },
+    "Quick Soil Presets (Representative Baselines)": { kn: "ತ್ವರಿತ ಮಣ್ಣಿನ ಮಾದರಿಗಳು", hi: "त्वरित मिट्टी विकल्प" },
+    "Rabi (Winter)": { kn: "ರಬಿ (ಹಿಂಗಾರು)", hi: "रबी (सर्दियाँ)" },
+    "Rainfall cannot be negative.": { kn: "ಮಳೆಯ ಪ್ರಮಾಣ ಋಣಾತ್ಮಕವಾಗಿರಬಾರದು.", hi: "वर्षा की मात्रा नकारात्मक नहीं हो सकती।" },
+    "Random Forest Classifier": { kn: "ರ್ಯಾಂಡಮ್ ಫಾರೆಸ್ಟ್ ವರ್ಗೀಕರಣ", hi: "रैंडम फ़ॉरेस्ट क्लासिफ़ायर" },
+    "Random Forest Regressor": { kn: "ರ್ಯಾಂಡಮ್ ಫಾರೆಸ್ಟ್ ರಿಗ್ರೆಸರ್", hi: "रैंडम फ़ॉरेस्ट रिग्रेसर" },
+    "Re-enter your password": { kn: "ನಿಮ್ಮ ಪಾಸ್‌ವರ್ಡ್ ಮರು-ನಮೂದಿಸಿ", hi: "अपना पासवर्ड पुनः दर्ज करें" },
+    "Recommends targeted commercial fertilizer categories (e.g. Urea, DAP, 14-35-14) based on detected soil nutrient deficits.": { kn: "ಮಣ್ಣಿನ ಪೋಷಕಾಂಶಗಳ ಕೊರತೆಯ ಆಧಾರದ ಮೇಲೆ ಸೂಕ್ತ ವಾಣಿಜ್ಯ ರಸಗೊಬ್ಬರಗಳನ್ನು (ಉದಾ. ಯೂರಿಯಾ, ಡಿಎಪಿ, 14-35-14) ಶಿಫಾರಸು ಮಾಡುತ್ತದೆ.", hi: "पहचाने गए मिट्टी के पोषक तत्वों की कमी के आधार पर लक्षित वाणिज्यिक उर्वरकों (जैसे यूरिया, डीएपी, 14-35-14) की सिफारिश करता है।" },
+    "Red Soil": { kn: "ಕೆಂಪು ಮಣ್ಣು (Red Soil)", hi: "लाल मिट्टी (Red Soil)" },
+    "Relative humidity must be between 0% and 100%.": { kn: "ಸಾಪೇಕ್ಷ ಆರ್ದ್ರತೆಯು 0% ಮತ್ತು 100% ನಡುವೆ ಇರಬೇಕು.", hi: "सापेक्ष आर्द्रता 0% और 100% के बीच होनी चाहिए।" },
+    "Reset Password": { kn: "ಪಾಸ್‌ವರ್ಡ್ ಮರುಹೊಂದಿಸಿ", hi: "पासवर्ड रीसेट करें" },
+    "Retry": { kn: "ಮತ್ತೆ ಪ್ರಯತ್ನಿಸಿ", hi: "पुनः प्रयास करें" },
+    "S. Interior Karnataka": { kn: "ದಕ್ಷಿಣ ಒಳನಾಡು ಕರ್ನಾಟಕ", hi: "दक्षिण आंतरिक कर्नाटक" },
+    "Sandy Soil": { kn: "ಮರಳು ಮಣ್ಣು (Sandy Soil)", hi: "बलुई मिट्टी (Sandy Soil)" },
+    "Search Any City": { kn: "ಯಾವುದೇ ನಗರವನ್ನು ಹುಡುಕಿ", hi: "किसी भी शहर को खोजें" },
+    "Sign In to Portal": { kn: "ಪೋರ್ಟಲ್‌ಗೆ ಸೈನ್ ಇನ್ ಮಾಡಿ", hi: "पोर्टल में साइन इन करें" },
+    "Smart Crop Recommendation": { kn: "ಸ್ಮಾರ್ಟ್ ಬೆಳೆ ಶಿಫಾರಸು", hi: "स्मार्ट फसल अनुशंसा" },
+    "Soil & Nutrient Optimization": { kn: "ಮಣ್ಣು ಮತ್ತು ಪೋಷಕಾಂಶಗಳ ಸಮತೋಲನ", hi: "मिट्टी और पोषक तत्व अनुकूलन" },
+    "Soil Health Card (SHC) Guidance:": { kn: "ಮಣ್ಣು ಆರೋಗ್ಯ ಕಾರ್ಡ್ (SHC) ಮಾರ್ಗದರ್ಶನ:", hi: "मृदा स्वास्थ्य कार्ड (SHC) मार्गदर्शन:" },
+    "Soil moisture percentage must be between 0% and 100%.": { kn: "ಮಣ್ಣಿನ ತೇವಾಂಶ ಶೇಕಡಾವಾರು 0% ಮತ್ತು 100% ನಡುವೆ ಇರಬೇಕು.", hi: "मिट्टी की नमी का प्रतिशत 0% और 100% के बीच होना चाहिए।" },
+    "Soil pH must be between 0 and 14.": { kn: "ಮಣ್ಣಿನ pH 0 ಮತ್ತು 14 ರ ನಡುವೆ ಇರಬೇಕು.", hi: "मिट्टी का पीएच 0 और 14 के बीच होना चाहिए।" },
+    "Sync Subdivision": { kn: "ಹವಾಮಾನ ಉಪವಿಭಾಗ ಹೊಂದಿಸಿ", hi: "उप-मंडल सिंक करें" },
+    "Tamil Nadu": { kn: "ತಮಿಳುನಾಡು", hi: "तमिलनाडु" },
+    "Tap to auto-detect your meteorological zone": { kn: "ನಿಮ್ಮ ಹವಾಮಾನ ವಲಯವನ್ನು ಪತ್ತೆಹಚ್ಚಲು ಸ್ಪರ್ಶಿಸಿ", hi: "अपने मौसम क्षेत्र का स्वतः पता लगाने के लिए टैप करें" },
+    "Target Crop": { kn: "ಉದ್ದೇಶಿತ ಬೆಳೆ", hi: "लक्षित फसल" },
+    "Targeted fertilizer type": { kn: "ಸೂಕ್ತ ರಸಗೊಬ್ಬರದ ಪ್ರಕಾರ", hi: "उचित उर्वरक का प्रकार" },
+    "Tech Stack & Governance": { kn: "ತಂತ್ರಜ್ಞಾನ ಮತ್ತು ನಿಯಮಾವಳಿ", hi: "तकनीकी स्टैक और प्रशासन" },
+    "Telangana": { kn: "ತೆಲಂಗಾಣ", hi: "तेलंगाना" },
+    "Temperature must be within plausible environmental range (-10°C to 60°C).": { kn: "ತಾಪಮಾನವು ನೈಜ ಪರಿಸರ ವ್ಯಾಪ್ತಿಯಲ್ಲಿರಬೇಕು (-10°C ನಿಂದ 60°C).", hi: "तापमान सामान्य पर्यावरणीय सीमा (-10°C से 60°C) के भीतर होना चाहिए।" },
+    "The chosen password is too common or easily guessable. Please choose a stronger password.": { kn: "ಆಯ್ಕೆಮಾಡಿದ ಪಾಸ್‌ವರ್ಡ್ ತುಂಬಾ ಸುಲಭವಾಗಿದೆ. ದಯವಿಟ್ಟು ಬಲವಾದ ಪಾಸ್‌ವರ್ಡ್ ಆಯ್ಕೆಮಾಡಿ.", hi: "चुना गया पासवर्ड बहुत सरल है। कृपया एक मजबूत पासवर्ड चुनें।" },
+    "Tonnes": { kn: "ಟನ್‌ಗಳು", hi: "टन" },
+    "Top-3 Model Candidates (Class Probabilities)": { kn: "ಪ್ರಮುಖ 3 ಬೆಳೆ ಆಯ್ಕೆಗಳು (ಸಂಭಾವ್ಯತೆಯೊಂದಿಗೆ)", hi: "शीर्ष 3 अनुशंसित फसलें (संभावना प्रतिशत)" },
+    "Total Forecasted Harvest": { kn: "ಒಟ್ಟು ಮುನ್ಸೂಚಿತ ಕೊಯ್ಲು", hi: "कुल अनुमानित उपज" },
+    "Update Password": { kn: "ಪಾಸ್‌ವರ್ಡ್ ನವೀಕರಿಸಿ", hi: "पासवर्ड अपडेट करें" },
+    "Use sidebar for prediction tools": { kn: "ಪರಿಕರಗಳಿಗಾಗಿ ಬದಿಯ ಮೆನು ಬಳಸಿ", hi: "टूल्स के लिए साइडबार का उपयोग करें" },
+    "Weather Intelligence Hub": { kn: "ಹವಾಮಾನ ಮಾಹಿತಿ ಕೇಂದ್ರ", hi: "मौसम सूचना केंद्र" },
+    "Whole Year": { kn: "ಪೂರ್ಣ ವರ್ಷ", hi: "पूरे वर्ष" },
+    "☁️ Black Soil Cotton": { kn: "☁️ ಕಪ್ಪು ಮಣ್ಣಿನ ಹತ್ತಿ", hi: "☁️ काली मिट्टी का कपास" },
+    "☁️ Cotton (Black Cotton Soil)": { kn: "☁️ ಹತ್ತಿ (ಕಪ್ಪು ಹತ್ತಿ ಮಣ್ಣು)", hi: "☁️ कपास (काली मिट्टी)" },
+    "☕ Coffee (Laterite Hill Soil)": { kn: "☕ ಕಾಫಿ (ಲ್ಯಾಟರೈಟ್ ಗುಡ್ಡಗಾಡು ಮಣ್ಣು)", hi: "☕ कॉफ़ी (लेटराइट पहाड़ी मिट्टी)" },
+    "🌽 Maize (Sandy Loam)": { kn: "🌽 ಮೆಕ್ಕೆಜೋಳ (ಮರಳು ಮಿಶ್ರಿತ ಜೇಡಿಮಣ್ಣು)", hi: "🌽 मक्का (बलुई दोमट)" },
+    "🌽 N-Deficient Maize": { kn: "🌽 ಸಾರಜನಕ ಕೊರತೆಯ ಮೆಕ್ಕೆಜೋಳ", hi: "🌽 नाइट्रोजन की कमी वाला मक्का" },
+    "🌾 High Moisture Paddy": { kn: "🌾 ಹೆಚ್ಚಿನ ತೇವಾಂಶದ ಭತ್ತ", hi: "🌾 अधिक नमी वाला धान" },
+    "🌾 Paddy Rice (Alluvial Clay Loam)": { kn: "🌾 ಭತ್ತ (ಮೆಕ್ಕಲು ಜೇಡಿಮಣ್ಣು)", hi: "🌾 धान / चावल (जलोढ़ मिट्टी)" },
+    "🌾 Sandy Wheat": { kn: "🌾 ಮರಳು ಮಣ್ಣಿನ ಗೋಧಿ", hi: "🌾 बलुई मिट्टी का गेहूँ" },
+    "🥥 Coconut (Coastal Sandy Loam)": { kn: "🥥 ತೆಂಗು (ಕರಾವಳಿ ಮರಳು ಮಣ್ಣು)", hi: "🥥 नारियल (तटीय बलुई दोमट)" },
   };
 
   // State
@@ -1239,6 +1356,36 @@
         }
       }
     });
+
+    // 7. General Headings, Paragraphs, Links, Table Headers, Spans, and List Items
+    document.querySelectorAll('h1, h2, h3, h4, h5, h6, p, th, td, li, .badge-agro, a.nav-link, a.nav-link-custom').forEach(el => {
+      if (el.hasAttribute('data-i18n')) return;
+      Array.from(el.childNodes).forEach(node => {
+        if (node.nodeType === Node.TEXT_NODE) {
+          const rawText = node.textContent.trim();
+          if (!rawText) return;
+          if (!node._origText) {
+            node._origText = rawText;
+          }
+          const orig = node._origText;
+          if (TRANSLATIONS[orig]) {
+            const translated = (currentLang === 'en') ? orig : t(orig, currentLang);
+            node.textContent = node.textContent.replace(rawText, translated);
+          }
+        }
+      });
+    });
+
+    // 8. Input and Textarea placeholders
+    document.querySelectorAll('input[placeholder], textarea[placeholder]').forEach(inp => {
+      if (!inp.getAttribute('data-orig-ph')) {
+        inp.setAttribute('data-orig-ph', inp.placeholder.trim());
+      }
+      const origPh = inp.getAttribute('data-orig-ph');
+      if (TRANSLATIONS[origPh]) {
+        inp.placeholder = (currentLang === 'en') ? origPh : t(origPh, currentLang);
+      }
+    });
   }
 
   // Setup dropdown clicks
@@ -1271,11 +1418,17 @@
     });
   }
 
-  // Initialize
-  document.addEventListener('DOMContentLoaded', function() {
+  // Robust Initialization (handles early or late script execution)
+  function initAgroIntelI18N() {
     setupLangDropdown();
     setLanguage(currentLang);
-  });
+  }
+
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initAgroIntelI18N);
+  } else {
+    initAgroIntelI18N();
+  }
 
   // Global Export
   window.AgroIntelI18N = {
